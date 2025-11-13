@@ -1,6 +1,6 @@
 // Mock data types for FlowFast prototype
 export type EnergyLevel = 'low' | 'medium' | 'high';
-export type FocusArea = 'cardio' | 'strength' | 'flexibility' | 'recovery' | 'full-body';
+export type FocusArea = 'cardio' | 'strength' | 'flexibility' | 'recovery' | 'full-body' | 'upper-body' | 'lower-body' | 'core';
 export type ExerciseType = 'cardio' | 'strength' | 'stretch' | 'breathing';
 
 export interface Exercise {

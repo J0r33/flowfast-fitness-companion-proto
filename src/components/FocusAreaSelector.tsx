@@ -1,6 +1,6 @@
 import { FocusArea } from '@/types/workout';
 import { Badge } from '@/components/ui/badge';
-import { Heart, Dumbbell, Accessibility, Sparkles, Activity } from 'lucide-react';
+import { Heart, Dumbbell, Accessibility, Sparkles, Activity, ArrowUp, ArrowDown, Target } from 'lucide-react';
 
 interface FocusAreaSelectorProps {
   selected: FocusArea[];
@@ -13,6 +13,9 @@ const focusOptions: { area: FocusArea; label: string; icon: any }[] = [
   { area: 'flexibility', label: 'Flexibility', icon: Accessibility },
   { area: 'recovery', label: 'Recovery', icon: Sparkles },
   { area: 'full-body', label: 'Full Body', icon: Activity },
+  { area: 'upper-body', label: 'Upper Body', icon: ArrowUp },
+  { area: 'lower-body', label: 'Lower Body', icon: ArrowDown },
+  { area: 'core', label: 'Core', icon: Target },
 ];
 
 export function FocusAreaSelector({ selected, onToggle }: FocusAreaSelectorProps) {

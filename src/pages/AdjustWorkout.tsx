@@ -5,11 +5,13 @@ import { EnergySelector } from '@/components/EnergySelector';
 import { TimeSelector } from '@/components/TimeSelector';
 import { FocusAreaSelector } from '@/components/FocusAreaSelector';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { MobileNav } from '@/components/MobileNav';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
-type Step = 'energy' | 'time' | 'focus';
+type Step = 'energy' | 'time' | 'focus' | 'goal';
 
 export default function AdjustWorkout() {
   const navigate = useNavigate();
@@ -17,18 +19,20 @@ export default function AdjustWorkout() {
   const [energy, setEnergy] = useState<EnergyLevel | null>(null);
   const [time, setTime] = useState<number | null>(null);
   const [focusAreas, setFocusAreas] = useState<FocusArea[]>([]);
+  const [goal, setGoal] = useState<string>('');
 
-  const steps: Step[] = ['energy', 'time', 'focus'];
+  const steps: Step[] = ['energy', 'time', 'focus', 'goal'];
   const currentStepIndex = steps.indexOf(step);
   const progress = ((currentStepIndex + 1) / steps.length) * 100;
 
   const handleNext = () => {
     if (step === 'energy' && energy) setStep('time');
     else if (step === 'time' && time) setStep('focus');
-    else if (step === 'focus' && focusAreas.length > 0) {
+    else if (step === 'focus' && focusAreas.length > 0) setStep('goal');
+    else if (step === 'goal' && goal.trim()) {
       // Navigate to session with params
       navigate('/session', { 
-        state: { energy, time, focusAreas, isAdjusted: true } 
+        state: { energy, time, focusAreas, goal, isAdjusted: true } 
       });
     }
   };
@@ -36,6 +40,7 @@ export default function AdjustWorkout() {
   const handleBack = () => {
     if (step === 'time') setStep('energy');
     else if (step === 'focus') setStep('time');
+    else if (step === 'goal') setStep('focus');
     else navigate('/');
   };
 
@@ -50,7 +55,8 @@ export default function AdjustWorkout() {
   const canProceed = 
     (step === 'energy' && energy) ||
     (step === 'time' && time) ||
-    (step === 'focus' && focusAreas.length > 0);
+    (step === 'focus' && focusAreas.length > 0) ||
+    (step === 'goal' && goal.trim());
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -82,6 +88,22 @@ export default function AdjustWorkout() {
             <FocusAreaSelector selected={focusAreas} onToggle={toggleFocusArea} />
           )}
 
+          {step === 'goal' && (
+            <div className="space-y-3">
+              <Label htmlFor="goal" className="font-semibold text-foreground">
+                What's your goal for this workout?
+              </Label>
+              <Input
+                id="goal"
+                type="text"
+                placeholder="e.g., feel less stiff, break a sweat"
+                value={goal}
+                onChange={(e) => setGoal(e.target.value)}
+                className="w-full"
+              />
+            </div>
+          )}
+
           <div className="pt-6">
             <Button
               variant="fitness"
@@ -90,7 +112,7 @@ export default function AdjustWorkout() {
               onClick={handleNext}
               disabled={!canProceed}
             >
-              {step === 'focus' ? 'Generate Workout' : 'Continue'}
+              {step === 'goal' ? 'Generate Workout' : 'Continue'}
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </div>
