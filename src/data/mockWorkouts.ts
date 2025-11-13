@@ -83,6 +83,7 @@ export const mockUserProfile: UserProfile = {
   totalWorkouts: 47,
   preferredFocusAreas: ['strength', 'cardio'],
   defaultTime: 30,
+  equipment: [],
 };
 
 export const mockTodayWorkout: WorkoutPlan = {

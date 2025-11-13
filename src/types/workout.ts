@@ -42,6 +42,7 @@ export interface UserProfile {
   totalWorkouts: number;
   preferredFocusAreas: FocusArea[];
   defaultTime: number;
+  equipment: string[];
 }
 
 export interface AdjustmentPreferences {
