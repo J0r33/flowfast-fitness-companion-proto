@@ -32,7 +32,7 @@ export default function Dashboard() {
           <h2 className="text-xl font-bold text-foreground mb-3">Today's Plan</h2>
           <WorkoutCard 
             workout={todayWorkout} 
-            onClick={() => navigate('/session', { state: { workout: todayWorkout } })}
+            onClick={() => navigate('/session')}
           />
         </section>
 
