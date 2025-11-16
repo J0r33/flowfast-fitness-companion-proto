@@ -24,6 +24,7 @@ export default function WorkoutPlayer() {
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [timerComplete, setTimerComplete] = useState(false);
+  const [timerStarted, setTimerStarted] = useState(false);
 
   useEffect(() => {
     const loaded = loadWorkoutSession();
@@ -49,10 +50,12 @@ export default function WorkoutPlayer() {
           setRemainingSeconds(step.durationSeconds);
           setIsPaused(false);
           setTimerComplete(false);
+          setTimerStarted(false);
         } else {
           setRemainingSeconds(null);
           setIsPaused(false);
           setTimerComplete(false);
+          setTimerStarted(false);
         }
       }
     }
@@ -60,7 +63,7 @@ export default function WorkoutPlayer() {
 
   // Countdown timer for timed exercises
   useEffect(() => {
-    if (remainingSeconds === null || remainingSeconds <= 0 || isPaused || timerComplete) return;
+    if (remainingSeconds === null || remainingSeconds <= 0 || isPaused || timerComplete || !timerStarted) return;
 
     const timer = setInterval(() => {
       setRemainingSeconds((prev) => {
@@ -75,7 +78,7 @@ export default function WorkoutPlayer() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [remainingSeconds, isPaused, timerComplete]);
+  }, [remainingSeconds, isPaused, timerComplete, timerStarted]);
 
   const playCompletionSound = () => {
     // Play a simple beep sound
@@ -94,6 +97,11 @@ export default function WorkoutPlayer() {
     
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + 0.5);
+  };
+
+  const startTimer = () => {
+    setTimerStarted(true);
+    setIsPaused(false);
   };
 
   const togglePause = () => {
@@ -194,7 +202,7 @@ export default function WorkoutPlayer() {
               <>
                 <div className="flex flex-col items-center gap-4">
                   <span className="text-sm text-muted-foreground">
-                    {timerComplete ? 'Time Complete!' : isPaused ? 'Paused' : 'Time Remaining'}
+                    {timerComplete ? 'Time Complete!' : !timerStarted ? 'Ready' : isPaused ? 'Paused' : 'Time Remaining'}
                   </span>
                   <span className={`text-6xl font-bold tabular-nums ${timerComplete ? 'text-green-500' : 'text-primary'}`}>
                     {remainingSeconds !== null 
@@ -203,24 +211,38 @@ export default function WorkoutPlayer() {
                     }
                   </span>
                   {remainingSeconds !== null && !timerComplete && (
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      onClick={togglePause}
-                      className="w-full"
-                    >
-                      {isPaused ? (
-                        <>
+                    <>
+                      {!timerStarted ? (
+                        <Button
+                          variant="default"
+                          size="lg"
+                          onClick={startTimer}
+                          className="w-full"
+                        >
                           <Play className="mr-2 h-5 w-5" />
-                          Resume
-                        </>
+                          Start Timer
+                        </Button>
                       ) : (
-                        <>
-                          <Pause className="mr-2 h-5 w-5" />
-                          Pause
-                        </>
+                        <Button
+                          variant="outline"
+                          size="lg"
+                          onClick={togglePause}
+                          className="w-full"
+                        >
+                          {isPaused ? (
+                            <>
+                              <Play className="mr-2 h-5 w-5" />
+                              Resume
+                            </>
+                          ) : (
+                            <>
+                              <Pause className="mr-2 h-5 w-5" />
+                              Pause
+                            </>
+                          )}
+                        </Button>
                       )}
-                    </Button>
+                    </>
                   )}
                 </div>
               </>
