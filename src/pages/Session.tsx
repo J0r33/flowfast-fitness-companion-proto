@@ -25,8 +25,11 @@ export default function Session() {
         state.focusAreas
       );
       setWorkout(generated);
+    } else if (state?.workout) {
+      // Use today's workout from Dashboard
+      setWorkout(state.workout);
     } else {
-      // Use today's default workout (from Dashboard)
+      // No workout provided, go back to home
       navigate('/', { replace: true });
     }
   }, [state, navigate]);
