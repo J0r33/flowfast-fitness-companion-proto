@@ -44,13 +44,14 @@ export default function WorkoutPlayer() {
         navigate('/workout/complete', { replace: true });
       } else {
         setCurrentStepIndex(index);
-        // Initialize timer for timed exercises
+        // Initialize timer for timed exercises and rest periods
         const step = session.steps[index];
-        if (step.type === 'time' && step.durationSeconds) {
+        if ((step.type === 'time' || step.type === 'rest') && step.durationSeconds) {
           setRemainingSeconds(step.durationSeconds);
           setIsPaused(false);
           setTimerComplete(false);
-          setTimerStarted(false);
+          // Auto-start rest periods
+          setTimerStarted(step.type === 'rest');
         } else {
           setRemainingSeconds(null);
           setIsPaused(false);
@@ -61,16 +62,30 @@ export default function WorkoutPlayer() {
     }
   }, [stepIndex, session, sessionId, navigate]);
 
-  // Countdown timer for timed exercises
+  // Countdown timer for timed exercises and rest periods
   useEffect(() => {
-    if (remainingSeconds === null || remainingSeconds <= 0 || isPaused || timerComplete || !timerStarted) return;
+    if (!session || remainingSeconds === null || remainingSeconds <= 0 || isPaused || timerComplete || !timerStarted) return;
 
     const timer = setInterval(() => {
       setRemainingSeconds((prev) => {
         if (prev === null || prev <= 1) {
-          // Timer complete - play sound and stop
+          // Timer complete
           setTimerComplete(true);
           playCompletionSound();
+          
+          // Auto-advance for rest periods
+          const step = session.steps[currentStepIndex];
+          if (step.type === 'rest') {
+            setTimeout(() => {
+              setSlideDirection('left');
+              if (currentStepIndex >= session.steps.length - 1) {
+                navigate('/workout/complete');
+              } else {
+                navigate(`/workout/${sessionId}/${currentStepIndex + 1}`);
+              }
+            }, 1000);
+          }
+          
           return 0;
         }
         return prev - 1;
@@ -78,7 +93,7 @@ export default function WorkoutPlayer() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [remainingSeconds, isPaused, timerComplete, timerStarted]);
+  }, [remainingSeconds, isPaused, timerComplete, timerStarted, session, currentStepIndex, sessionId, navigate]);
 
   const playCompletionSound = () => {
     // Play a simple beep sound
@@ -188,16 +203,32 @@ export default function WorkoutPlayer() {
           <div className="bg-muted/30 rounded-2xl aspect-square flex items-center justify-center border border-border">
             <div className="text-center p-8">
               <div className="h-32 w-32 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center">
-                <span className="text-4xl">💪</span>
+                <span className="text-4xl">{currentStep.type === 'rest' ? '⏸️' : '💪'}</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                Animation: {currentStep.animationAssetId}
+                {currentStep.type === 'rest' ? 'Take a breather' : `Animation: ${currentStep.animationAssetId}`}
               </p>
             </div>
           </div>
 
           {/* Exercise Details */}
           <div className="bg-card border border-border rounded-xl p-6 space-y-3">
+            {currentStep.type === 'rest' && currentStep.durationSeconds && (
+              <div className="flex flex-col items-center gap-4">
+                <span className="text-sm text-muted-foreground">
+                  {timerComplete ? 'Rest Complete - Moving to next exercise...' : 'Rest Time'}
+                </span>
+                <span className={`text-6xl font-bold tabular-nums ${timerComplete ? 'text-green-500' : 'text-primary'}`}>
+                  {remainingSeconds !== null 
+                    ? `${Math.floor(remainingSeconds / 60)}:${String(remainingSeconds % 60).padStart(2, '0')}`
+                    : `${Math.floor(currentStep.durationSeconds / 60)}:${String(currentStep.durationSeconds % 60).padStart(2, '0')}`
+                  }
+                </span>
+                <p className="text-sm text-muted-foreground text-center">
+                  Catch your breath and prepare for the next challenge
+                </p>
+              </div>
+            )}
             {currentStep.type === 'time' && currentStep.durationSeconds && (
               <>
                 <div className="flex flex-col items-center gap-4">

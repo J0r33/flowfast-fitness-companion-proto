@@ -54,7 +54,7 @@ export interface AdjustmentPreferences {
 export interface WorkoutStep {
   id: string;
   exerciseName: string;
-  type: 'time' | 'reps';
+  type: 'time' | 'reps' | 'rest';
   durationSeconds?: number;
   reps?: number;
   setIndex: number;
@@ -63,6 +63,7 @@ export interface WorkoutStep {
   groupLabel?: string;
   animationAssetId?: string;
   tooltipInstructions?: string;
+  isRest?: boolean;
 }
 
 export interface WorkoutSession {
