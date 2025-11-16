@@ -5,7 +5,7 @@ import { loadWorkoutSession } from '@/utils/workoutSession';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, ArrowRight, Info } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Info, Pause, Play } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -22,6 +22,8 @@ export default function WorkoutPlayer() {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('left');
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const [timerComplete, setTimerComplete] = useState(false);
 
   useEffect(() => {
     const loaded = loadWorkoutSession();
@@ -45,8 +47,12 @@ export default function WorkoutPlayer() {
         const step = session.steps[index];
         if (step.type === 'time' && step.durationSeconds) {
           setRemainingSeconds(step.durationSeconds);
+          setIsPaused(false);
+          setTimerComplete(false);
         } else {
           setRemainingSeconds(null);
+          setIsPaused(false);
+          setTimerComplete(false);
         }
       }
     }
@@ -54,21 +60,45 @@ export default function WorkoutPlayer() {
 
   // Countdown timer for timed exercises
   useEffect(() => {
-    if (remainingSeconds === null || remainingSeconds <= 0) return;
+    if (remainingSeconds === null || remainingSeconds <= 0 || isPaused || timerComplete) return;
 
     const timer = setInterval(() => {
       setRemainingSeconds((prev) => {
         if (prev === null || prev <= 1) {
-          // Timer complete - auto-advance
-          handleNext();
-          return null;
+          // Timer complete - play sound and stop
+          setTimerComplete(true);
+          playCompletionSound();
+          return 0;
         }
         return prev - 1;
       });
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [remainingSeconds]);
+  }, [remainingSeconds, isPaused, timerComplete]);
+
+  const playCompletionSound = () => {
+    // Play a simple beep sound
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.value = 800;
+    oscillator.type = 'sine';
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+  };
+
+  const togglePause = () => {
+    setIsPaused(!isPaused);
+  };
 
   if (!session) return null;
 
@@ -161,17 +191,39 @@ export default function WorkoutPlayer() {
           {/* Exercise Details */}
           <div className="bg-card border border-border rounded-xl p-6 space-y-3">
             {currentStep.type === 'time' && currentStep.durationSeconds && (
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">
-                  {remainingSeconds !== null ? 'Time Remaining' : 'Duration'}
-                </span>
-                <span className="text-4xl font-bold text-primary tabular-nums">
-                  {remainingSeconds !== null 
-                    ? `${Math.floor(remainingSeconds / 60)}:${String(remainingSeconds % 60).padStart(2, '0')}`
-                    : `${Math.floor(currentStep.durationSeconds / 60)}:${String(currentStep.durationSeconds % 60).padStart(2, '0')}`
-                  }
-                </span>
-              </div>
+              <>
+                <div className="flex flex-col items-center gap-4">
+                  <span className="text-sm text-muted-foreground">
+                    {timerComplete ? 'Time Complete!' : isPaused ? 'Paused' : 'Time Remaining'}
+                  </span>
+                  <span className={`text-6xl font-bold tabular-nums ${timerComplete ? 'text-green-500' : 'text-primary'}`}>
+                    {remainingSeconds !== null 
+                      ? `${Math.floor(remainingSeconds / 60)}:${String(remainingSeconds % 60).padStart(2, '0')}`
+                      : `${Math.floor(currentStep.durationSeconds / 60)}:${String(currentStep.durationSeconds % 60).padStart(2, '0')}`
+                    }
+                  </span>
+                  {remainingSeconds !== null && !timerComplete && (
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      onClick={togglePause}
+                      className="w-full"
+                    >
+                      {isPaused ? (
+                        <>
+                          <Play className="mr-2 h-5 w-5" />
+                          Resume
+                        </>
+                      ) : (
+                        <>
+                          <Pause className="mr-2 h-5 w-5" />
+                          Pause
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
+              </>
             )}
             {currentStep.type === 'reps' && currentStep.reps && (
               <div className="flex items-center justify-between">
