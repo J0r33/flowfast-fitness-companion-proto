@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import AdjustWorkout from "./pages/AdjustWorkout";
 import Session from "./pages/Session";
+import WorkoutPlayer from "./pages/WorkoutPlayer";
+import WorkoutComplete from "./pages/WorkoutComplete";
 import Feedback from "./pages/Feedback";
 import History from "./pages/History";
 import Stats from "./pages/Stats";
@@ -24,6 +26,8 @@ const App = () => (
           <Route path="/" element={<Dashboard />} />
           <Route path="/adjust" element={<AdjustWorkout />} />
           <Route path="/session" element={<Session />} />
+          <Route path="/workout/:sessionId/:stepIndex" element={<WorkoutPlayer />} />
+          <Route path="/workout/complete" element={<WorkoutComplete />} />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/history" element={<History />} />
           <Route path="/stats" element={<Stats />} />

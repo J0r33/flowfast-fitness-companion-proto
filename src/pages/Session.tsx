@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { WorkoutPlan } from '@/types/workout';
 import { generateMockWorkout } from '@/data/mockWorkouts';
+import { buildWorkoutSession, saveWorkoutSession } from '@/utils/workoutSession';
 import { ExerciseListItem } from '@/components/ExerciseListItem';
 import { Button } from '@/components/ui/button';
 import { MobileNav } from '@/components/MobileNav';
@@ -31,9 +32,14 @@ export default function Session() {
   }, [state, navigate]);
 
   const handleStartWorkout = () => {
-    // In a real app, this would start a workout timer/tracker
-    // For now, go directly to feedback
-    navigate('/feedback', { state: { workout } });
+    if (!workout) return;
+    
+    // Build workout session and save to localStorage
+    const session = buildWorkoutSession(workout);
+    saveWorkoutSession(session);
+    
+    // Navigate to first step of workout player
+    navigate(`/workout/${session.id}/0`);
   };
 
   const handleRefine = () => {

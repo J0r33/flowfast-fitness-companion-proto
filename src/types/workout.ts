@@ -50,3 +50,24 @@ export interface AdjustmentPreferences {
   availableTime: number;
   focusAreas: FocusArea[];
 }
+
+export interface WorkoutStep {
+  id: string;
+  exerciseName: string;
+  type: 'time' | 'reps';
+  durationSeconds?: number;
+  reps?: number;
+  setIndex: number;
+  totalSets: number;
+  groupType?: 'superset' | 'circuit' | null;
+  groupLabel?: string;
+  animationAssetId?: string;
+  tooltipInstructions?: string;
+}
+
+export interface WorkoutSession {
+  id: string;
+  title: string;
+  steps: WorkoutStep[];
+  workoutPlan: WorkoutPlan;
+}
