@@ -21,6 +21,7 @@ export default function WorkoutPlayer() {
   const [session, setSession] = useState<WorkoutSession | null>(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('left');
+  const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
 
   useEffect(() => {
     const loaded = loadWorkoutSession();
@@ -40,9 +41,34 @@ export default function WorkoutPlayer() {
         navigate('/workout/complete', { replace: true });
       } else {
         setCurrentStepIndex(index);
+        // Initialize timer for timed exercises
+        const step = session.steps[index];
+        if (step.type === 'time' && step.durationSeconds) {
+          setRemainingSeconds(step.durationSeconds);
+        } else {
+          setRemainingSeconds(null);
+        }
       }
     }
   }, [stepIndex, session, sessionId, navigate]);
+
+  // Countdown timer for timed exercises
+  useEffect(() => {
+    if (remainingSeconds === null || remainingSeconds <= 0) return;
+
+    const timer = setInterval(() => {
+      setRemainingSeconds((prev) => {
+        if (prev === null || prev <= 1) {
+          // Timer complete - auto-advance
+          handleNext();
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [remainingSeconds]);
 
   if (!session) return null;
 
@@ -136,10 +162,14 @@ export default function WorkoutPlayer() {
           <div className="bg-card border border-border rounded-xl p-6 space-y-3">
             {currentStep.type === 'time' && currentStep.durationSeconds && (
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Duration</span>
-                <span className="text-xl font-semibold text-foreground">
-                  {Math.floor(currentStep.durationSeconds / 60)}:
-                  {(currentStep.durationSeconds % 60).toString().padStart(2, '0')}
+                <span className="text-muted-foreground">
+                  {remainingSeconds !== null ? 'Time Remaining' : 'Duration'}
+                </span>
+                <span className="text-4xl font-bold text-primary tabular-nums">
+                  {remainingSeconds !== null 
+                    ? `${Math.floor(remainingSeconds / 60)}:${String(remainingSeconds % 60).padStart(2, '0')}`
+                    : `${Math.floor(currentStep.durationSeconds / 60)}:${String(currentStep.durationSeconds % 60).padStart(2, '0')}`
+                  }
                 </span>
               </div>
             )}
