@@ -9,7 +9,7 @@ export function buildWorkoutSession(workoutPlan: WorkoutPlan): WorkoutSession {
   const steps: WorkoutStep[] = [];
   let stepCounter = 0;
 
-  // Default rest durations (will be replaced by LLM later)
+  // Fallback rest durations if LLM doesn't provide them
   const DEFAULT_REST_BETWEEN_SETS = 30; // seconds
   const DEFAULT_REST_BETWEEN_EXERCISES = 60; // seconds
 
@@ -17,27 +17,36 @@ export function buildWorkoutSession(workoutPlan: WorkoutPlan): WorkoutSession {
     const totalSets = exercise.sets || 1;
     const isLastExercise = exerciseIndex === workoutPlan.exercises.length - 1;
     
+    // Extract LLM-provided rest periods (stored in private fields)
+    const restBetweenSets = (exercise as any)._restBetweenSets ?? DEFAULT_REST_BETWEEN_SETS;
+    const restAfterExercise = (exercise as any)._restAfterExercise ?? DEFAULT_REST_BETWEEN_EXERCISES;
+    
+    // Extract grouping info
+    const groupType = (exercise as any)._groupType ?? null;
+    const groupLabel = (exercise as any)._groupLabel ?? undefined;
+    const tooltip = (exercise as any)._tooltip ?? exercise.notes ?? `Perform ${exercise.name} with proper form. Focus on controlled movements.`;
+    
     for (let setIndex = 1; setIndex <= totalSets; setIndex++) {
       // Add exercise step
       steps.push({
         id: `step-${stepCounter++}`,
         exerciseName: exercise.name,
-        type: exercise.duration ? 'time' : 'reps',
+        type: exercise.mode === 'time' ? 'time' : 'reps',
         durationSeconds: exercise.duration,
         reps: exercise.reps,
         setIndex,
         totalSets,
-        groupType: null,
-        groupLabel: undefined,
+        groupType,
+        groupLabel,
         animationAssetId: `anim-${exercise.type}`,
-        tooltipInstructions: exercise.notes || `Perform ${exercise.name} with proper form. Focus on controlled movements.`,
+        tooltipInstructions: tooltip,
         isRest: false,
       });
 
       // Add rest period after each set (except the last set of the last exercise)
       const isLastSet = setIndex === totalSets;
       if (!isLastSet || !isLastExercise) {
-        const restDuration = isLastSet ? DEFAULT_REST_BETWEEN_EXERCISES : DEFAULT_REST_BETWEEN_SETS;
+        const restDuration = isLastSet ? restAfterExercise : restBetweenSets;
         const restLabel = isLastSet ? 'Rest - Next Exercise' : `Rest - Set ${setIndex + 1}`;
         
         steps.push({
