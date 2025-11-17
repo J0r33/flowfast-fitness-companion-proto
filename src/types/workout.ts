@@ -131,3 +131,9 @@ export interface WorkoutStatsSummary {
   thisWeekWorkouts: number;
   currentStreak: number;
 }
+
+export interface WeeklyGoals {
+  targetWorkoutsPerWeek: number;    // e.g. 3
+  targetMinutesPerWeek: number;     // e.g. 90
+  lastUpdated?: string;             // ISO date string
+}
