@@ -32,16 +32,16 @@ interface LLMExercise {
   category: "cardio" | "strength" | "stretch" | "breathing";
   mode: "reps" | "time";
   sets: number;
-  reps: number;
-  duration_seconds: number;
-  rest_between_sets_seconds: number;
-  rest_after_exercise_seconds: number;
-  group_type: "superset" | "circuit" | "none";
-  group_label: string;
+  reps: number | null;
+  duration_seconds: number | null;
+  rest_between_sets_seconds: number | null;
+  rest_after_exercise_seconds: number | null;
+  group_type: "superset" | "circuit" | null;
+  group_label: string | null;
   equipment: string[];
   note: string;
   tooltip: string;
-  calories_estimate: number;
+  calories_estimate: number | null;
 }
 
 interface LLMResponse {
@@ -108,17 +108,18 @@ const WORKOUT_TOOL_SCHEMA = {
   description: "Generate a personalized workout plan with exercises, rest periods, and instructions",
   parameters: {
     type: "object",
+    additionalProperties: false,
     properties: {
       version: { 
         type: "number", 
-        enum: [1],
         description: "Schema version, always 1"
       },
       context: {
         type: "object",
+        additionalProperties: false,
         description: "Echo back the user's input context for logging",
         properties: {
-          energy: { type: "string", enum: ["low", "medium", "high"] },
+          energy: { type: "string" },
           time_minutes: { type: "number" },
           focus_areas: { type: "array", items: { type: "string" } },
           goal: { type: "string" },
@@ -130,6 +131,7 @@ const WORKOUT_TOOL_SCHEMA = {
         description: "Array of exercises in the workout plan",
         items: {
           type: "object",
+          additionalProperties: false,
           properties: {
             id: { 
               type: "string",
@@ -154,29 +156,29 @@ const WORKOUT_TOOL_SCHEMA = {
               description: "Number of sets, minimum 1"
             },
             reps: { 
-              type: "number",
+              type: ["number", "null"],
               description: "Reps per set (required if mode is 'reps')"
             },
             duration_seconds: { 
-              type: "number",
+              type: ["number", "null"],
               description: "Duration in seconds (required if mode is 'time')"
             },
             rest_between_sets_seconds: { 
-              type: "number",
+              type: ["number", "null"],
               description: "Rest between sets in seconds"
             },
             rest_after_exercise_seconds: { 
-              type: "number",
+              type: ["number", "null"],
               description: "Rest after all sets of this exercise in seconds"
             },
             group_type: {
-              type: "string",
-              enum: ["superset", "circuit", "none"],
-              description: "Grouping type if exercises are paired/grouped, 'none' otherwise"
+              type: ["string", "null"],
+              enum: ["superset", "circuit", null],
+              description: "Grouping type if exercises are paired/grouped, null otherwise"
             },
             group_label: { 
-              type: "string",
-              description: "Label for the group, e.g., 'Superset A', 'Circuit 1' (empty string if no grouping)"
+              type: ["string", "null"],
+              description: "Label for the group, e.g., 'Superset A', 'Circuit 1' (null if no grouping)"
             },
             equipment: {
               type: "array",
@@ -192,22 +194,13 @@ const WORKOUT_TOOL_SCHEMA = {
               description: "Clear, step-by-step instructions on how to perform the exercise"
             },
             calories_estimate: { 
-              type: "number",
+              type: ["number", "null"],
               description: "Estimated calories burned for this exercise"
             }
-          },
-          required: [
-            "id", "name", "category", "mode", "sets", 
-            "equipment", "tooltip", "note", "calories_estimate",
-            "rest_between_sets_seconds", "rest_after_exercise_seconds",
-            "group_type", "group_label"
-          ],
-          additionalProperties: false
+          }
         }
       }
-    },
-    required: ["version", "context", "exercises"],
-    additionalProperties: false
+    }
   }
 };
 
@@ -338,8 +331,8 @@ function mapLLMResponseToWorkoutPlan(
     _restBetweenSets: ex.rest_between_sets_seconds || 30,
     _restAfterExercise: ex.rest_after_exercise_seconds || 60,
     // Store grouping info for WorkoutStep mapping
-    _groupType: ex.group_type === "none" ? null : ex.group_type,
-    _groupLabel: ex.group_label === "" ? undefined : ex.group_label,
+    _groupType: ex.group_type,
+    _groupLabel: ex.group_label || undefined,
     _tooltip: ex.tooltip,
   }));
 
