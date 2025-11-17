@@ -4,6 +4,7 @@ import { WorkoutPlan } from '@/types/workout';
 import { generateMockWorkout } from '@/data/mockWorkouts';
 import { buildWorkoutSession, saveWorkoutSession } from '@/utils/workoutSession';
 import { generatePlannerHistorySnapshot } from '@/utils/adaptationState';
+import { loadWeeklyGoals } from '@/utils/weeklyGoals';
 import { ExerciseListItem } from '@/components/ExerciseListItem';
 import { Button } from '@/components/ui/button';
 import { MobileNav } from '@/components/MobileNav';
@@ -35,6 +36,10 @@ export default function Session() {
           
           // Generate history snapshot for adaptation
           const history = generatePlannerHistorySnapshot();
+          
+          // Load primary goal from weekly goals
+          const weeklyGoals = loadWeeklyGoals();
+          const primaryGoal = weeklyGoals.primaryGoal;
 
           const response = await fetch(
             `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-workout-plan`,
@@ -51,6 +56,7 @@ export default function Session() {
                 goal_text: goalText,
                 equipment: userEquipment,
                 history: history,
+                primary_goal: primaryGoal,
               }),
             }
           );

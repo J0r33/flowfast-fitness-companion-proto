@@ -4,11 +4,13 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dumbbell, Target } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { loadWeeklyGoals, saveWeeklyGoals } from '@/utils/weeklyGoals';
+import { loadWeeklyGoals, saveWeeklyGoals, DEFAULT_WEEKLY_GOALS } from '@/utils/weeklyGoals';
+import { WeeklyGoals, TrainingGoal } from '@/types/workout';
 
 const EQUIPMENT_OPTIONS = [
   'Workout bands / Resistance bands',
@@ -35,8 +37,7 @@ const EQUIPMENT_OPTIONS = [
 export default function Settings() {
   const navigate = useNavigate();
   const [selectedEquipment, setSelectedEquipment] = useState<string[]>([]);
-  const [targetWorkouts, setTargetWorkouts] = useState(3);
-  const [targetMinutes, setTargetMinutes] = useState(90);
+  const [weeklyGoals, setWeeklyGoals] = useState<WeeklyGoals>(DEFAULT_WEEKLY_GOALS);
 
   useEffect(() => {
     const saved = localStorage.getItem('userEquipment');
@@ -45,8 +46,7 @@ export default function Settings() {
     }
     
     const goals = loadWeeklyGoals();
-    setTargetWorkouts(goals.targetWorkoutsPerWeek);
-    setTargetMinutes(goals.targetMinutesPerWeek);
+    setWeeklyGoals(goals);
   }, []);
 
   const handleToggleEquipment = (equipment: string) => {
@@ -74,19 +74,16 @@ export default function Settings() {
   };
 
   const handleSaveGoals = () => {
-    if (targetWorkouts < 1 || targetWorkouts > 7) {
+    if (weeklyGoals.targetWorkoutsPerWeek < 1 || weeklyGoals.targetWorkoutsPerWeek > 7) {
       toast.error('Workouts per week must be between 1 and 7');
       return;
     }
-    if (targetMinutes < 30 || targetMinutes > 500) {
+    if (weeklyGoals.targetMinutesPerWeek < 30 || weeklyGoals.targetMinutesPerWeek > 500) {
       toast.error('Minutes per week must be between 30 and 500');
       return;
     }
     
-    saveWeeklyGoals({
-      targetWorkoutsPerWeek: targetWorkouts,
-      targetMinutesPerWeek: targetMinutes,
-    });
+    saveWeeklyGoals(weeklyGoals);
     toast.success('Weekly goals saved');
   };
 
@@ -112,6 +109,31 @@ export default function Settings() {
 
           <div className="space-y-4">
             <div>
+              <Label className="mb-1 block text-sm font-medium">
+                Primary Goal
+              </Label>
+              <Select
+                value={weeklyGoals.primaryGoal}
+                onValueChange={(value: TrainingGoal) =>
+                  setWeeklyGoals((prev) => ({
+                    ...prev,
+                    primaryGoal: value,
+                  }))
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select your main goal" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="lose_weight">🔥 Lose weight</SelectItem>
+                  <SelectItem value="get_stronger">💪 Get stronger</SelectItem>
+                  <SelectItem value="get_toned">✨ Get toned</SelectItem>
+                  <SelectItem value="general_fitness">🏃 General fitness</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
               <Label htmlFor="targetWorkouts" className="text-sm font-medium">
                 Workouts per week
               </Label>
@@ -120,8 +142,11 @@ export default function Settings() {
                 type="number"
                 min={1}
                 max={7}
-                value={targetWorkouts}
-                onChange={(e) => setTargetWorkouts(parseInt(e.target.value) || 1)}
+                value={weeklyGoals.targetWorkoutsPerWeek}
+                onChange={(e) => setWeeklyGoals((prev) => ({
+                  ...prev,
+                  targetWorkoutsPerWeek: parseInt(e.target.value) || 1,
+                }))}
                 className="mt-2"
               />
               <p className="text-xs text-muted-foreground mt-1">
@@ -139,8 +164,11 @@ export default function Settings() {
                 min={30}
                 max={500}
                 step={15}
-                value={targetMinutes}
-                onChange={(e) => setTargetMinutes(parseInt(e.target.value) || 30)}
+                value={weeklyGoals.targetMinutesPerWeek}
+                onChange={(e) => setWeeklyGoals((prev) => ({
+                  ...prev,
+                  targetMinutesPerWeek: parseInt(e.target.value) || 30,
+                }))}
                 className="mt-2"
               />
               <p className="text-xs text-muted-foreground mt-1">

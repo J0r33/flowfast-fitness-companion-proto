@@ -5,6 +5,7 @@ const STORAGE_KEY = 'flowfast_weekly_goals';
 export const DEFAULT_WEEKLY_GOALS: WeeklyGoals = {
   targetWorkoutsPerWeek: 3,
   targetMinutesPerWeek: 90,
+  primaryGoal: 'get_toned',
 };
 
 /**
@@ -18,18 +19,22 @@ export function loadWeeklyGoals(): WeeklyGoals {
       return DEFAULT_WEEKLY_GOALS;
     }
     
-    const parsed = JSON.parse(stored) as WeeklyGoals;
+    const parsed = JSON.parse(stored);
     
-    // Validate the data structure
-    if (
-      typeof parsed.targetWorkoutsPerWeek === 'number' &&
-      typeof parsed.targetMinutesPerWeek === 'number'
-    ) {
-      return parsed;
-    }
-    
-    console.warn('Invalid weekly goals data structure, using defaults');
-    return DEFAULT_WEEKLY_GOALS;
+    // Validate and merge with defaults for backward compatibility
+    return {
+      targetWorkoutsPerWeek:
+        typeof parsed?.targetWorkoutsPerWeek === 'number'
+          ? parsed.targetWorkoutsPerWeek
+          : DEFAULT_WEEKLY_GOALS.targetWorkoutsPerWeek,
+      targetMinutesPerWeek:
+        typeof parsed?.targetMinutesPerWeek === 'number'
+          ? parsed.targetMinutesPerWeek
+          : DEFAULT_WEEKLY_GOALS.targetMinutesPerWeek,
+      primaryGoal:
+        parsed?.primaryGoal ?? DEFAULT_WEEKLY_GOALS.primaryGoal,
+      lastUpdated: parsed?.lastUpdated,
+    };
   } catch (error) {
     console.error('Failed to load weekly goals:', error);
     return DEFAULT_WEEKLY_GOALS;
@@ -40,7 +45,7 @@ export function loadWeeklyGoals(): WeeklyGoals {
  * Save weekly goals to localStorage.
  * Automatically adds lastUpdated timestamp.
  */
-export function saveWeeklyGoals(goals: Omit<WeeklyGoals, 'lastUpdated'>): void {
+export function saveWeeklyGoals(goals: WeeklyGoals): void {
   try {
     const goalsWithTimestamp: WeeklyGoals = {
       ...goals,
