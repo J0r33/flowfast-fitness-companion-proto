@@ -4,6 +4,7 @@ export type FocusArea = 'cardio' | 'strength' | 'flexibility' | 'recovery' | 'fu
 export type ExerciseType = 'cardio' | 'strength' | 'stretch' | 'breathing';
 export type DifficultyFeedback = 'too_easy' | 'just_right' | 'too_hard' | 'couldnt_finish';
 export type RPE = number; // 1-10 scale
+export type TrainingGoal = 'lose_weight' | 'get_stronger' | 'get_toned' | 'general_fitness';
 
 export interface Exercise {
   id: string;
@@ -135,5 +136,6 @@ export interface WorkoutStatsSummary {
 export interface WeeklyGoals {
   targetWorkoutsPerWeek: number;    // e.g. 3
   targetMinutesPerWeek: number;     // e.g. 90
+  primaryGoal: TrainingGoal;        // e.g. 'get_toned'
   lastUpdated?: string;             // ISO date string
 }

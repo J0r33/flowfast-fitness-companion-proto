@@ -23,6 +23,7 @@ interface WorkoutPlannerInput {
     avg_rpe?: number;
     last_rpe?: number;
   };
+  primary_goal?: "lose_weight" | "get_stronger" | "get_toned" | "general_fitness";
 }
 
 // LLM Response interfaces (matching tool calling schema)
@@ -162,6 +163,33 @@ Focus Areas:
 Rest Periods (adjust based on intensity):
 - Between sets: 20-45s (high energy), 30-60s (medium), 45-90s (low)
 - Between exercises: 30-60s (high energy), 45-75s (medium), 60-120s (low)
+
+Primary Training Goals:
+- lose_weight:
+  * Emphasize higher total work volume (circuits, intervals, cardio blocks)
+  * Include more full-body and compound movements to maximize calorie burn
+  * Keep rest periods shorter (within safe limits) to maintain elevated heart rate
+  * Include at least some moderate-intensity cardio where equipment allows
+  * Higher rep ranges (12-20) with focus on metabolic conditioning
+- get_stronger:
+  * Emphasize strength-focused rep ranges (4-8 reps for main lifts)
+  * Prioritize compound movements (squats, hinges, pushes, pulls)
+  * Allow longer rest between sets (60-120s) for full recovery
+  * Lower overall exercise count but higher quality and intensity per exercise
+  * Focus on progressive overload and building strength progressively
+- get_toned:
+  * Focus on moderate rep ranges (8-15) with time-under-tension
+  * Mix strength and light conditioning to build lean muscle
+  * Use supersets or short circuits to keep heart rate elevated
+  * Balance between muscle building and fat burning
+  * Include both compound and isolation movements
+- general_fitness:
+  * Balanced mix of strength, cardio, and mobility work
+  * Moderate reps (8-12) and rest periods, avoiding extremes
+  * Well-rounded approach hitting all major muscle groups
+  * Include variety to develop multiple fitness qualities
+
+**IMPORTANT: Always consider the user's primary_goal when generating workouts. Adjust exercise selection, rep schemes, rest patterns, and overall structure to align with this goal while still respecting energy level, available time, and equipment constraints.**
 
 Exercise Selection:
 - Only include exercises that can be done with the available equipment
@@ -319,10 +347,11 @@ async function generateWorkoutWithRetry(
 - Energy level: ${input.energy}
 - Available time: ${input.time_minutes} minutes
 - Focus areas: ${input.focus_areas.join(", ")}
-- Goal: ${input.goal_text}
+- Primary training goal: ${input.primary_goal ?? "general_fitness"}
+- User goal description: ${input.goal_text}
 - Available equipment: ${input.equipment.length > 0 ? input.equipment.join(", ") : "None (bodyweight only)"}
 
-Generate a complete, balanced workout that fits within the time constraint.`
+Generate a complete, balanced workout that fits within the time constraint and aligns with the primary training goal.`
             }
           ],
           tools: [
