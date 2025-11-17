@@ -115,3 +115,12 @@ export interface WorkoutHistoryEntry {
 export interface WorkoutHistory {
   entries: WorkoutHistoryEntry[];
 }
+
+export interface WorkoutStatsSummary {
+  totalWorkouts: number;
+  totalMinutesPlanned: number;
+  totalEstimatedCalories: number;
+  lastWorkoutDate?: string;
+  thisWeekWorkouts: number;
+  currentStreak: number;
+}

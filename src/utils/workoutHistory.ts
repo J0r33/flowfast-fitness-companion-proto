@@ -1,4 +1,4 @@
-import { WorkoutHistory, WorkoutHistoryEntry, WorkoutPlan, DifficultyFeedback } from '@/types/workout';
+import { WorkoutHistory, WorkoutHistoryEntry, WorkoutPlan, DifficultyFeedback, WorkoutStatsSummary } from '@/types/workout';
 
 const STORAGE_KEY = 'flowfast_workout_history';
 
@@ -9,6 +9,8 @@ const DEFAULT_HISTORY: WorkoutHistory = {
 
 // Read from localStorage
 export function loadWorkoutHistory(): WorkoutHistory {
+  if (typeof window === 'undefined') return DEFAULT_HISTORY;
+  
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULT_HISTORY;
@@ -21,6 +23,8 @@ export function loadWorkoutHistory(): WorkoutHistory {
 
 // Write to localStorage
 export function saveWorkoutHistory(history: WorkoutHistory): void {
+  if (typeof window === 'undefined') return;
+  
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
   } catch (error) {
@@ -57,7 +61,14 @@ export function addWorkoutHistoryEntry(
     feedbackDifficulty,
   };
   
-  history.entries.push(entry);
+  history.entries.unshift(entry); // Newest first
+  saveWorkoutHistory(history);
+}
+
+// Alternative append helper (matches original spec)
+export function appendWorkoutHistoryEntry(entry: WorkoutHistoryEntry): void {
+  const history = loadWorkoutHistory();
+  history.entries.unshift(entry); // Newest first
   saveWorkoutHistory(history);
 }
 
@@ -127,4 +138,46 @@ export function getTotalMinutes(): number {
     (sum, entry) => sum + entry.timeMinutesPlanned,
     0
   );
+}
+
+// Unified stats computation (matches original spec)
+export function computeWorkoutStats(
+  history?: WorkoutHistory,
+  today: Date = new Date()
+): WorkoutStatsSummary {
+  const hist = history || loadWorkoutHistory();
+  
+  const totalWorkouts = hist.entries.length;
+  let totalMinutesPlanned = 0;
+  let totalEstimatedCalories = 0;
+  let thisWeekWorkouts = 0;
+
+  // Calculate start of week (Monday)
+  const startOfWeek = new Date(today);
+  const day = startOfWeek.getDay();
+  const diffToMonday = (day + 6) % 7;
+  startOfWeek.setDate(startOfWeek.getDate() - diffToMonday);
+  startOfWeek.setHours(0, 0, 0, 0);
+
+  const todayCopy = new Date(today);
+  todayCopy.setHours(23, 59, 59, 999);
+
+  for (const entry of hist.entries) {
+    totalMinutesPlanned += entry.timeMinutesPlanned ?? 0;
+    totalEstimatedCalories += entry.totalEstimatedCalories ?? 0;
+
+    const d = new Date(entry.date);
+    if (d >= startOfWeek && d <= todayCopy) {
+      thisWeekWorkouts += 1;
+    }
+  }
+
+  return {
+    totalWorkouts,
+    totalMinutesPlanned,
+    totalEstimatedCalories,
+    lastWorkoutDate: hist.entries[0]?.date,
+    thisWeekWorkouts,
+    currentStreak: getCurrentStreak(),
+  };
 }
