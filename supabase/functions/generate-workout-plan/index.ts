@@ -15,6 +15,12 @@ interface WorkoutPlannerInput {
   focus_areas: string[];
   goal_text: string;
   equipment: string[];
+  history?: {
+    sessions_completed: number;
+    difficulty_bias: -1 | 0 | 1;
+    days_since_last_workout: number | null;
+    last_feedback?: string;
+  };
 }
 
 // LLM Response interfaces (matching tool calling schema)
@@ -50,9 +56,57 @@ interface LLMResponse {
   exercises: LLMExercise[];
 }
 
-const SYSTEM_PROMPT = `You are a certified fitness trainer AI creating personalized workout plans.
+function buildSystemPrompt(input: WorkoutPlannerInput): string {
+  const adaptationSection = input.history ? `
 
-Given the user's energy level, available time, focus areas, goal, and available equipment, generate an appropriate workout plan.
+## ADAPTATION RULES (CRITICAL - APPLY THESE FIRST)
+User workout history:
+- Total sessions completed: ${input.history.sessions_completed}
+- Difficulty trend: ${
+  input.history.difficulty_bias === 1 ? "Workouts have been TOO EASY - increase intensity/volume" :
+  input.history.difficulty_bias === -1 ? "Workouts have been TOO HARD - reduce intensity/volume" :
+  "Difficulty is balanced - maintain current level"
+}
+- Days since last workout: ${
+  input.history.days_since_last_workout === null ? "First workout" :
+  input.history.days_since_last_workout === 0 ? "Today (same day)" :
+  `${input.history.days_since_last_workout} days ago`
+}
+- Last feedback: ${input.history.last_feedback || "none yet"}
+
+**Adaptation Guidelines (MUST FOLLOW):**
+1. If difficulty_bias = 1 (too easy):
+   - Increase reps by 2-3 per set
+   - Add 1 extra set to key exercises
+   - Reduce rest periods by 10-15 seconds
+   - Include more challenging exercise variations
+
+2. If difficulty_bias = -1 (too hard):
+   - Reduce reps by 2-3 per set
+   - Remove 1 set from exercises
+   - Increase rest periods by 10-15 seconds
+   - Use easier exercise variations or progressions
+
+3. If last_feedback = "couldnt_finish":
+   - Significantly reduce volume (fewer sets/exercises)
+   - Increase rest periods
+   - Focus on fundamental movements
+
+4. If days_since_last_workout > 7:
+   - Start with easier variations to ease back in
+   - Focus on full-body mobility and recovery
+   - Shorter workout duration
+
+5. If days_since_last_workout = 0-1:
+   - Ensure adequate recovery focus
+   - Avoid overlapping muscle groups from yesterday
+   - Consider active recovery or mobility work
+
+` : '';
+
+  return `You are a certified fitness trainer AI creating personalized workout plans.
+
+${adaptationSection}Given the user's energy level, available time, focus areas, goal, and available equipment, generate an appropriate workout plan.
 
 **Guidelines:**
 
@@ -101,6 +155,7 @@ Quality over quantity:
 - Ensure the workout is achievable and motivating, not overwhelming
 
 Return a complete, balanced workout that the user will enjoy and benefit from.`;
+}
 
 // Tool calling schema for structured output
 const WORKOUT_TOOL_SCHEMA = {
@@ -223,7 +278,7 @@ async function generateWorkoutWithRetry(
         body: JSON.stringify({
           model: "google/gemini-2.5-flash",
           messages: [
-            { role: "system", content: SYSTEM_PROMPT },
+            { role: "system", content: buildSystemPrompt(input) },
             { 
               role: "user", 
               content: `Create a workout plan for:

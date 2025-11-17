@@ -2,6 +2,7 @@
 export type EnergyLevel = 'low' | 'medium' | 'high';
 export type FocusArea = 'cardio' | 'strength' | 'flexibility' | 'recovery' | 'full-body' | 'upper-body' | 'lower-body' | 'core';
 export type ExerciseType = 'cardio' | 'strength' | 'stretch' | 'breathing';
+export type DifficultyFeedback = 'too_easy' | 'just_right' | 'too_hard' | 'couldnt_finish';
 
 export interface Exercise {
   id: string;
@@ -73,4 +74,20 @@ export interface WorkoutSession {
   title: string;
   steps: WorkoutStep[];
   workoutPlan: WorkoutPlan;
+}
+
+export interface AdaptationState {
+  totalSessions: number;
+  tooEasyCount: number;
+  tooHardCount: number;
+  couldntFinishCount: number;
+  lastFeedback?: DifficultyFeedback;
+  lastWorkoutDate?: string; // ISO string
+}
+
+export interface PlannerHistorySnapshot {
+  sessions_completed: number;
+  difficulty_bias: -1 | 0 | 1; // -1 = too hard, 0 = balanced, 1 = too easy
+  days_since_last_workout: number | null; // null if none yet
+  last_feedback?: DifficultyFeedback;
 }

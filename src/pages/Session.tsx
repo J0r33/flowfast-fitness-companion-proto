@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { WorkoutPlan } from '@/types/workout';
 import { generateMockWorkout } from '@/data/mockWorkouts';
 import { buildWorkoutSession, saveWorkoutSession } from '@/utils/workoutSession';
+import { generatePlannerHistorySnapshot } from '@/utils/adaptationState';
 import { ExerciseListItem } from '@/components/ExerciseListItem';
 import { Button } from '@/components/ui/button';
 import { MobileNav } from '@/components/MobileNav';
@@ -31,6 +32,9 @@ export default function Session() {
           
           // Build goal text from focus areas
           const goalText = `Focus on ${state.focusAreas.join(', ')} training`;
+          
+          // Generate history snapshot for adaptation
+          const history = generatePlannerHistorySnapshot();
 
           const response = await fetch(
             `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-workout-plan`,
@@ -46,6 +50,7 @@ export default function Session() {
                 focus_areas: state.focusAreas,
                 goal_text: goalText,
                 equipment: userEquipment,
+                history: history,
               }),
             }
           );
