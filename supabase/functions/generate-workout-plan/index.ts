@@ -32,16 +32,16 @@ interface LLMExercise {
   category: "cardio" | "strength" | "stretch" | "breathing";
   mode: "reps" | "time";
   sets: number;
-  reps: number | null;
-  duration_seconds: number | null;
-  rest_between_sets_seconds: number | null;
-  rest_after_exercise_seconds: number | null;
-  group_type: "superset" | "circuit" | null;
-  group_label: string | null;
+  reps: number;
+  duration_seconds: number;
+  rest_between_sets_seconds: number;
+  rest_after_exercise_seconds: number;
+  group_type: "superset" | "circuit" | "none";
+  group_label: string;
   equipment: string[];
   note: string;
   tooltip: string;
-  calories_estimate: number | null;
+  calories_estimate: number;
 }
 
 interface LLMResponse {
@@ -123,8 +123,7 @@ const WORKOUT_TOOL_SCHEMA = {
           focus_areas: { type: "array", items: { type: "string" } },
           goal: { type: "string" },
           equipment: { type: "array", items: { type: "string" } }
-        },
-        required: ["energy", "time_minutes", "focus_areas", "goal", "equipment"]
+        }
       },
       exercises: {
         type: "array",
@@ -155,29 +154,29 @@ const WORKOUT_TOOL_SCHEMA = {
               description: "Number of sets, minimum 1"
             },
             reps: { 
-              type: ["number", "null"],
-              description: "Reps per set (required if mode is 'reps', null otherwise)"
+              type: "number",
+              description: "Reps per set (required if mode is 'reps')"
             },
             duration_seconds: { 
-              type: ["number", "null"],
-              description: "Duration in seconds (required if mode is 'time', null otherwise)"
+              type: "number",
+              description: "Duration in seconds (required if mode is 'time')"
             },
             rest_between_sets_seconds: { 
-              type: ["number", "null"],
-              description: "Rest between sets in seconds (null for last set)"
+              type: "number",
+              description: "Rest between sets in seconds"
             },
             rest_after_exercise_seconds: { 
-              type: ["number", "null"],
-              description: "Rest after all sets of this exercise in seconds (null for last exercise)"
+              type: "number",
+              description: "Rest after all sets of this exercise in seconds"
             },
             group_type: {
-              type: ["string", "null"],
-              enum: ["superset", "circuit", null],
-              description: "Grouping type if exercises are paired/grouped, null otherwise"
+              type: "string",
+              enum: ["superset", "circuit", "none"],
+              description: "Grouping type if exercises are paired/grouped, 'none' otherwise"
             },
             group_label: { 
-              type: ["string", "null"],
-              description: "Label for the group, e.g., 'Superset A', 'Circuit 1' (null if no grouping)"
+              type: "string",
+              description: "Label for the group, e.g., 'Superset A', 'Circuit 1' (empty string if no grouping)"
             },
             equipment: {
               type: "array",
@@ -193,18 +192,22 @@ const WORKOUT_TOOL_SCHEMA = {
               description: "Clear, step-by-step instructions on how to perform the exercise"
             },
             calories_estimate: { 
-              type: ["number", "null"],
-              description: "Estimated calories burned for this exercise (null if unknown)"
+              type: "number",
+              description: "Estimated calories burned for this exercise"
             }
           },
           required: [
             "id", "name", "category", "mode", "sets", 
-            "equipment", "tooltip", "note"
-          ]
+            "equipment", "tooltip", "note", "calories_estimate",
+            "rest_between_sets_seconds", "rest_after_exercise_seconds",
+            "group_type", "group_label"
+          ],
+          additionalProperties: false
         }
       }
     },
-    required: ["version", "context", "exercises"]
+    required: ["version", "context", "exercises"],
+    additionalProperties: false
   }
 };
 
@@ -287,13 +290,10 @@ Generate a complete, balanced workout that fits within the time constraint.`
         throw new Error("LLM returned zero exercises");
       }
 
-      // Validate each exercise has required mode-specific fields
+      // Basic validation of exercises
       for (const ex of llmResponse.exercises) {
-        if (ex.mode === "reps" && (ex.reps === null || ex.reps === undefined)) {
-          throw new Error(`Exercise ${ex.id} has mode 'reps' but no reps specified`);
-        }
-        if (ex.mode === "time" && (ex.duration_seconds === null || ex.duration_seconds === undefined)) {
-          throw new Error(`Exercise ${ex.id} has mode 'time' but no duration_seconds specified`);
+        if (!ex.mode || !ex.name || !ex.category) {
+          throw new Error(`Exercise ${ex.id} missing required fields`);
         }
       }
 
@@ -330,16 +330,16 @@ function mapLLMResponseToWorkoutPlan(
     mode: ex.mode,
     equipment: ex.equipment,
     sets: ex.sets,
-    reps: ex.reps ?? undefined,
-    duration: ex.duration_seconds ?? undefined,
+    reps: ex.mode === "reps" ? ex.reps : undefined,
+    duration: ex.mode === "time" ? ex.duration_seconds : undefined,
     notes: ex.note,
-    caloriesEstimate: ex.calories_estimate ?? undefined,
+    caloriesEstimate: ex.calories_estimate || 0,
     // Store LLM rest periods for use in buildWorkoutSession
-    _restBetweenSets: ex.rest_between_sets_seconds ?? undefined,
-    _restAfterExercise: ex.rest_after_exercise_seconds ?? undefined,
+    _restBetweenSets: ex.rest_between_sets_seconds || 30,
+    _restAfterExercise: ex.rest_after_exercise_seconds || 60,
     // Store grouping info for WorkoutStep mapping
-    _groupType: ex.group_type ?? undefined,
-    _groupLabel: ex.group_label ?? undefined,
+    _groupType: ex.group_type === "none" ? null : ex.group_type,
+    _groupLabel: ex.group_label === "" ? undefined : ex.group_label,
     _tooltip: ex.tooltip,
   }));
 
