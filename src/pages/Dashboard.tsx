@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { mockUserProfile, mockTodayWorkout } from '@/data/mockWorkouts';
 import { WorkoutCard } from '@/components/WorkoutCard';
@@ -6,11 +6,25 @@ import { ProgressStats } from '@/components/ProgressStats';
 import { Button } from '@/components/ui/button';
 import { MobileNav } from '@/components/MobileNav';
 import { Sparkles } from 'lucide-react';
+import { getTotalWorkouts, getCurrentStreak, getWorkoutsThisWeek } from '@/utils/workoutHistory';
+import { UserProfile } from '@/types/workout';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const [todayWorkout] = useState(mockTodayWorkout);
-  const [profile] = useState(mockUserProfile);
+  const [profile, setProfile] = useState<UserProfile>(mockUserProfile);
+  
+  useEffect(() => {
+    // Load real stats from workout history
+    const totalWorkouts = getTotalWorkouts();
+    const currentStreak = getCurrentStreak();
+    
+    setProfile(prev => ({
+      ...prev,
+      totalWorkouts,
+      currentStreak,
+    }));
+  }, []);
 
   return (
     <div className="min-h-screen bg-background pb-24">

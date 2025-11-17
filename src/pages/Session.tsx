@@ -26,10 +26,10 @@ export default function Session() {
         // Generate workout via LLM
         setIsGenerating(true);
         
+        // Load equipment from localStorage (outside try-catch so it's available in catch)
+        const userEquipment = JSON.parse(localStorage.getItem('userEquipment') || '[]') as string[];
+        
         try {
-          // Load equipment from localStorage
-          const userEquipment = JSON.parse(localStorage.getItem('userEquipment') || '[]') as string[];
-          
           // Build goal text from focus areas
           const goalText = `Focus on ${state.focusAreas.join(', ')} training`;
           
@@ -66,7 +66,19 @@ export default function Session() {
           }
 
           console.log('LLM Context:', data.llm_context); // Debug logging
-          setWorkout(data.workout);
+          
+          // Add context to workout plan
+          const workoutWithContext = {
+            ...data.workout,
+            context: {
+              energy: state.energy,
+              timeMinutes: state.time,
+              focusAreas: state.focusAreas,
+              equipment: userEquipment,
+            }
+          };
+          
+          setWorkout(workoutWithContext);
 
         } catch (error) {
           console.error('Failed to generate workout with LLM:', error);
@@ -83,7 +95,19 @@ export default function Session() {
             state.time,
             state.focusAreas
           );
-          setWorkout(fallbackWorkout);
+          
+          // Add context to fallback workout
+          const fallbackWithContext = {
+            ...fallbackWorkout,
+            context: {
+              energy: state.energy,
+              timeMinutes: state.time,
+              focusAreas: state.focusAreas,
+              equipment: userEquipment,
+            }
+          };
+          
+          setWorkout(fallbackWithContext);
         } finally {
           setIsGenerating(false);
         }

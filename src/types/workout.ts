@@ -28,6 +28,12 @@ export interface WorkoutPlan {
     energy: EnergyLevel;
     availableTime: number;
   };
+  context?: {
+    energy: EnergyLevel;
+    timeMinutes: number;
+    focusAreas: FocusArea[];
+    equipment: string[];
+  };
   completed?: boolean;
   feedback?: WorkoutFeedback;
 }
@@ -90,4 +96,22 @@ export interface PlannerHistorySnapshot {
   difficulty_bias: -1 | 0 | 1; // -1 = too hard, 0 = balanced, 1 = too easy
   days_since_last_workout: number | null; // null if none yet
   last_feedback?: DifficultyFeedback;
+}
+
+export interface WorkoutHistoryEntry {
+  id: string;
+  date: string;
+  energy: EnergyLevel;
+  timeMinutesPlanned: number;
+  timeMinutesActual?: number;
+  focusAreas: FocusArea[];
+  equipment: string[];
+  exercisesCount: number;
+  totalSets: number;
+  totalEstimatedCalories?: number;
+  feedbackDifficulty?: DifficultyFeedback;
+}
+
+export interface WorkoutHistory {
+  entries: WorkoutHistoryEntry[];
 }
