@@ -86,3 +86,22 @@ export function formatDifficulty(feedback?: DifficultyFeedback): {
   
   return map[feedback] || null;
 }
+
+// Format RPE with context
+export function formatRPE(rpe?: number): { 
+  label: string; 
+  color: string;
+  emoji: string;
+} | null {
+  if (!rpe) return null;
+  
+  if (rpe <= 3) {
+    return { label: `RPE ${rpe}/10`, color: 'text-green-600', emoji: '😌' };
+  } else if (rpe <= 6) {
+    return { label: `RPE ${rpe}/10`, color: 'text-blue-600', emoji: '💪' };
+  } else if (rpe <= 8) {
+    return { label: `RPE ${rpe}/10`, color: 'text-orange-600', emoji: '🔥' };
+  } else {
+    return { label: `RPE ${rpe}/10`, color: 'text-red-600', emoji: '💥' };
+  }
+}

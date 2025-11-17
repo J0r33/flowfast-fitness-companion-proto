@@ -35,7 +35,8 @@ export function saveWorkoutHistory(history: WorkoutHistory): void {
 // Add a new history entry
 export function addWorkoutHistoryEntry(
   workoutPlan: WorkoutPlan,
-  feedbackDifficulty?: DifficultyFeedback
+  feedbackDifficulty?: DifficultyFeedback,
+  rpe?: number
 ): void {
   const history = loadWorkoutHistory();
   
@@ -59,6 +60,7 @@ export function addWorkoutHistoryEntry(
     totalSets,
     totalEstimatedCalories: totalEstimatedCalories > 0 ? totalEstimatedCalories : undefined,
     feedbackDifficulty,
+    rpe: rpe ?? undefined,
   };
   
   history.entries.unshift(entry); // Newest first
