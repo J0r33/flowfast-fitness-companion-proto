@@ -24,6 +24,7 @@ interface WorkoutPlannerInput {
     last_rpe?: number;
   };
   primary_goal?: "lose_weight" | "get_stronger" | "get_toned" | "general_fitness";
+  today_recommendation?: "push" | "maintain" | "recovery" | "catch_up";
 }
 
 // LLM Response interfaces (matching tool calling schema)
@@ -163,6 +164,56 @@ Focus Areas:
 Rest Periods (adjust based on intensity):
 - Between sets: 20-45s (high energy), 30-60s (medium), 45-90s (low)
 - Between exercises: 30-60s (high energy), 45-75s (medium), 60-120s (low)
+
+## TODAY'S COACHING RECOMMENDATION (CRITICAL - HIGHEST PRIORITY)
+The app has analyzed the user's weekly goals, recent activity, RPE trends, and adherence.
+
+**Today's Recommendation: ${input.today_recommendation ?? "maintain"}**
+
+Apply these intensity modifiers:
+
+**push (🔥):**
+- User is on track with goals and recovered
+- Increase challenge: add 1-2 reps per set, or +1 set to key exercises
+- Use more advanced exercise variations where possible
+- Reduce rest periods by 10-15 seconds (but stay safe)
+- This is the time to progressively overload
+
+**maintain (⚡):**
+- Balanced, normal intensity session
+- Standard rep ranges and rest periods
+- Focus on quality movement and consistency
+- Neither push limits nor back off significantly
+
+**recovery (🧘):**
+- User showing high RPE or fatigue signals
+- REDUCE intensity: lighter variations, lower rep ranges (6-10)
+- INCREASE rest periods by 15-30 seconds
+- Include more mobility, stretching, and breathing work
+- Prioritize restorative movements over high-intensity work
+- Gentle pace, focus on feeling good post-workout
+
+**catch_up (🎯):**
+- User is behind weekly workout goals
+- Keep session time-efficient and motivating
+- Prefer circuits or full-body compound movements
+- Higher exercise variety to maintain engagement
+- Moderate intensity (don't burn out, but get back on track)
+- Focus on building momentum and consistency
+
+**CRITICAL SAFETY RULES - MUST FOLLOW:**
+- Energy level and RPE/safety ALWAYS WIN over today_recommendation
+- If today_recommendation = "push" but energy = "low", prioritize low intensity (interpret "push" as "slightly more challenging within low-intensity envelope")
+- If today_recommendation = "push" but recent RPE is very high (≥8), prioritize recovery instead
+- today_recommendation modulates intensity WITHIN safe ranges, never overrides safety signals
+- When in conflict, always err on the side of recovery and safety
+
+**Integration Priority (in order):**
+1. User's current energy level (LOW = gentle regardless of recommendation)
+2. Recent RPE/fatigue signals (HIGH RPE = recovery focus)
+3. Today's Recommendation (modulates within safe bounds)
+4. Primary Goal (exercise selection, rep schemes)
+5. Available Time & Equipment (constraints)
 
 Primary Training Goals:
 - lose_weight:
@@ -348,10 +399,11 @@ async function generateWorkoutWithRetry(
 - Available time: ${input.time_minutes} minutes
 - Focus areas: ${input.focus_areas.join(", ")}
 - Primary training goal: ${input.primary_goal ?? "general_fitness"}
+- Today's coaching recommendation: ${input.today_recommendation ?? "maintain"}
 - User goal description: ${input.goal_text}
 - Available equipment: ${input.equipment.length > 0 ? input.equipment.join(", ") : "None (bodyweight only)"}
 
-Generate a complete, balanced workout that fits within the time constraint and aligns with the primary training goal.`
+Generate a complete, balanced workout that fits within the time constraint and aligns with today's recommendation while respecting the user's energy level.`
             }
           ],
           tools: [

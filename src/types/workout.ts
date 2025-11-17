@@ -5,6 +5,7 @@ export type ExerciseType = 'cardio' | 'strength' | 'stretch' | 'breathing';
 export type DifficultyFeedback = 'too_easy' | 'just_right' | 'too_hard' | 'couldnt_finish';
 export type RPE = number; // 1-10 scale
 export type TrainingGoal = 'lose_weight' | 'get_stronger' | 'get_toned' | 'general_fitness';
+export type TodayRecommendation = 'push' | 'maintain' | 'recovery' | 'catch_up';
 
 export interface Exercise {
   id: string;

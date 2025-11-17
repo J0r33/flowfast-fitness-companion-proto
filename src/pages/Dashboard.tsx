@@ -4,18 +4,22 @@ import { mockUserProfile, mockTodayWorkout } from '@/data/mockWorkouts';
 import { WorkoutCard } from '@/components/WorkoutCard';
 import { ProgressStats } from '@/components/ProgressStats';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { MobileNav } from '@/components/MobileNav';
 import { Sparkles, Activity, Zap } from 'lucide-react';
 import { computeWorkoutStats } from '@/utils/workoutHistory';
+import { getTodayRecommendation } from '@/utils/todayRecommendation';
 import { formatMinutes, formatCalories } from '@/utils/formatters';
-import { UserProfile, WorkoutStatsSummary } from '@/types/workout';
+import { UserProfile, WorkoutStatsSummary, TodayRecommendation } from '@/types/workout';
+import { cn } from '@/lib/utils';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const [todayWorkout] = useState(mockTodayWorkout);
   const [profile, setProfile] = useState<UserProfile>(mockUserProfile);
   const [stats, setStats] = useState<WorkoutStatsSummary | null>(null);
+  const [todayRec, setTodayRec] = useState<TodayRecommendation | null>(null);
   
   useEffect(() => {
     // Load unified stats
@@ -27,6 +31,10 @@ export default function Dashboard() {
       totalWorkouts: workoutStats.totalWorkouts,
       currentStreak: workoutStats.currentStreak,
     }));
+
+    // Load today's recommendation
+    const rec = getTodayRecommendation();
+    setTodayRec(rec);
   }, []);
 
   return (
@@ -79,10 +87,44 @@ export default function Dashboard() {
         {/* Today's Workout */}
         <section>
           <h2 className="text-xl font-bold text-foreground mb-3">Today's Plan</h2>
-          <WorkoutCard 
-            workout={todayWorkout} 
-            onClick={() => navigate('/session', { state: { workout: todayWorkout } })}
-          />
+          
+          <div 
+            className={cn(
+              "rounded-lg transition-all",
+              todayRec === "push" && "ring-2 ring-orange-500/30 bg-gradient-to-br from-orange-50/30 to-transparent dark:from-orange-950/20",
+              todayRec === "recovery" && "ring-2 ring-blue-500/30 bg-gradient-to-br from-blue-50/30 to-transparent dark:from-blue-950/20",
+              todayRec === "catch_up" && "ring-2 ring-yellow-500/30 bg-gradient-to-br from-yellow-50/30 to-transparent dark:from-yellow-950/20"
+            )}
+          >
+            {todayRec && (
+              <div className="mb-3 px-1 pt-1">
+                <Badge 
+                  variant={
+                    todayRec === "push" ? "default" :
+                    todayRec === "recovery" ? "secondary" :
+                    "outline"
+                  }
+                  className={cn(
+                    todayRec === "push" && "bg-orange-500 hover:bg-orange-600 text-white border-transparent",
+                    todayRec === "catch_up" && "bg-yellow-500 hover:bg-yellow-600 text-foreground border-transparent"
+                  )}
+                >
+                  {todayRec === "push" && "🔥 Push Day"}
+                  {todayRec === "maintain" && "⚡ Maintain Day"}
+                  {todayRec === "recovery" && "🧘 Recovery Day"}
+                  {todayRec === "catch_up" && "🎯 Catch-Up Day"}
+                </Badge>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Smart recommendation based on your recent activity and goals
+                </p>
+              </div>
+            )}
+            
+            <WorkoutCard 
+              workout={todayWorkout} 
+              onClick={() => navigate('/session', { state: { workout: todayWorkout } })}
+            />
+          </div>
         </section>
 
         {/* Adjust Button */}
