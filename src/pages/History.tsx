@@ -10,7 +10,7 @@ import {
   formatEnergy,
   formatMinutes,
   formatCalories,
-  formatDifficulty,
+  formatDifficultyFromRPE,
 } from '@/utils/formatters';
 
 export default function History() {
@@ -47,7 +47,7 @@ export default function History() {
           <div className="space-y-4">
             {entries.map((entry) => {
               const energyInfo = formatEnergy(entry.energy);
-              const difficultyInfo = formatDifficulty(entry.feedbackDifficulty);
+              const difficultyInfo = formatDifficultyFromRPE(entry.rpe);
 
               return (
                 <Card key={entry.id} className="p-4 hover:shadow-md transition-shadow">
