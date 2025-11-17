@@ -105,3 +105,42 @@ export function formatRPE(rpe?: number): {
     return { label: `RPE ${rpe}/10`, color: 'text-red-600', emoji: '💥' };
   }
 }
+
+// Format difficulty level based on RPE (1-10 scale)
+export function formatDifficultyFromRPE(rpe?: number): { 
+  label: string; 
+  variant: 'default' | 'secondary' | 'destructive' | 'outline';
+  emoji: string;
+} | null {
+  if (!rpe) return null;
+  
+  if (rpe <= 3) {
+    // Very Easy: RPE 1-3
+    return { 
+      label: 'Very Easy', 
+      variant: 'secondary' as const, 
+      emoji: '😌' 
+    };
+  } else if (rpe <= 6) {
+    // Comfortable: RPE 4-6
+    return { 
+      label: 'Comfortable', 
+      variant: 'outline' as const, 
+      emoji: '💪' 
+    };
+  } else if (rpe <= 8) {
+    // Challenging: RPE 7-8
+    return { 
+      label: 'Challenging', 
+      variant: 'default' as const, 
+      emoji: '🔥' 
+    };
+  } else {
+    // Max Effort: RPE 9-10
+    return { 
+      label: 'Max Effort', 
+      variant: 'destructive' as const, 
+      emoji: '💥' 
+    };
+  }
+}
