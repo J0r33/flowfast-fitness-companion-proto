@@ -7,6 +7,8 @@ export interface Exercise {
   id: string;
   name: string;
   type: ExerciseType;
+  mode?: 'reps' | 'time';  // NEW: explicitly track the exercise mode
+  equipment?: string[];     // NEW: track which equipment is needed
   sets?: number;
   reps?: number;
   duration?: number; // in seconds
