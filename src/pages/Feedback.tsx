@@ -18,10 +18,11 @@ export default function Feedback() {
 
   const [rating, setRating] = useState<number | null>(null);
   const [energyAfter, setEnergyAfter] = useState<EnergyLevel | null>(null);
+  const [rpe, setRpe] = useState<number | null>(null);
   const [notes, setNotes] = useState('');
 
   const handleSubmit = () => {
-    if (rating === null || energyAfter === null) return;
+    if (rating === null || energyAfter === null || rpe === null) return;
     
     // Derive difficulty feedback from rating
     let difficultyFeedback: DifficultyFeedback;
@@ -40,15 +41,15 @@ export default function Feedback() {
       difficultyFeedback = 'couldnt_finish';
     }
     
-    // Record feedback for adaptation
-    recordWorkoutFeedback(rating, energyAfter);
+    // Record feedback for adaptation with RPE
+    recordWorkoutFeedback(rating, energyAfter, rpe);
     
-    // Add to workout history
+    // Add to workout history with RPE
     if (workout) {
-      addWorkoutHistoryEntry(workout, difficultyFeedback);
+      addWorkoutHistoryEntry(workout, difficultyFeedback, rpe);
     }
     
-    console.log({ rating, energyAfter, notes, difficulty: difficultyFeedback });
+    console.log({ rating, energyAfter, rpe, notes, difficulty: difficultyFeedback });
     
     toast.success('Great work! Feedback saved', {
       description: 'Keep up the momentum!',
@@ -64,7 +65,7 @@ export default function Feedback() {
     { level: 'high' as EnergyLevel, label: 'High', icon: BatteryFull },
   ];
 
-  const canSubmit = rating !== null && energyAfter !== null;
+  const canSubmit = rating !== null && energyAfter !== null && rpe !== null;
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -124,6 +125,29 @@ export default function Feedback() {
                   {label}
                 </span>
               </Card>
+            ))}
+          </div>
+        </section>
+
+        {/* RPE Selection */}
+        <section>
+          <h3 className="font-semibold text-foreground mb-2">
+            Rate of Perceived Effort (RPE)
+          </h3>
+          <p className="text-xs text-muted-foreground mb-3">
+            1 = very easy, 10 = maximal effort
+          </p>
+          <div className="flex flex-wrap gap-2 justify-center">
+            {Array.from({ length: 10 }, (_, i) => i + 1).map((value) => (
+              <Button
+                key={value}
+                size="sm"
+                variant={rpe === value ? "fitness" : "outline"}
+                onClick={() => setRpe(value)}
+                className="w-12 h-12 text-base font-semibold"
+              >
+                {value}
+              </Button>
             ))}
           </div>
         </section>

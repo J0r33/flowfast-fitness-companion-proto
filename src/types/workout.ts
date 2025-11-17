@@ -3,6 +3,7 @@ export type EnergyLevel = 'low' | 'medium' | 'high';
 export type FocusArea = 'cardio' | 'strength' | 'flexibility' | 'recovery' | 'full-body' | 'upper-body' | 'lower-body' | 'core';
 export type ExerciseType = 'cardio' | 'strength' | 'stretch' | 'breathing';
 export type DifficultyFeedback = 'too_easy' | 'just_right' | 'too_hard' | 'couldnt_finish';
+export type RPE = number; // 1-10 scale
 
 export interface Exercise {
   id: string;
@@ -89,6 +90,9 @@ export interface AdaptationState {
   couldntFinishCount: number;
   lastFeedback?: DifficultyFeedback;
   lastWorkoutDate?: string; // ISO string
+  lastRpe?: number;        // Most recent RPE score (1-10)
+  rpeSum?: number;         // Sum of all RPE scores for averaging
+  rpeCount?: number;       // Number of sessions with valid RPE
 }
 
 export interface PlannerHistorySnapshot {
@@ -96,6 +100,8 @@ export interface PlannerHistorySnapshot {
   difficulty_bias: -1 | 0 | 1; // -1 = too hard, 0 = balanced, 1 = too easy
   days_since_last_workout: number | null; // null if none yet
   last_feedback?: DifficultyFeedback;
+  avg_rpe?: number;  // Average RPE across all sessions
+  last_rpe?: number; // Most recent RPE score
 }
 
 export interface WorkoutHistoryEntry {
@@ -110,6 +116,7 @@ export interface WorkoutHistoryEntry {
   totalSets: number;
   totalEstimatedCalories?: number;
   feedbackDifficulty?: DifficultyFeedback;
+  rpe?: number; // Rate of Perceived Effort (1-10)
 }
 
 export interface WorkoutHistory {

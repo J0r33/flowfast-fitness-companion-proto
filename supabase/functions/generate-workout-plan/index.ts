@@ -20,6 +20,8 @@ interface WorkoutPlannerInput {
     difficulty_bias: -1 | 0 | 1;
     days_since_last_workout: number | null;
     last_feedback?: string;
+    avg_rpe?: number;
+    last_rpe?: number;
   };
 }
 
@@ -73,8 +75,40 @@ User workout history:
   `${input.history.days_since_last_workout} days ago`
 }
 - Last feedback: ${input.history.last_feedback || "none yet"}
+- Average RPE: ${
+  typeof input.history.avg_rpe === 'number' 
+    ? `${input.history.avg_rpe.toFixed(1)}/10`
+    : "unknown"
+}
+- Last RPE: ${
+  typeof input.history.last_rpe === 'number'
+    ? `${input.history.last_rpe}/10`
+    : "unknown"
+}
 
 **Adaptation Guidelines (MUST FOLLOW):**
+0. RPE-Based Intensity Control (HIGHEST PRIORITY):
+   - If avg_rpe >= 8 or last_rpe >= 9:
+     * User is consistently working at very high intensity
+     * REDUCE volume by 10-15% or add more rest time
+     * This prevents overtraining even if difficulty_bias suggests "too easy"
+     * Consider deload week if avg_rpe > 8.5 for 3+ sessions
+   
+   - If avg_rpe <= 4 and difficulty_bias = 1 (too easy):
+     * Safe to progressively increase difficulty
+     * Add 1-2 reps per set or 1 additional set
+     * Reduce rest by 5-10 seconds
+     * Include more challenging variations
+   
+   - If last_rpe >= 8 and days_since_last_workout >= 3:
+     * Previous workout was very hard AND user took time off
+     * Start with moderate intensity (RPE 5-6 target)
+     * Focus on technique and recovery
+     * Gradually rebuild rather than jumping back to high intensity
+
+   **IMPORTANT: RPE takes precedence over difficulty_bias when there's a conflict.**
+   A high RPE (8+) with "too easy" feedback suggests the user needs better recovery, not more volume.
+
 1. If difficulty_bias = 1 (too easy):
    - Increase reps by 2-3 per set
    - Add 1 extra set to key exercises

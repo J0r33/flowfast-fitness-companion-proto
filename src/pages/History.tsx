@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { MobileNav } from '@/components/MobileNav';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, Flame, Dumbbell, TrendingUp } from 'lucide-react';
+import { Calendar, Clock, Flame, Dumbbell, TrendingUp, Activity } from 'lucide-react';
 import { loadWorkoutHistory } from '@/utils/workoutHistory';
 import { WorkoutHistoryEntry } from '@/types/workout';
 import {
@@ -101,6 +101,15 @@ export default function History() {
                         {entry.exercisesCount} exercises
                       </span>
                     </div>
+
+                    {entry.rpe && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Activity className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-foreground font-medium">
+                          RPE {entry.rpe}/10
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Focus Areas */}

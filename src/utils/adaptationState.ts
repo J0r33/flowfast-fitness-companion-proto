@@ -8,6 +8,9 @@ const DEFAULT_STATE: AdaptationState = {
   tooEasyCount: 0,
   tooHardCount: 0,
   couldntFinishCount: 0,
+  lastRpe: undefined,
+  rpeSum: 0,
+  rpeCount: 0,
 };
 
 // Read from localStorage
@@ -34,7 +37,8 @@ export function saveAdaptationState(state: AdaptationState): void {
 // Update state with new feedback
 export function recordWorkoutFeedback(
   rating: number,
-  energyAfter: string
+  energyAfter: string,
+  rpe?: number
 ): void {
   const state = loadAdaptationState();
   
@@ -65,6 +69,15 @@ export function recordWorkoutFeedback(
   }
   
   state.lastFeedback = difficultyFeedback;
+  
+  // Track RPE if provided
+  if (typeof rpe === 'number') {
+    const clampedRpe = Math.min(10, Math.max(1, Math.round(rpe)));
+    state.lastRpe = clampedRpe;
+    state.rpeSum = (state.rpeSum ?? 0) + clampedRpe;
+    state.rpeCount = (state.rpeCount ?? 0) + 1;
+  }
+  
   saveAdaptationState(state);
 }
 
@@ -102,10 +115,18 @@ function calculateDaysSinceLastWorkout(lastWorkoutDate?: string): number | null 
 export function generatePlannerHistorySnapshot(): PlannerHistorySnapshot {
   const state = loadAdaptationState();
   
+  // Calculate average RPE
+  const avg_rpe = 
+    state.rpeCount && state.rpeCount > 0
+      ? (state.rpeSum ?? 0) / state.rpeCount
+      : undefined;
+  
   return {
     sessions_completed: state.totalSessions,
     difficulty_bias: calculateDifficultyBias(state),
     days_since_last_workout: calculateDaysSinceLastWorkout(state.lastWorkoutDate),
     last_feedback: state.lastFeedback,
+    avg_rpe,
+    last_rpe: state.lastRpe,
   };
 }
