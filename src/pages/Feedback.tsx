@@ -7,6 +7,7 @@ import { MobileNav } from '@/components/MobileNav';
 import { Card } from '@/components/ui/card';
 import { Star, Battery, BatteryMedium, BatteryFull } from 'lucide-react';
 import { toast } from 'sonner';
+import { recordWorkoutFeedback } from '@/utils/adaptationState';
 
 export default function Feedback() {
   const navigate = useNavigate();
@@ -18,6 +19,11 @@ export default function Feedback() {
   const [notes, setNotes] = useState('');
 
   const handleSubmit = () => {
+    if (rating === null || energyAfter === null) return;
+    
+    // Record feedback for adaptation
+    recordWorkoutFeedback(rating, energyAfter);
+    
     // Mock submission
     console.log({ rating, energyAfter, notes });
     
