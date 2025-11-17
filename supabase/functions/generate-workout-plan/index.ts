@@ -9,6 +9,14 @@ const corsHeaders = {
 };
 
 // Input interface
+interface RecentFocusSummary {
+  last_sessions: {
+    date: string;
+    focusAreas: string[];
+  }[];
+  focus_counts: Record<string, number>;
+}
+
 interface WorkoutPlannerInput {
   energy: "low" | "medium" | "high";
   time_minutes: number;
@@ -25,6 +33,7 @@ interface WorkoutPlannerInput {
   };
   primary_goal?: "lose_weight" | "get_stronger" | "get_toned" | "general_fitness";
   today_recommendation?: "push" | "maintain" | "recovery" | "catch_up";
+  recent_focus_summary?: RecentFocusSummary;
 }
 
 // LLM Response interfaces (matching tool calling schema)
@@ -140,9 +149,57 @@ User workout history:
 
 ` : '';
 
+  const recentFocusSection = input.recent_focus_summary ? `
+
+## RECENT WORKOUT FOCUS (MANDATORY BALANCING RULES)
+
+The app provides a summary of the user's last sessions to ensure balanced training:
+
+**Last Sessions:**
+${input.recent_focus_summary.last_sessions.map(s => `- ${s.date}: [${s.focusAreas.join(", ")}]`).join("\n")}
+
+**Focus Area Counts (from recent workouts):**
+${Object.entries(input.recent_focus_summary.focus_counts)
+  .sort(([, a], [, b]) => a - b)
+  .map(([area, count]) => `- ${area}: ${count} time(s)`)
+  .join("\n")}
+
+**YOU MUST FOLLOW THESE BALANCING RULES:**
+
+1. **Prioritize Under-Trained Areas:**
+   - Focus areas with LOWER counts are under-trained and should be prioritized TODAY
+   - If the user's focus_areas input includes under-trained areas, emphasize them
+   - Avoid overloading areas that already have HIGH counts in recent sessions
+
+2. **Avoid Overworking Same Areas:**
+   - If an area appears frequently in recent sessions (high count), reduce emphasis TODAY
+   - Never design a workout that hammers the same focus area 3+ days in a row
+   - Provide variety to prevent overuse and maintain engagement
+
+3. **Balance Within User's Focus:**
+   - Respect the user's explicit focus_areas input for this session
+   - Within those focus areas, bias exercise selection toward under-trained movements
+   - Example: If focus is "upper-body" but recent workouts emphasized "push", prioritize "pull" exercises today
+
+4. **Recovery Signals:**
+   - If an area was worked heavily yesterday (appears in most recent session), use lighter variations or reduced volume
+   - Consider muscle recovery when sequencing exercises
+   - If high RPE was recorded for a specific focus area, ease off that area today
+
+5. **Default to Balance:**
+   - If no clear under-trained areas exist, default to full-body or balanced approach
+   - Variety prevents plateaus and maintains motivation
+
+**Integration with Today's Plan:**
+- The focus_areas provided for today already account for balancing logic
+- Your job is to execute that focus effectively while considering the recent training history
+- Use the focus_counts to fine-tune exercise selection within the chosen focus areas
+
+` : '';
+
   return `You are a certified fitness trainer AI creating personalized workout plans.
 
-${adaptationSection}Given the user's energy level, available time, focus areas, goal, and available equipment, generate an appropriate workout plan.
+${adaptationSection}${recentFocusSection}Given the user's energy level, available time, focus areas, goal, and available equipment, generate an appropriate workout plan.
 
 **Guidelines:**
 
@@ -530,7 +587,20 @@ serve(async (req) => {
   try {
     const input: WorkoutPlannerInput = await req.json();
     
-    console.log("Generating workout plan for:", input);
+    console.log("Generating workout plan for:", {
+      energy: input.energy,
+      time_minutes: input.time_minutes,
+      focus_areas: input.focus_areas,
+      goal_text: input.goal_text,
+      equipment: input.equipment,
+      history: input.history,
+      primary_goal: input.primary_goal,
+      today_recommendation: input.today_recommendation,
+      recent_focus_summary: input.recent_focus_summary ? {
+        last_sessions_count: input.recent_focus_summary.last_sessions.length,
+        focus_counts: input.recent_focus_summary.focus_counts,
+      } : "none",
+    });
 
     // Validate input
     if (!input.energy || !["low", "medium", "high"].includes(input.energy)) {

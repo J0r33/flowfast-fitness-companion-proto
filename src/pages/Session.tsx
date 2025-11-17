@@ -6,6 +6,7 @@ import { buildWorkoutSession, saveWorkoutSession } from '@/utils/workoutSession'
 import { generatePlannerHistorySnapshot } from '@/utils/adaptationState';
 import { loadWeeklyGoals } from '@/utils/weeklyGoals';
 import { getTodayRecommendation } from '@/utils/todayRecommendation';
+import { buildAutoTodayPlanInput } from '@/utils/autoTodayPlan';
 import { ExerciseListItem } from '@/components/ExerciseListItem';
 import { Button } from '@/components/ui/button';
 import { MobileNav } from '@/components/MobileNav';
@@ -24,7 +25,79 @@ export default function Session() {
 
   useEffect(() => {
     async function loadWorkout() {
-      if (state?.isAdjusted) {
+      if (state?.mode === "today_auto") {
+        // Auto Today mode - derive all inputs automatically
+        setIsGenerating(true);
+        try {
+          const userEquipment = JSON.parse(localStorage.getItem("userEquipment") || "[]") as string[];
+          const autoInput = buildAutoTodayPlanInput();
+
+          const response = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-workout-plan`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+              },
+              body: JSON.stringify({
+                energy: autoInput.energy,
+                time_minutes: autoInput.time_minutes,
+                focus_areas: autoInput.focus_areas,
+                goal_text: autoInput.goal_text,
+                equipment: userEquipment,
+                history: autoInput.history,
+                primary_goal: autoInput.primary_goal,
+                today_recommendation: autoInput.today_recommendation,
+                recent_focus_summary: autoInput.recent_focus_summary,
+              }),
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+
+          const data = await response.json();
+
+          if (!data.success) {
+            throw new Error(data.error || "Failed to generate workout");
+          }
+
+          console.log("LLM Context:", data.llm_context);
+
+          const workoutWithContext = {
+            ...data.workout,
+            context: {
+              energy: autoInput.energy,
+              timeMinutes: autoInput.time_minutes,
+              focusAreas: autoInput.focus_areas,
+              equipment: userEquipment,
+            },
+          };
+
+          setWorkout(workoutWithContext);
+        } catch (error) {
+          console.error("Failed to generate auto today workout:", error);
+
+          toast({
+            title: "Using Quick Workout",
+            description: "We've created a quick workout for you based on your preferences.",
+            variant: "default",
+          });
+
+          // Fallback to mock workout using auto-derived inputs
+          const autoInput = buildAutoTodayPlanInput();
+          const fallbackWorkout = generateMockWorkout(
+            autoInput.energy,
+            autoInput.time_minutes,
+            autoInput.focus_areas
+          );
+          setWorkout(fallbackWorkout);
+        } finally {
+          setIsGenerating(false);
+        }
+      } else if (state?.isAdjusted) {
         // Generate workout via LLM
         setIsGenerating(true);
         

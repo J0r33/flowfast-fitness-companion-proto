@@ -120,10 +120,10 @@ export default function Dashboard() {
               </div>
             )}
             
-            <WorkoutCard 
-              workout={todayWorkout} 
-              onClick={() => navigate('/session', { state: { workout: todayWorkout } })}
-            />
+          <WorkoutCard
+            workout={todayWorkout}
+            onClick={() => navigate('/session', { state: { mode: 'today_auto' } })}
+          />
           </div>
         </section>
 
