@@ -3,10 +3,12 @@ import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Dumbbell } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Dumbbell, Target } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { loadWeeklyGoals, saveWeeklyGoals } from '@/utils/weeklyGoals';
 
 const EQUIPMENT_OPTIONS = [
   'Workout bands / Resistance bands',
@@ -33,12 +35,18 @@ const EQUIPMENT_OPTIONS = [
 export default function Settings() {
   const navigate = useNavigate();
   const [selectedEquipment, setSelectedEquipment] = useState<string[]>([]);
+  const [targetWorkouts, setTargetWorkouts] = useState(3);
+  const [targetMinutes, setTargetMinutes] = useState(90);
 
   useEffect(() => {
     const saved = localStorage.getItem('userEquipment');
     if (saved) {
       setSelectedEquipment(JSON.parse(saved));
     }
+    
+    const goals = loadWeeklyGoals();
+    setTargetWorkouts(goals.targetWorkoutsPerWeek);
+    setTargetMinutes(goals.targetMinutesPerWeek);
   }, []);
 
   const handleToggleEquipment = (equipment: string) => {
@@ -60,10 +68,26 @@ export default function Settings() {
     });
   };
 
-  const handleSave = () => {
+  const handleSaveEquipment = () => {
     localStorage.setItem('userEquipment', JSON.stringify(selectedEquipment));
     toast.success('Equipment preferences saved');
-    navigate('/');
+  };
+
+  const handleSaveGoals = () => {
+    if (targetWorkouts < 1 || targetWorkouts > 7) {
+      toast.error('Workouts per week must be between 1 and 7');
+      return;
+    }
+    if (targetMinutes < 30 || targetMinutes > 500) {
+      toast.error('Minutes per week must be between 30 and 500');
+      return;
+    }
+    
+    saveWeeklyGoals({
+      targetWorkoutsPerWeek: targetWorkouts,
+      targetMinutesPerWeek: targetMinutes,
+    });
+    toast.success('Weekly goals saved');
   };
 
   return (
@@ -75,6 +99,61 @@ export default function Settings() {
       </header>
 
       <main className="max-w-md mx-auto px-6 py-6 space-y-6">
+        <Card className="p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <Target className="h-6 w-6 text-primary" />
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">Weekly Goals</h2>
+              <p className="text-sm text-muted-foreground">
+                Set your weekly workout targets to track progress.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="targetWorkouts" className="text-sm font-medium">
+                Workouts per week
+              </Label>
+              <Input
+                id="targetWorkouts"
+                type="number"
+                min={1}
+                max={7}
+                value={targetWorkouts}
+                onChange={(e) => setTargetWorkouts(parseInt(e.target.value) || 1)}
+                className="mt-2"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Target: 1-7 workouts per week
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="targetMinutes" className="text-sm font-medium">
+                Minutes per week
+              </Label>
+              <Input
+                id="targetMinutes"
+                type="number"
+                min={30}
+                max={500}
+                step={15}
+                value={targetMinutes}
+                onChange={(e) => setTargetMinutes(parseInt(e.target.value) || 30)}
+                className="mt-2"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Target: 30-500 minutes per week (increments of 15)
+              </p>
+            </div>
+          </div>
+
+          <Button onClick={handleSaveGoals} className="w-full mt-6">
+            Save Goals
+          </Button>
+        </Card>
+
         <Card className="p-6">
           <div className="flex items-center gap-3 mb-4">
             <Dumbbell className="h-6 w-6 text-primary" />
@@ -110,7 +189,7 @@ export default function Settings() {
             </p>
           )}
 
-          <Button onClick={handleSave} className="w-full mt-6">
+          <Button onClick={handleSaveEquipment} className="w-full mt-6">
             Save Equipment
           </Button>
         </Card>
