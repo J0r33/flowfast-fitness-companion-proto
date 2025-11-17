@@ -8,6 +8,8 @@ import { Card } from '@/components/ui/card';
 import { Star, Battery, BatteryMedium, BatteryFull } from 'lucide-react';
 import { toast } from 'sonner';
 import { recordWorkoutFeedback } from '@/utils/adaptationState';
+import { addWorkoutHistoryEntry } from '@/utils/workoutHistory';
+import { DifficultyFeedback } from '@/types/workout';
 
 export default function Feedback() {
   const navigate = useNavigate();
@@ -21,11 +23,32 @@ export default function Feedback() {
   const handleSubmit = () => {
     if (rating === null || energyAfter === null) return;
     
+    // Derive difficulty feedback from rating
+    let difficultyFeedback: DifficultyFeedback;
+    if (rating <= 2) {
+      difficultyFeedback = 'too_hard';
+    } else if (rating === 3) {
+      difficultyFeedback = 'just_right';
+    } else if (rating === 4) {
+      difficultyFeedback = 'too_easy';
+    } else {
+      difficultyFeedback = 'too_easy';
+    }
+    
+    // Special case: if energy after is 'low', consider it couldn't finish
+    if (energyAfter === 'low' && rating <= 3) {
+      difficultyFeedback = 'couldnt_finish';
+    }
+    
     // Record feedback for adaptation
     recordWorkoutFeedback(rating, energyAfter);
     
-    // Mock submission
-    console.log({ rating, energyAfter, notes });
+    // Add to workout history
+    if (workout) {
+      addWorkoutHistoryEntry(workout, difficultyFeedback);
+    }
+    
+    console.log({ rating, energyAfter, notes, difficulty: difficultyFeedback });
     
     toast.success('Great work! Feedback saved', {
       description: 'Keep up the momentum!',
