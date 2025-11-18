@@ -1,14 +1,13 @@
 import { UserProfile } from '@/types/workout';
 import { Card } from '@/components/ui/card';
 import { Flame, Trophy, Calendar } from 'lucide-react';
-import { getWorkoutsThisWeek } from '@/utils/workoutHistory';
 
 interface ProgressStatsProps {
   profile: UserProfile;
+  workoutsThisWeek: number;
 }
 
-export function ProgressStats({ profile }: ProgressStatsProps) {
-  const workoutsThisWeek = getWorkoutsThisWeek();
+export function ProgressStats({ profile, workoutsThisWeek }: ProgressStatsProps) {
   
   return (
     <div className="grid grid-cols-3 gap-3">

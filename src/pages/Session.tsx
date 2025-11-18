@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import { WorkoutPlan } from '@/types/workout';
 import { generateMockWorkout } from '@/data/mockWorkouts';
 import { buildWorkoutSession, saveWorkoutSession } from '@/utils/workoutSession';
 import { generatePlannerHistorySnapshot } from '@/utils/adaptationState';
-import { loadWeeklyGoals } from '@/utils/weeklyGoals';
 import { getTodayRecommendation } from '@/utils/todayRecommendation';
 import { buildAutoTodayPlanInput } from '@/utils/autoTodayPlan';
 import { ExerciseListItem } from '@/components/ExerciseListItem';
@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 export default function Session() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
   const state = location.state as any;
   const { toast } = useToast();
 
@@ -30,6 +31,7 @@ export default function Session() {
         setIsGenerating(true);
         try {
           const userEquipment = JSON.parse(localStorage.getItem("userEquipment") || "[]") as string[];
+          // buildAutoTodayPlanInput uses sync Local functions
           const autoInput = buildAutoTodayPlanInput();
 
           const response = await fetch(
@@ -110,10 +112,6 @@ export default function Session() {
           
           // Generate history snapshot for adaptation
           const history = generatePlannerHistorySnapshot();
-          
-          // Load primary goal from weekly goals
-          const weeklyGoals = loadWeeklyGoals();
-          const primaryGoal = weeklyGoals.primaryGoal;
 
           // Load today's coaching recommendation
           const todayRec = getTodayRecommendation();
@@ -128,12 +126,12 @@ export default function Session() {
               },
               body: JSON.stringify({
                 energy: state.energy,
-                time_minutes: state.time,
+                time_minutes: state.timeMinutes,
                 focus_areas: state.focusAreas,
                 goal_text: goalText,
                 equipment: userEquipment,
                 history: history,
-                primary_goal: primaryGoal,
+                primary_goal: state.primaryGoal || 'general_fitness',
                 today_recommendation: todayRec,
               }),
             }

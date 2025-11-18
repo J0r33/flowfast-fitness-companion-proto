@@ -1,6 +1,6 @@
-import { loadWeeklyGoals } from "@/utils/weeklyGoals";
+import { loadWeeklyGoalsLocal } from "@/utils/weeklyGoals";
 import { loadAdaptationState, generatePlannerHistorySnapshot } from "@/utils/adaptationState";
-import { loadWorkoutHistory } from "@/utils/workoutHistory";
+import { loadWorkoutHistoryLocal } from "@/utils/workoutHistory";
 import { getTodayRecommendation } from "@/utils/todayRecommendation";
 import { TodayRecommendation, FocusArea } from "@/types/workout";
 
@@ -40,9 +40,9 @@ const ALL_FOCUS_AREAS: FocusArea[] = [
  * from user history, goals, and current state.
  */
 export function buildAutoTodayPlanInput(): AutoTodayPlanInput {
-  const weeklyGoals = loadWeeklyGoals();
+  const weeklyGoals = loadWeeklyGoalsLocal();
   const adaptation = loadAdaptationState();
-  const history = loadWorkoutHistory();
+  const history = loadWorkoutHistoryLocal();
   const todayRec = getTodayRecommendation();
 
   // Check if this is the user's first workout

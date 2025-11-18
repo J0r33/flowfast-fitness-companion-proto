@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import { mockUserProfile, mockTodayWorkout } from '@/data/mockWorkouts';
 import { WorkoutCard } from '@/components/WorkoutCard';
 import { ProgressStats } from '@/components/ProgressStats';
@@ -8,34 +9,47 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { MobileNav } from '@/components/MobileNav';
 import { Sparkles, Activity, Zap } from 'lucide-react';
-import { computeWorkoutStats } from '@/utils/workoutHistory';
+import { loadWorkoutHistoryUnified, computeWorkoutStats } from '@/utils/workoutHistory';
 import { getTodayRecommendation } from '@/utils/todayRecommendation';
 import { formatMinutes, formatCalories } from '@/utils/formatters';
-import { UserProfile, WorkoutStatsSummary, TodayRecommendation } from '@/types/workout';
+import { UserProfile, WorkoutStatsSummary, TodayRecommendation, WorkoutHistory } from '@/types/workout';
 import { cn } from '@/lib/utils';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [todayWorkout] = useState(mockTodayWorkout);
   const [profile, setProfile] = useState<UserProfile>(mockUserProfile);
   const [stats, setStats] = useState<WorkoutStatsSummary | null>(null);
   const [todayRec, setTodayRec] = useState<TodayRecommendation | null>(null);
+  const [workoutsThisWeek, setWorkoutsThisWeek] = useState(0);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    // Load unified stats
-    const workoutStats = computeWorkoutStats();
-    setStats(workoutStats);
-    
-    setProfile(prev => ({
-      ...prev,
-      totalWorkouts: workoutStats.totalWorkouts,
-      currentStreak: workoutStats.currentStreak,
-    }));
+    async function loadData() {
+      try {
+        const history = await loadWorkoutHistoryUnified(user?.id);
+        const workoutStats = computeWorkoutStats(history);
+        setStats(workoutStats);
+        setWorkoutsThisWeek(workoutStats.thisWeekWorkouts);
+        
+        setProfile(prev => ({
+          ...prev,
+          totalWorkouts: workoutStats.totalWorkouts,
+          currentStreak: workoutStats.currentStreak,
+        }));
 
-    // Load today's recommendation
-    const rec = getTodayRecommendation();
-    setTodayRec(rec);
-  }, []);
+        // Load today's recommendation (sync)
+        const rec = getTodayRecommendation();
+        setTodayRec(rec);
+      } catch (error) {
+        console.error('Failed to load dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, [user?.id]);
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -49,11 +63,15 @@ export default function Dashboard() {
 
       {/* Content */}
       <main className="max-w-md mx-auto px-6 py-6 space-y-6">
-        {/* Stats */}
-        <ProgressStats profile={profile} />
+        {loading ? (
+          <div className="text-center py-8 text-muted-foreground">Loading...</div>
+        ) : (
+          <>
+            {/* Stats */}
+            <ProgressStats profile={profile} workoutsThisWeek={workoutsThisWeek} />
 
-        {/* Weekly Highlights */}
-        {stats && stats.totalWorkouts > 0 && (
+            {/* Weekly Highlights */}
+            {stats && stats.totalWorkouts > 0 && (
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-3">This Week</h2>
             <div className="grid grid-cols-2 gap-3">
@@ -81,11 +99,11 @@ export default function Dashboard() {
                 </div>
               </Card>
             </div>
-          </section>
-        )}
+            </section>
+          )}
 
-        {/* Today's Workout */}
-        <section>
+          {/* Today's Workout */}
+          <section>
           <h2 className="text-xl font-bold text-foreground mb-3">Today's Plan</h2>
           
           <div 

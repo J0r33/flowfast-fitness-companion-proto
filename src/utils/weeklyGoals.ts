@@ -24,7 +24,7 @@ export async function loadWeeklyGoalsFromDB(userId: string): Promise<WeeklyGoals
     if (!data) return DEFAULT_WEEKLY_GOALS;
 
     return {
-      primaryGoal: data.primary_goal || DEFAULT_WEEKLY_GOALS.primaryGoal,
+      primaryGoal: (data.primary_goal as TrainingGoal) || DEFAULT_WEEKLY_GOALS.primaryGoal,
       targetWorkoutsPerWeek: data.target_workouts_per_week || DEFAULT_WEEKLY_GOALS.targetWorkoutsPerWeek,
       targetMinutesPerWeek: data.target_minutes_per_week || DEFAULT_WEEKLY_GOALS.targetMinutesPerWeek,
       lastUpdated: data.updated_at,
@@ -54,13 +54,13 @@ export async function saveWeeklyGoalsToDB(userId: string, goals: WeeklyGoals): P
   }
 }
 
-// ==================== LOCALSTORAGE OPERATIONS ====================
+// ==================== LOCALSTORAGE OPERATIONS (SYNC) ====================
 
 /**
- * Load weekly goals from localStorage.
+ * Load weekly goals from localStorage (synchronous).
  * Returns default goals if none exist or if parsing fails.
  */
-export function loadWeeklyGoalsFromLocalStorage(): WeeklyGoals {
+export function loadWeeklyGoalsLocal(): WeeklyGoals {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) {
@@ -90,10 +90,10 @@ export function loadWeeklyGoalsFromLocalStorage(): WeeklyGoals {
 }
 
 /**
- * Save weekly goals to localStorage.
+ * Save weekly goals to localStorage (synchronous).
  * Automatically adds lastUpdated timestamp.
  */
-export function saveWeeklyGoalsToLocalStorage(goals: WeeklyGoals): void {
+export function saveWeeklyGoalsLocal(goals: WeeklyGoals): void {
   try {
     const goalsWithTimestamp: WeeklyGoals = {
       ...goals,
@@ -107,25 +107,33 @@ export function saveWeeklyGoalsToLocalStorage(goals: WeeklyGoals): void {
   }
 }
 
-// ==================== HYBRID OPERATIONS ====================
+// ==================== HYBRID OPERATIONS (ASYNC) ====================
 
 /**
- * Load weekly goals (DB if userId provided, otherwise localStorage)
+ * Load weekly goals - unified loader (DB with localStorage fallback)
  */
-export async function loadWeeklyGoals(userId?: string): Promise<WeeklyGoals> {
+export async function loadWeeklyGoalsUnified(userId?: string): Promise<WeeklyGoals> {
   if (userId) {
-    return await loadWeeklyGoalsFromDB(userId);
+    try {
+      return await loadWeeklyGoalsFromDB(userId);
+    } catch (error) {
+      console.error('DB load failed, falling back to localStorage:', error);
+      return loadWeeklyGoalsLocal();
+    }
   }
-  return loadWeeklyGoalsFromLocalStorage();
+  return loadWeeklyGoalsLocal();
 }
 
 /**
- * Save weekly goals (DB if userId provided, otherwise localStorage)
+ * Save weekly goals - unified saver
  */
-export async function saveWeeklyGoals(goals: WeeklyGoals, userId?: string): Promise<void> {
+export async function saveWeeklyGoalsUnified(
+  goals: WeeklyGoals,
+  userId?: string
+): Promise<void> {
   if (userId) {
     await saveWeeklyGoalsToDB(userId, goals);
   } else {
-    saveWeeklyGoalsToLocalStorage(goals);
+    saveWeeklyGoalsLocal(goals);
   }
 }

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import { EnergyLevel } from '@/types/workout';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -14,6 +15,7 @@ import { DifficultyFeedback } from '@/types/workout';
 export default function Feedback() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
   const workout = location.state?.workout;
 
   const [rating, setRating] = useState<number | null>(null);
@@ -21,7 +23,7 @@ export default function Feedback() {
   const [rpe, setRpe] = useState<number | null>(null);
   const [notes, setNotes] = useState('');
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (rating === null || energyAfter === null || rpe === null) return;
     
     // Derive difficulty feedback from rating
@@ -41,22 +43,27 @@ export default function Feedback() {
       difficultyFeedback = 'couldnt_finish';
     }
     
-    // Record feedback for adaptation with RPE
-    recordWorkoutFeedback(rating, energyAfter, rpe);
-    
-    // Add to workout history with RPE
-    if (workout) {
-      addWorkoutHistoryEntry(workout, difficultyFeedback, rpe);
-    }
-    
-    console.log({ rating, energyAfter, rpe, notes, difficulty: difficultyFeedback });
-    
-    toast.success('Great work! Feedback saved', {
-      description: 'Keep up the momentum!',
-    });
+    try {
+      // Record feedback for adaptation with RPE
+      recordWorkoutFeedback(rating, energyAfter, rpe);
+      
+      // Add to workout history with RPE (async)
+      if (workout) {
+        await addWorkoutHistoryEntry(workout, difficultyFeedback, rpe, user?.id);
+      }
+      
+      console.log({ rating, energyAfter, rpe, notes, difficulty: difficultyFeedback });
+      
+      toast.success('Great work! Feedback saved', {
+        description: 'Keep up the momentum!',
+      });
 
-    // Navigate back to dashboard
-    setTimeout(() => navigate('/'), 1000);
+      // Navigate back to dashboard
+      setTimeout(() => navigate('/'), 1000);
+    } catch (error) {
+      console.error('Failed to save feedback:', error);
+      toast.error('Failed to save feedback');
+    }
   };
 
   const energyOptions = [
