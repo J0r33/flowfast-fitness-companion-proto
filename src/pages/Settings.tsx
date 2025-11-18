@@ -9,8 +9,9 @@ import { Dumbbell, Target } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { loadWeeklyGoals, saveWeeklyGoals, DEFAULT_WEEKLY_GOALS } from '@/utils/weeklyGoals';
 import { WeeklyGoals, TrainingGoal } from '@/types/workout';
+import { loadUserProfile, saveUserProfile } from '@/utils/profileSync';
+import { DEFAULT_WEEKLY_GOALS } from '@/utils/weeklyGoals';
 
 const EQUIPMENT_OPTIONS = [
   'Workout bands / Resistance bands',
@@ -40,13 +41,12 @@ export default function Settings() {
   const [weeklyGoals, setWeeklyGoals] = useState<WeeklyGoals>(DEFAULT_WEEKLY_GOALS);
 
   useEffect(() => {
-    const saved = localStorage.getItem('userEquipment');
-    if (saved) {
-      setSelectedEquipment(JSON.parse(saved));
+    async function loadProfile() {
+      const profile = await loadUserProfile();
+      setSelectedEquipment(profile.equipment);
+      setWeeklyGoals(profile.goals);
     }
-    
-    const goals = loadWeeklyGoals();
-    setWeeklyGoals(goals);
+    loadProfile();
   }, []);
 
   const handleToggleEquipment = (equipment: string) => {
@@ -68,12 +68,16 @@ export default function Settings() {
     });
   };
 
-  const handleSaveEquipment = () => {
-    localStorage.setItem('userEquipment', JSON.stringify(selectedEquipment));
-    toast.success('Equipment preferences saved');
+  const handleSaveEquipment = async () => {
+    try {
+      await saveUserProfile(selectedEquipment, weeklyGoals);
+      toast.success('Equipment preferences saved');
+    } catch (error) {
+      toast.error('Failed to save equipment preferences');
+    }
   };
 
-  const handleSaveGoals = () => {
+  const handleSaveGoals = async () => {
     if (weeklyGoals.targetWorkoutsPerWeek < 1 || weeklyGoals.targetWorkoutsPerWeek > 7) {
       toast.error('Workouts per week must be between 1 and 7');
       return;
@@ -83,8 +87,12 @@ export default function Settings() {
       return;
     }
     
-    saveWeeklyGoals(weeklyGoals);
-    toast.success('Weekly goals saved');
+    try {
+      await saveUserProfile(selectedEquipment, weeklyGoals);
+      toast.success('Weekly goals saved');
+    } catch (error) {
+      toast.error('Failed to save weekly goals');
+    }
   };
 
   return (
