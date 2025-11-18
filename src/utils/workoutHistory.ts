@@ -106,10 +106,37 @@ export async function saveWorkoutHistory(entry: WorkoutHistoryEntry, userId?: st
   if (userId) {
     await saveWorkoutHistoryToDB(userId, entry);
   } else {
-    const history = loadWorkoutHistoryFromLocalStorage();
-    history.entries.unshift(entry);
-    saveWorkoutHistoryToLocalStorage(history);
-  }
+  const history = loadWorkoutHistoryLocal();
+  history.entries.unshift(entry);
+  saveWorkoutHistoryLocal(history);
+}
+
+/**
+ * Add workout history entry from a WorkoutPlan (async, unified).
+ */
+export async function addWorkoutHistoryEntry(
+  plan: WorkoutPlan,
+  feedbackDifficulty?: DifficultyFeedback,
+  rpe?: number,
+  userId?: string
+): Promise<void> {
+  const entry: WorkoutHistoryEntry = {
+    id: crypto.randomUUID(),
+    date: new Date().toISOString(),
+    energy: plan.context.energy,
+    timeMinutesPlanned: plan.context.timeMinutes,
+    timeMinutesActual: undefined,
+    focusAreas: plan.context.focusAreas,
+    equipment: plan.context.equipment || [],
+    exercisesCount: plan.exercises.length,
+    totalSets: plan.exercises.reduce((sum, ex) => sum + ex.sets, 0),
+    totalEstimatedCalories: plan.estimatedCalories,
+    feedbackDifficulty,
+    rpe,
+  };
+
+  await saveWorkoutHistoryEntryUnified(entry, userId);
+}
 }
 
 // Add a new history entry
