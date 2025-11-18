@@ -72,7 +72,7 @@ export default function Dashboard() {
 
             {/* Weekly Highlights */}
             {stats && stats.totalWorkouts > 0 && (
-          <section>
+              <section>
             <h2 className="text-lg font-semibold text-foreground mb-3">This Week</h2>
             <div className="grid grid-cols-2 gap-3">
               <Card className="p-4">
@@ -98,16 +98,16 @@ export default function Dashboard() {
                   </div>
                 </div>
               </Card>
-            </div>
-            </section>
-          )}
+              </div>
+              </section>
+            )}
 
-          {/* Today's Workout */}
-          <section>
-          <h2 className="text-xl font-bold text-foreground mb-3">Today's Plan</h2>
-          
-          <div 
-            className={cn(
+            {/* Today's Workout */}
+            <section>
+              <h2 className="text-xl font-bold text-foreground mb-3">Today's Plan</h2>
+              
+              <div 
+                className={cn(
               "rounded-lg transition-all",
               todayRec === "push" && "ring-2 ring-orange-500/30 bg-gradient-to-br from-orange-50/30 to-transparent dark:from-orange-950/20",
               todayRec === "recovery" && "ring-2 ring-blue-500/30 bg-gradient-to-br from-blue-50/30 to-transparent dark:from-blue-950/20",
@@ -147,42 +147,43 @@ export default function Dashboard() {
 
         {/* Adjust Button */}
         <Button
-          variant="fitness"
-          size="lg"
-          className="w-full"
-          onClick={() => navigate('/adjust')}
-        >
-          <Sparkles className="mr-2 h-5 w-5" />
-          Adjust My Workout
-        </Button>
+                variant="outline"
+                className="w-full mt-4"
+                onClick={() => navigate('/adjust')}
+              >
+                Adjust My Workout
+              </Button>
+            </section>
 
-        {/* Empty State for new users */}
-        {stats && stats.totalWorkouts === 0 && (
-          <Card className="p-6 text-center border-dashed">
-            <Sparkles className="h-10 w-10 mx-auto mb-3 text-primary" />
-            <h3 className="font-semibold text-foreground mb-2">
-              Start Your Journey
-            </h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Complete your first workout to see your progress here!
-            </p>
-            <Button
-              variant="fitness"
-              onClick={() => navigate('/adjust')}
-            >
-              Get Started
-            </Button>
-          </Card>
-        )}
+            {/* Empty State for new users */}
+            {stats && stats.totalWorkouts === 0 && (
+              <Card className="p-6 text-center border-dashed">
+                <Sparkles className="h-10 w-10 mx-auto mb-3 text-primary" />
+                <h3 className="font-semibold text-foreground mb-2">
+                  Start Your Journey
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Complete your first workout to see your progress here!
+                </p>
+                <Button
+                  variant="fitness"
+                  onClick={() => navigate('/adjust')}
+                >
+                  Get Started
+                </Button>
+              </Card>
+            )}
 
-        {/* Quick Tips */}
-        {stats && stats.totalWorkouts > 0 && (
-          <section className="bg-muted/50 p-4 rounded-lg border border-border">
-            <h3 className="font-semibold text-foreground mb-2">💡 Today's Tip</h3>
-            <p className="text-sm text-muted-foreground">
-              Consistency beats intensity! Even a 15-minute workout keeps your momentum going.
-            </p>
-          </section>
+            {/* Quick Tips */}
+            {stats && stats.totalWorkouts > 0 && (
+              <section className="bg-muted/50 p-4 rounded-lg border border-border">
+                <h3 className="font-semibold text-foreground mb-2">💡 Today's Tip</h3>
+                <p className="text-sm text-muted-foreground">
+                  Consistency beats intensity! Even a 15-minute workout keeps your momentum going.
+                </p>
+              </section>
+            )}
+          </>
         )}
       </main>
 
