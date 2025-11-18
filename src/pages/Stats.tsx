@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
 import { MobileNav } from '@/components/MobileNav';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,7 +14,7 @@ import {
 } from 'lucide-react';
 
 import {
-  loadWorkoutHistoryUnified,
+  loadWorkoutHistory,
   computeWorkoutStats,
 } from '@/utils/workoutHistory';
 
@@ -36,38 +35,28 @@ import {
 
 export default function Stats() {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [stats, setStats] = useState<WorkoutStatsSummary | null>(null);
   const [avgRpe, setAvgRpe] = useState<number | undefined>(undefined);
   const [lastRpe, setLastRpe] = useState<number | undefined>(undefined);
   const [weeklyMinutes, setWeeklyMinutes] = useState(0);
   const [weeklyCalories, setWeeklyCalories] = useState(0);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const history = await loadWorkoutHistoryUnified(user?.id);
-        const summary = computeWorkoutStats(history);
-        setStats(summary);
+    // Load workout history and compute stats
+    const history = loadWorkoutHistory();
+    const summary = computeWorkoutStats(history);
+    setStats(summary);
 
-        // Calculate weekly stats
-        const weekly = calculateWeeklyStats(history);
-        setWeeklyMinutes(weekly.weeklyMinutes);
-        setWeeklyCalories(weekly.weeklyCalories);
+    // Calculate weekly stats
+    const weekly = calculateWeeklyStats(history);
+    setWeeklyMinutes(weekly.weeklyMinutes);
+    setWeeklyCalories(weekly.weeklyCalories);
 
-        // Load RPE data from adaptation state (sync)
-        const snapshot = generatePlannerHistorySnapshot();
-        setAvgRpe(snapshot.avg_rpe);
-        setLastRpe(snapshot.last_rpe);
-      } catch (error) {
-        console.error('Failed to load stats:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadData();
-  }, [user?.id]);
+    // Load RPE data from adaptation state
+    const snapshot = generatePlannerHistorySnapshot();
+    setAvgRpe(snapshot.avg_rpe);
+    setLastRpe(snapshot.last_rpe);
+  }, []);
 
   // Calculate weekly minutes and calories
   const calculateWeeklyStats = (history: WorkoutHistory) => {
@@ -95,7 +84,7 @@ export default function Stats() {
     return { weeklyMinutes, weeklyCalories };
   };
 
-  if (loading || !stats) {
+  if (!stats) {
     return (
       <div className="min-h-screen bg-background pb-24">
         <header className="bg-card border-b border-border px-6 py-6">
@@ -103,9 +92,6 @@ export default function Stats() {
             <h1 className="text-2xl font-bold text-foreground">Stats</h1>
           </div>
         </header>
-        <main className="max-w-md mx-auto px-6 py-8">
-          <div className="text-center text-muted-foreground">Loading...</div>
-        </main>
         <MobileNav />
       </div>
     );

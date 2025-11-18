@@ -1,16 +1,16 @@
 import {
   computeWorkoutStats,
-  loadWorkoutHistoryLocal
+  loadWorkoutHistory
 } from "@/utils/workoutHistory";
 import { loadAdaptationState } from "@/utils/adaptationState";
-import { loadWeeklyGoalsLocal } from "@/utils/weeklyGoals";
+import { loadWeeklyGoals } from "@/utils/weeklyGoals";
 import { TodayRecommendation } from "@/types/workout";
 
 export function getTodayRecommendation(): TodayRecommendation {
-  const history = loadWorkoutHistoryLocal();
+  const history = loadWorkoutHistory();
   const stats = computeWorkoutStats(history);
   const adaptation = loadAdaptationState();
-  const goals = loadWeeklyGoalsLocal();
+  const goals = loadWeeklyGoals();
 
   // --- Collect Inputs ---
   const workoutsThisWeek = stats.thisWeekWorkouts;

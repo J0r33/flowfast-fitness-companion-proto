@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
 import { mockUserProfile, mockTodayWorkout } from '@/data/mockWorkouts';
 import { WorkoutCard } from '@/components/WorkoutCard';
 import { ProgressStats } from '@/components/ProgressStats';
@@ -9,47 +8,34 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { MobileNav } from '@/components/MobileNav';
 import { Sparkles, Activity, Zap } from 'lucide-react';
-import { loadWorkoutHistoryUnified, computeWorkoutStats } from '@/utils/workoutHistory';
+import { computeWorkoutStats } from '@/utils/workoutHistory';
 import { getTodayRecommendation } from '@/utils/todayRecommendation';
 import { formatMinutes, formatCalories } from '@/utils/formatters';
-import { UserProfile, WorkoutStatsSummary, TodayRecommendation, WorkoutHistory } from '@/types/workout';
+import { UserProfile, WorkoutStatsSummary, TodayRecommendation } from '@/types/workout';
 import { cn } from '@/lib/utils';
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [todayWorkout] = useState(mockTodayWorkout);
   const [profile, setProfile] = useState<UserProfile>(mockUserProfile);
   const [stats, setStats] = useState<WorkoutStatsSummary | null>(null);
   const [todayRec, setTodayRec] = useState<TodayRecommendation | null>(null);
-  const [workoutsThisWeek, setWorkoutsThisWeek] = useState(0);
-  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    async function loadData() {
-      try {
-        const history = await loadWorkoutHistoryUnified(user?.id);
-        const workoutStats = computeWorkoutStats(history);
-        setStats(workoutStats);
-        setWorkoutsThisWeek(workoutStats.thisWeekWorkouts);
-        
-        setProfile(prev => ({
-          ...prev,
-          totalWorkouts: workoutStats.totalWorkouts,
-          currentStreak: workoutStats.currentStreak,
-        }));
+    // Load unified stats
+    const workoutStats = computeWorkoutStats();
+    setStats(workoutStats);
+    
+    setProfile(prev => ({
+      ...prev,
+      totalWorkouts: workoutStats.totalWorkouts,
+      currentStreak: workoutStats.currentStreak,
+    }));
 
-        // Load today's recommendation (sync)
-        const rec = getTodayRecommendation();
-        setTodayRec(rec);
-      } catch (error) {
-        console.error('Failed to load dashboard data:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadData();
-  }, [user?.id]);
+    // Load today's recommendation
+    const rec = getTodayRecommendation();
+    setTodayRec(rec);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -63,16 +49,12 @@ export default function Dashboard() {
 
       {/* Content */}
       <main className="max-w-md mx-auto px-6 py-6 space-y-6">
-        {loading ? (
-          <div className="text-center py-8 text-muted-foreground">Loading...</div>
-        ) : (
-          <>
-            {/* Stats */}
-            <ProgressStats profile={profile} workoutsThisWeek={workoutsThisWeek} />
+        {/* Stats */}
+        <ProgressStats profile={profile} />
 
-            {/* Weekly Highlights */}
-            {stats && stats.totalWorkouts > 0 && (
-              <section>
+        {/* Weekly Highlights */}
+        {stats && stats.totalWorkouts > 0 && (
+          <section>
             <h2 className="text-lg font-semibold text-foreground mb-3">This Week</h2>
             <div className="grid grid-cols-2 gap-3">
               <Card className="p-4">
@@ -98,16 +80,16 @@ export default function Dashboard() {
                   </div>
                 </div>
               </Card>
-              </div>
-              </section>
-            )}
+            </div>
+          </section>
+        )}
 
-            {/* Today's Workout */}
-            <section>
-              <h2 className="text-xl font-bold text-foreground mb-3">Today's Plan</h2>
-              
-              <div 
-                className={cn(
+        {/* Today's Workout */}
+        <section>
+          <h2 className="text-xl font-bold text-foreground mb-3">Today's Plan</h2>
+          
+          <div 
+            className={cn(
               "rounded-lg transition-all",
               todayRec === "push" && "ring-2 ring-orange-500/30 bg-gradient-to-br from-orange-50/30 to-transparent dark:from-orange-950/20",
               todayRec === "recovery" && "ring-2 ring-blue-500/30 bg-gradient-to-br from-blue-50/30 to-transparent dark:from-blue-950/20",
@@ -147,43 +129,42 @@ export default function Dashboard() {
 
         {/* Adjust Button */}
         <Button
-                variant="outline"
-                className="w-full mt-4"
-                onClick={() => navigate('/adjust')}
-              >
-                Adjust My Workout
-              </Button>
-            </section>
+          variant="fitness"
+          size="lg"
+          className="w-full"
+          onClick={() => navigate('/adjust')}
+        >
+          <Sparkles className="mr-2 h-5 w-5" />
+          Adjust My Workout
+        </Button>
 
-            {/* Empty State for new users */}
-            {stats && stats.totalWorkouts === 0 && (
-              <Card className="p-6 text-center border-dashed">
-                <Sparkles className="h-10 w-10 mx-auto mb-3 text-primary" />
-                <h3 className="font-semibold text-foreground mb-2">
-                  Start Your Journey
-                </h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Complete your first workout to see your progress here!
-                </p>
-                <Button
-                  variant="fitness"
-                  onClick={() => navigate('/adjust')}
-                >
-                  Get Started
-                </Button>
-              </Card>
-            )}
+        {/* Empty State for new users */}
+        {stats && stats.totalWorkouts === 0 && (
+          <Card className="p-6 text-center border-dashed">
+            <Sparkles className="h-10 w-10 mx-auto mb-3 text-primary" />
+            <h3 className="font-semibold text-foreground mb-2">
+              Start Your Journey
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Complete your first workout to see your progress here!
+            </p>
+            <Button
+              variant="fitness"
+              onClick={() => navigate('/adjust')}
+            >
+              Get Started
+            </Button>
+          </Card>
+        )}
 
-            {/* Quick Tips */}
-            {stats && stats.totalWorkouts > 0 && (
-              <section className="bg-muted/50 p-4 rounded-lg border border-border">
-                <h3 className="font-semibold text-foreground mb-2">💡 Today's Tip</h3>
-                <p className="text-sm text-muted-foreground">
-                  Consistency beats intensity! Even a 15-minute workout keeps your momentum going.
-                </p>
-              </section>
-            )}
-          </>
+        {/* Quick Tips */}
+        {stats && stats.totalWorkouts > 0 && (
+          <section className="bg-muted/50 p-4 rounded-lg border border-border">
+            <h3 className="font-semibold text-foreground mb-2">💡 Today's Tip</h3>
+            <p className="text-sm text-muted-foreground">
+              Consistency beats intensity! Even a 15-minute workout keeps your momentum going.
+            </p>
+          </section>
         )}
       </main>
 

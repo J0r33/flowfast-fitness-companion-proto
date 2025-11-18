@@ -8,9 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dumbbell, Target } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import { loadWeeklyGoalsUnified, saveWeeklyGoalsUnified, DEFAULT_WEEKLY_GOALS } from '@/utils/weeklyGoals';
+import { loadWeeklyGoals, saveWeeklyGoals, DEFAULT_WEEKLY_GOALS } from '@/utils/weeklyGoals';
 import { WeeklyGoals, TrainingGoal } from '@/types/workout';
 
 const EQUIPMENT_OPTIONS = [
@@ -37,29 +36,18 @@ const EQUIPMENT_OPTIONS = [
 
 export default function Settings() {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [selectedEquipment, setSelectedEquipment] = useState<string[]>([]);
   const [weeklyGoals, setWeeklyGoals] = useState<WeeklyGoals>(DEFAULT_WEEKLY_GOALS);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const saved = localStorage.getItem('userEquipment');
-        if (saved) {
-          setSelectedEquipment(JSON.parse(saved));
-        }
-        
-        const goals = await loadWeeklyGoalsUnified(user?.id);
-        setWeeklyGoals(goals);
-      } catch (error) {
-        console.error('Failed to load settings:', error);
-      } finally {
-        setLoading(false);
-      }
+    const saved = localStorage.getItem('userEquipment');
+    if (saved) {
+      setSelectedEquipment(JSON.parse(saved));
     }
-    loadData();
-  }, [user?.id]);
+    
+    const goals = loadWeeklyGoals();
+    setWeeklyGoals(goals);
+  }, []);
 
   const handleToggleEquipment = (equipment: string) => {
     setSelectedEquipment((prev) => {
@@ -85,7 +73,7 @@ export default function Settings() {
     toast.success('Equipment preferences saved');
   };
 
-  const handleSaveGoals = async () => {
+  const handleSaveGoals = () => {
     if (weeklyGoals.targetWorkoutsPerWeek < 1 || weeklyGoals.targetWorkoutsPerWeek > 7) {
       toast.error('Workouts per week must be between 1 and 7');
       return;
@@ -95,13 +83,8 @@ export default function Settings() {
       return;
     }
     
-    try {
-      await saveWeeklyGoalsUnified(weeklyGoals, user?.id);
-      toast.success('Weekly goals saved');
-    } catch (error) {
-      console.error('Failed to save goals:', error);
-      toast.error('Failed to save goals');
-    }
+    saveWeeklyGoals(weeklyGoals);
+    toast.success('Weekly goals saved');
   };
 
   return (
@@ -113,11 +96,7 @@ export default function Settings() {
       </header>
 
       <main className="max-w-md mx-auto px-6 py-6 space-y-6">
-        {loading ? (
-          <div className="text-center py-8 text-muted-foreground">Loading...</div>
-        ) : (
-          <>
-            <Card className="p-6">
+        <Card className="p-6">
           <div className="flex items-center gap-3 mb-4">
             <Target className="h-6 w-6 text-primary" />
             <div>
@@ -242,8 +221,6 @@ export default function Settings() {
             Save Equipment
           </Button>
         </Card>
-          </>
-        )}
       </main>
 
       <MobileNav />

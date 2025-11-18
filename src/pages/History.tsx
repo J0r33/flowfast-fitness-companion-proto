@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
 import { MobileNav } from '@/components/MobileNav';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, Flame, Dumbbell, TrendingUp, Activity } from 'lucide-react';
-import { loadWorkoutHistoryUnified } from '@/utils/workoutHistory';
+import { loadWorkoutHistory } from '@/utils/workoutHistory';
 import { WorkoutHistoryEntry } from '@/types/workout';
 import {
   formatDate,
@@ -15,23 +14,12 @@ import {
 } from '@/utils/formatters';
 
 export default function History() {
-  const { user } = useAuth();
   const [entries, setEntries] = useState<WorkoutHistoryEntry[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const history = await loadWorkoutHistoryUnified(user?.id);
-        setEntries(history.entries);
-      } catch (error) {
-        console.error('Failed to load history:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadData();
-  }, [user?.id]);
+    const history = loadWorkoutHistory();
+    setEntries(history.entries);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -45,9 +33,7 @@ export default function History() {
       </header>
 
       <main className="max-w-md mx-auto px-6 py-6">
-        {loading ? (
-          <div className="text-center py-8 text-muted-foreground">Loading...</div>
-        ) : entries.length === 0 ? (
+        {entries.length === 0 ? (
           // Empty state
           <Card className="p-12 text-center">
             <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
