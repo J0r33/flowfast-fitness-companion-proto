@@ -1,4 +1,5 @@
 import { WeeklyGoals } from '@/types/workout';
+import { supabase } from '@/integrations/supabase/client';
 
 const STORAGE_KEY = 'flowfast_weekly_goals';
 
@@ -8,11 +9,58 @@ export const DEFAULT_WEEKLY_GOALS: WeeklyGoals = {
   primaryGoal: 'get_toned',
 };
 
+// ==================== DATABASE OPERATIONS ====================
+
+// Load weekly goals from database
+export async function loadWeeklyGoalsFromDB(userId: string): Promise<WeeklyGoals> {
+  try {
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .select('primary_goal, equipment, target_workouts_per_week, target_minutes_per_week, updated_at')
+      .eq('id', userId)
+      .single();
+
+    if (error) throw error;
+    if (!data) return DEFAULT_WEEKLY_GOALS;
+
+    return {
+      primaryGoal: data.primary_goal || DEFAULT_WEEKLY_GOALS.primaryGoal,
+      targetWorkoutsPerWeek: data.target_workouts_per_week || DEFAULT_WEEKLY_GOALS.targetWorkoutsPerWeek,
+      targetMinutesPerWeek: data.target_minutes_per_week || DEFAULT_WEEKLY_GOALS.targetMinutesPerWeek,
+      lastUpdated: data.updated_at,
+    };
+  } catch (error) {
+    console.error('Failed to load weekly goals from DB:', error);
+    return DEFAULT_WEEKLY_GOALS;
+  }
+}
+
+// Save weekly goals to database
+export async function saveWeeklyGoalsToDB(userId: string, goals: WeeklyGoals): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('user_profiles')
+      .update({
+        primary_goal: goals.primaryGoal,
+        target_workouts_per_week: goals.targetWorkoutsPerWeek,
+        target_minutes_per_week: goals.targetMinutesPerWeek,
+      })
+      .eq('id', userId);
+
+    if (error) throw error;
+  } catch (error) {
+    console.error('Failed to save weekly goals to DB:', error);
+    throw error;
+  }
+}
+
+// ==================== LOCALSTORAGE OPERATIONS ====================
+
 /**
  * Load weekly goals from localStorage.
  * Returns default goals if none exist or if parsing fails.
  */
-export function loadWeeklyGoals(): WeeklyGoals {
+export function loadWeeklyGoalsFromLocalStorage(): WeeklyGoals {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) {
@@ -45,7 +93,7 @@ export function loadWeeklyGoals(): WeeklyGoals {
  * Save weekly goals to localStorage.
  * Automatically adds lastUpdated timestamp.
  */
-export function saveWeeklyGoals(goals: WeeklyGoals): void {
+export function saveWeeklyGoalsToLocalStorage(goals: WeeklyGoals): void {
   try {
     const goalsWithTimestamp: WeeklyGoals = {
       ...goals,
@@ -56,5 +104,28 @@ export function saveWeeklyGoals(goals: WeeklyGoals): void {
   } catch (error) {
     console.error('Failed to save weekly goals:', error);
     throw error;
+  }
+}
+
+// ==================== HYBRID OPERATIONS ====================
+
+/**
+ * Load weekly goals (DB if userId provided, otherwise localStorage)
+ */
+export async function loadWeeklyGoals(userId?: string): Promise<WeeklyGoals> {
+  if (userId) {
+    return await loadWeeklyGoalsFromDB(userId);
+  }
+  return loadWeeklyGoalsFromLocalStorage();
+}
+
+/**
+ * Save weekly goals (DB if userId provided, otherwise localStorage)
+ */
+export async function saveWeeklyGoals(goals: WeeklyGoals, userId?: string): Promise<void> {
+  if (userId) {
+    await saveWeeklyGoalsToDB(userId, goals);
+  } else {
+    saveWeeklyGoalsToLocalStorage(goals);
   }
 }
