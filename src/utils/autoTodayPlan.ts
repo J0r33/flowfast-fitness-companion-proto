@@ -1,7 +1,7 @@
-import { loadWeeklyGoals } from "@/utils/weeklyGoals";
 import { loadAdaptationState, generatePlannerHistorySnapshot } from "@/utils/adaptationState";
 import { loadWorkoutHistory } from "@/utils/workoutHistory";
 import { getTodayRecommendation } from "@/utils/todayRecommendation";
+import { loadGoals } from "@/utils/profileSync";
 import { TodayRecommendation, FocusArea } from "@/types/workout";
 
 interface RecentFocusSummary {
@@ -39,8 +39,8 @@ const ALL_FOCUS_AREAS: FocusArea[] = [
  * Build input for Auto Today mode - automatically derives workout parameters
  * from user history, goals, and current state.
  */
-export function buildAutoTodayPlanInput(): AutoTodayPlanInput {
-  const weeklyGoals = loadWeeklyGoals();
+export async function buildAutoTodayPlanInput(): Promise<AutoTodayPlanInput> {
+  const weeklyGoals = await loadGoals();
   const adaptation = loadAdaptationState();
   const history = loadWorkoutHistory();
   const todayRec = getTodayRecommendation();

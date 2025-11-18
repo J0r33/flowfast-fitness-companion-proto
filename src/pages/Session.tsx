@@ -4,9 +4,9 @@ import { WorkoutPlan } from '@/types/workout';
 import { generateMockWorkout } from '@/data/mockWorkouts';
 import { buildWorkoutSession, saveWorkoutSession } from '@/utils/workoutSession';
 import { generatePlannerHistorySnapshot } from '@/utils/adaptationState';
-import { loadWeeklyGoals } from '@/utils/weeklyGoals';
 import { getTodayRecommendation } from '@/utils/todayRecommendation';
 import { buildAutoTodayPlanInput } from '@/utils/autoTodayPlan';
+import { loadEquipment, loadGoals } from '@/utils/profileSync';
 import { ExerciseListItem } from '@/components/ExerciseListItem';
 import { Button } from '@/components/ui/button';
 import { MobileNav } from '@/components/MobileNav';
@@ -29,8 +29,8 @@ export default function Session() {
         // Auto Today mode - derive all inputs automatically
         setIsGenerating(true);
         try {
-          const userEquipment = JSON.parse(localStorage.getItem("userEquipment") || "[]") as string[];
-          const autoInput = buildAutoTodayPlanInput();
+          const userEquipment = await loadEquipment();
+          const autoInput = await buildAutoTodayPlanInput();
 
           const response = await fetch(
             `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-workout-plan`,
@@ -87,7 +87,7 @@ export default function Session() {
           });
 
           // Fallback to mock workout using auto-derived inputs
-          const autoInput = buildAutoTodayPlanInput();
+          const autoInput = await buildAutoTodayPlanInput();
           const fallbackWorkout = generateMockWorkout(
             autoInput.energy,
             autoInput.time_minutes,
@@ -100,9 +100,7 @@ export default function Session() {
       } else if (state?.isAdjusted) {
         // Generate workout via LLM
         setIsGenerating(true);
-        
-        // Load equipment from localStorage (outside try-catch so it's available in catch)
-        const userEquipment = JSON.parse(localStorage.getItem('userEquipment') || '[]') as string[];
+        const userEquipment = await loadEquipment();
         
         try {
           // Build goal text from focus areas
@@ -112,7 +110,7 @@ export default function Session() {
           const history = generatePlannerHistorySnapshot();
           
           // Load primary goal from weekly goals
-          const weeklyGoals = loadWeeklyGoals();
+          const weeklyGoals = await loadGoals();
           const primaryGoal = weeklyGoals.primaryGoal;
 
           // Load today's coaching recommendation

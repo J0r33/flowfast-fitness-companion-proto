@@ -1,4 +1,7 @@
-import { WeeklyGoals } from '@/types/workout';
+import { WeeklyGoals as WorkoutWeeklyGoals, TrainingGoal } from '@/types/workout';
+
+export type WeeklyGoals = WorkoutWeeklyGoals;
+export type { TrainingGoal };
 
 const STORAGE_KEY = 'flowfast_weekly_goals';
 

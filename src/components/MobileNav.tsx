@@ -1,9 +1,22 @@
-import { Home, Settings, Calendar, BarChart3 } from 'lucide-react';
+import { Home, Settings, Calendar, BarChart3, LogOut } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 export function MobileNav() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast.success('Signed out successfully');
+      navigate('/auth', { replace: true });
+    } catch (error) {
+      toast.error('Failed to sign out');
+    }
+  };
 
   const navItems = [
     { path: '/', icon: Home, label: 'Home' },
@@ -30,6 +43,13 @@ export function MobileNav() {
             </button>
           );
         })}
+        <button
+          onClick={handleSignOut}
+          className="flex flex-col items-center gap-1 transition-smooth text-muted-foreground hover:text-foreground"
+        >
+          <LogOut className="h-6 w-6" />
+          <span className="text-xs font-medium">Sign Out</span>
+        </button>
       </div>
     </nav>
   );
