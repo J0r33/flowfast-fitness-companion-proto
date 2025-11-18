@@ -1,4 +1,5 @@
 import { WorkoutHistory, WorkoutHistoryEntry, WorkoutPlan, DifficultyFeedback, WorkoutStatsSummary } from '@/types/workout';
+import { supabase } from '@/integrations/supabase/client';
 
 const STORAGE_KEY = 'flowfast_workout_history';
 
@@ -7,8 +8,68 @@ const DEFAULT_HISTORY: WorkoutHistory = {
   entries: [],
 };
 
-// Read from localStorage
-export function loadWorkoutHistory(): WorkoutHistory {
+// Load from database (authenticated users)
+export async function loadWorkoutHistoryFromDB(userId: string): Promise<WorkoutHistory> {
+  try {
+    const { data, error } = await supabase
+      .from('workout_history')
+      .select('*')
+      .eq('user_id', userId)
+      .order('date', { ascending: false });
+
+    if (error) throw error;
+
+    const entries: WorkoutHistoryEntry[] = (data || []).map((row) => ({
+      id: row.id,
+      date: row.date,
+      energy: row.energy as 'low' | 'medium' | 'high',
+      timeMinutesPlanned: row.time_minutes_planned,
+      timeMinutesActual: row.time_minutes_actual ?? undefined,
+      focusAreas: row.focus_areas || [],
+      equipment: row.equipment || [],
+      exercisesCount: row.exercises_count,
+      totalSets: row.total_sets,
+      totalEstimatedCalories: row.total_estimated_calories ?? undefined,
+      feedbackDifficulty: row.feedback_difficulty as DifficultyFeedback | undefined,
+      rpe: row.rpe ?? undefined,
+    }));
+
+    return { entries };
+  } catch (error) {
+    console.error('Failed to load workout history from DB:', error);
+    return DEFAULT_HISTORY;
+  }
+}
+
+// Save to database (authenticated users)
+export async function saveWorkoutHistoryToDB(userId: string, entry: WorkoutHistoryEntry): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('workout_history')
+      .insert({
+        user_id: userId,
+        date: entry.date,
+        energy: entry.energy,
+        time_minutes_planned: entry.timeMinutesPlanned,
+        time_minutes_actual: entry.timeMinutesActual ?? null,
+        focus_areas: entry.focusAreas,
+        equipment: entry.equipment,
+        exercises_count: entry.exercisesCount,
+        total_sets: entry.totalSets,
+        total_estimated_calories: entry.totalEstimatedCalories ?? null,
+        feedback_difficulty: entry.feedbackDifficulty ?? null,
+        rpe: entry.rpe ?? null,
+      });
+
+    if (error) throw error;
+  } catch (error) {
+    console.error('Failed to save workout history to DB:', error);
+    throw error;
+  }
+}
+
+// Read from localStorage (fallback for anonymous users)
+export function loadWorkoutHistoryFromLocalStorage(): WorkoutHistory {
   if (typeof window === 'undefined') return DEFAULT_HISTORY;
   
   try {
@@ -16,30 +77,48 @@ export function loadWorkoutHistory(): WorkoutHistory {
     if (!raw) return DEFAULT_HISTORY;
     return JSON.parse(raw);
   } catch (error) {
-    console.error('Failed to load workout history:', error);
+    console.error('Failed to load workout history from localStorage:', error);
     return DEFAULT_HISTORY;
   }
 }
 
-// Write to localStorage
-export function saveWorkoutHistory(history: WorkoutHistory): void {
+// Write to localStorage (fallback for anonymous users)
+export function saveWorkoutHistoryToLocalStorage(history: WorkoutHistory): void {
   if (typeof window === 'undefined') return;
   
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
   } catch (error) {
-    console.error('Failed to save workout history:', error);
+    console.error('Failed to save workout history to localStorage:', error);
+  }
+}
+
+// Hybrid load function (uses DB if user provided, otherwise localStorage)
+export async function loadWorkoutHistory(userId?: string): Promise<WorkoutHistory> {
+  if (userId) {
+    return await loadWorkoutHistoryFromDB(userId);
+  }
+  return loadWorkoutHistoryFromLocalStorage();
+}
+
+// Hybrid save function (uses DB if user provided, otherwise localStorage)
+export async function saveWorkoutHistory(entry: WorkoutHistoryEntry, userId?: string): Promise<void> {
+  if (userId) {
+    await saveWorkoutHistoryToDB(userId, entry);
+  } else {
+    const history = loadWorkoutHistoryFromLocalStorage();
+    history.entries.unshift(entry);
+    saveWorkoutHistoryToLocalStorage(history);
   }
 }
 
 // Add a new history entry
-export function addWorkoutHistoryEntry(
+export async function addWorkoutHistoryEntry(
   workoutPlan: WorkoutPlan,
+  userId?: string,
   feedbackDifficulty?: DifficultyFeedback,
   rpe?: number
-): void {
-  const history = loadWorkoutHistory();
-  
+): Promise<void> {
   // Calculate total sets
   const totalSets = workoutPlan.exercises.reduce((sum, ex) => sum + (ex.sets || 0), 0);
   
@@ -63,26 +142,23 @@ export function addWorkoutHistoryEntry(
     rpe: rpe ?? undefined,
   };
   
-  history.entries.unshift(entry); // Newest first
-  saveWorkoutHistory(history);
+  await saveWorkoutHistory(entry, userId);
 }
 
 // Alternative append helper (matches original spec)
-export function appendWorkoutHistoryEntry(entry: WorkoutHistoryEntry): void {
-  const history = loadWorkoutHistory();
-  history.entries.unshift(entry); // Newest first
-  saveWorkoutHistory(history);
+export async function appendWorkoutHistoryEntry(entry: WorkoutHistoryEntry, userId?: string): Promise<void> {
+  await saveWorkoutHistory(entry, userId);
 }
 
 // Get total workouts completed
-export function getTotalWorkouts(): number {
-  const history = loadWorkoutHistory();
+export async function getTotalWorkouts(userId?: string): Promise<number> {
+  const history = await loadWorkoutHistory(userId);
   return history.entries.length;
 }
 
 // Get current streak (consecutive days with workouts)
-export function getCurrentStreak(): number {
-  const history = loadWorkoutHistory();
+export async function getCurrentStreak(userId?: string): Promise<number> {
+  const history = await loadWorkoutHistory(userId);
   if (history.entries.length === 0) return 0;
   
   // Sort entries by date descending
@@ -113,8 +189,8 @@ export function getCurrentStreak(): number {
 }
 
 // Get workouts completed this week
-export function getWorkoutsThisWeek(): number {
-  const history = loadWorkoutHistory();
+export async function getWorkoutsThisWeek(userId?: string): Promise<number> {
+  const history = await loadWorkoutHistory(userId);
   const now = new Date();
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   

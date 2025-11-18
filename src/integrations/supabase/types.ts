@@ -14,13 +14,96 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      user_profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          equipment: string[] | null
+          id: string
+          primary_goal: string | null
+          target_minutes_per_week: number | null
+          target_workouts_per_week: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          equipment?: string[] | null
+          id: string
+          primary_goal?: string | null
+          target_minutes_per_week?: number | null
+          target_workouts_per_week?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          equipment?: string[] | null
+          id?: string
+          primary_goal?: string | null
+          target_minutes_per_week?: number | null
+          target_workouts_per_week?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      workout_history: {
+        Row: {
+          created_at: string
+          date: string
+          energy: string | null
+          equipment: string[] | null
+          exercises_count: number | null
+          feedback_difficulty: string | null
+          focus_areas: string[] | null
+          id: string
+          rpe: number | null
+          time_minutes_actual: number | null
+          time_minutes_planned: number | null
+          total_estimated_calories: number | null
+          total_sets: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          energy?: string | null
+          equipment?: string[] | null
+          exercises_count?: number | null
+          feedback_difficulty?: string | null
+          focus_areas?: string[] | null
+          id?: string
+          rpe?: number | null
+          time_minutes_actual?: number | null
+          time_minutes_planned?: number | null
+          total_estimated_calories?: number | null
+          total_sets?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          energy?: string | null
+          equipment?: string[] | null
+          exercises_count?: number | null
+          feedback_difficulty?: string | null
+          focus_areas?: string[] | null
+          id?: string
+          rpe?: number | null
+          time_minutes_actual?: number | null
+          time_minutes_planned?: number | null
+          total_estimated_calories?: number | null
+          total_sets?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_workout_stats: { Args: { user_uuid: string }; Returns: Json }
     }
     Enums: {
       [_ in never]: never
