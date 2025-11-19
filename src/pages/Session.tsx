@@ -3,7 +3,11 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { WorkoutPlan } from '@/types/workout';
 import { generateMockWorkout } from '@/data/mockWorkouts';
 import { buildWorkoutSession, saveWorkoutSession } from '@/utils/workoutSession';
-import { generatePlannerHistorySnapshotUnified } from '@/utils/adaptationState';
+import { 
+  computeAdaptationMetricsFromHistory,
+  generatePlannerHistorySnapshotFromMetrics 
+} from '@/utils/adaptationState';
+import { loadWorkoutHistoryUnified } from '@/utils/workoutHistory';
 import { getTodayRecommendation } from '@/utils/todayRecommendation';
 import { buildAutoTodayPlanInput } from '@/utils/autoTodayPlan';
 import { loadEquipment, loadGoals } from '@/utils/profileSync';
@@ -108,8 +112,10 @@ export default function Session() {
           // Build goal text from focus areas
           const goalText = `Focus on ${state.focusAreas.join(', ')} training`;
           
-          // Generate history snapshot for adaptation
-          const history = await generatePlannerHistorySnapshotUnified(user?.id);
+          // Load history and derive snapshot using pure functions
+          const workoutHistory = await loadWorkoutHistoryUnified(user?.id);
+          const metrics = computeAdaptationMetricsFromHistory(workoutHistory);
+          const historySnapshot = generatePlannerHistorySnapshotFromMetrics(metrics);
           
           // Load primary goal from weekly goals
           const weeklyGoals = await loadGoals();
@@ -132,7 +138,7 @@ export default function Session() {
                 focus_areas: state.focusAreas,
                 goal_text: goalText,
                 equipment: userEquipment,
-                history: history,
+                history: historySnapshot,
                 primary_goal: primaryGoal,
                 today_recommendation: todayRec,
               }),
