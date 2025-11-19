@@ -3,8 +3,9 @@ import { MobileNav } from '@/components/MobileNav';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, Flame, Dumbbell, TrendingUp, Activity } from 'lucide-react';
-import { loadWorkoutHistory } from '@/utils/workoutHistory';
+import { loadWorkoutHistoryUnified } from '@/utils/workoutHistory';
 import { WorkoutHistoryEntry } from '@/types/workout';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   formatDate,
   formatEnergy,
@@ -14,12 +15,44 @@ import {
 } from '@/utils/formatters';
 
 export default function History() {
+  const { user } = useAuth();
   const [entries, setEntries] = useState<WorkoutHistoryEntry[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const history = loadWorkoutHistory();
-    setEntries(history.entries);
-  }, []);
+    let isMounted = true;
+
+    async function loadData() {
+      try {
+        const history = await loadWorkoutHistoryUnified(user?.id);
+        if (isMounted) {
+          setEntries(history.entries);
+        }
+      } catch (error) {
+        console.error('Failed to load workout history:', error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadData();
+    return () => { isMounted = false; };
+  }, [user?.id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background pb-24">
+        <header className="bg-card border-b border-border px-6 py-6">
+          <div className="max-w-md mx-auto">
+            <h1 className="text-2xl font-bold text-foreground">History</h1>
+          </div>
+        </header>
+        <MobileNav />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-24">

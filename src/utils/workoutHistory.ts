@@ -1,4 +1,5 @@
 import { WorkoutHistory, WorkoutHistoryEntry, WorkoutPlan, DifficultyFeedback, WorkoutStatsSummary } from '@/types/workout';
+import { supabase } from '@/integrations/supabase/client';
 
 const STORAGE_KEY = 'flowfast_workout_history';
 
@@ -7,8 +8,12 @@ const DEFAULT_HISTORY: WorkoutHistory = {
   entries: [],
 };
 
+// ============================================================
+// LOCAL STORAGE FUNCTIONS (for backward compatibility & fallback)
+// ============================================================
+
 // Read from localStorage
-export function loadWorkoutHistory(): WorkoutHistory {
+export function loadWorkoutHistoryLocal(): WorkoutHistory {
   if (typeof window === 'undefined') return DEFAULT_HISTORY;
   
   try {
@@ -22,7 +27,7 @@ export function loadWorkoutHistory(): WorkoutHistory {
 }
 
 // Write to localStorage
-export function saveWorkoutHistory(history: WorkoutHistory): void {
+export function saveWorkoutHistoryLocal(history: WorkoutHistory): void {
   if (typeof window === 'undefined') return;
   
   try {
@@ -32,13 +37,132 @@ export function saveWorkoutHistory(history: WorkoutHistory): void {
   }
 }
 
-// Add a new history entry
+// Add a new history entry to localStorage
+export function addWorkoutHistoryEntryLocal(entry: WorkoutHistoryEntry): void {
+  const history = loadWorkoutHistoryLocal();
+  history.entries.unshift(entry); // Newest first
+  saveWorkoutHistoryLocal(history);
+}
+
+// ============================================================
+// SUPABASE DATABASE FUNCTIONS
+// ============================================================
+
+// Load workout history from database for a specific user
+export async function loadWorkoutHistoryFromDb(userId: string): Promise<WorkoutHistory> {
+  try {
+    const { data, error } = await supabase
+      .from('workout_history')
+      .select('*')
+      .eq('user_id', userId)
+      .order('date', { ascending: false });
+
+    if (error) throw error;
+
+    const entries: WorkoutHistoryEntry[] = (data || []).map((row) => ({
+      id: row.id,
+      date: row.date,
+      energy: (row.energy || 'medium') as any,
+      timeMinutesPlanned: row.time_minutes_planned || 0,
+      timeMinutesActual: row.time_minutes_actual,
+      focusAreas: (row.focus_areas || []) as any[],
+      equipment: row.equipment || [],
+      exercisesCount: row.exercises_count || 0,
+      totalSets: row.total_sets || 0,
+      totalEstimatedCalories: row.total_estimated_calories,
+      feedbackDifficulty: row.feedback_difficulty as any,
+      rpe: row.rpe,
+    }));
+
+    return { entries };
+  } catch (error) {
+    console.error('Failed to load workout history from DB:', error);
+    throw error;
+  }
+}
+
+// Save a single workout history entry to database
+export async function saveWorkoutHistoryEntryToDb(
+  userId: string,
+  entry: WorkoutHistoryEntry
+): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('workout_history')
+      .insert({
+        id: entry.id,
+        user_id: userId,
+        date: entry.date,
+        energy: entry.energy,
+        time_minutes_planned: entry.timeMinutesPlanned,
+        time_minutes_actual: entry.timeMinutesActual,
+        focus_areas: entry.focusAreas,
+        equipment: entry.equipment,
+        exercises_count: entry.exercisesCount,
+        total_sets: entry.totalSets,
+        total_estimated_calories: entry.totalEstimatedCalories,
+        feedback_difficulty: entry.feedbackDifficulty,
+        rpe: entry.rpe,
+      });
+
+    if (error) throw error;
+  } catch (error) {
+    console.error('Failed to save workout history to DB:', error);
+    throw error;
+  }
+}
+
+// ============================================================
+// UNIFIED FUNCTIONS (DB with localStorage fallback)
+// ============================================================
+
+// Load workout history: from DB if user is authenticated, otherwise from localStorage
+export async function loadWorkoutHistoryUnified(userId?: string): Promise<WorkoutHistory> {
+  if (!userId) {
+    return loadWorkoutHistoryLocal();
+  }
+
+  try {
+    return await loadWorkoutHistoryFromDb(userId);
+  } catch (error) {
+    console.error('DB load failed, falling back to localStorage:', error);
+    return loadWorkoutHistoryLocal();
+  }
+}
+
+// Save workout history entry: always mirror to localStorage, and save to DB if user is authenticated
+export async function saveWorkoutHistoryEntryUnified(
+  entry: WorkoutHistoryEntry,
+  userId?: string
+): Promise<void> {
+  // Always mirror to localStorage for backward compatibility
+  addWorkoutHistoryEntryLocal(entry);
+
+  if (!userId) return;
+
+  try {
+    await saveWorkoutHistoryEntryToDb(userId, entry);
+  } catch (error) {
+    console.error('Failed to save workout history to DB, localStorage already updated:', error);
+  }
+}
+
+// ============================================================
+// LEGACY WRAPPER FUNCTIONS (for backward compatibility)
+// ============================================================
+
+// Synchronous load for legacy code (adaptation state, etc.)
+export function loadWorkoutHistory(): WorkoutHistory {
+  return loadWorkoutHistoryLocal();
+}
+
+// Legacy add entry function (converts WorkoutPlan to entry and saves to localStorage only)
 export function addWorkoutHistoryEntry(
   workoutPlan: WorkoutPlan,
   feedbackDifficulty?: DifficultyFeedback,
   rpe?: number
 ): void {
-  const history = loadWorkoutHistory();
+  const history = loadWorkoutHistoryLocal();
   
   // Calculate total sets
   const totalSets = workoutPlan.exercises.reduce((sum, ex) => sum + (ex.sets || 0), 0);
@@ -64,14 +188,14 @@ export function addWorkoutHistoryEntry(
   };
   
   history.entries.unshift(entry); // Newest first
-  saveWorkoutHistory(history);
+  saveWorkoutHistoryLocal(history);
 }
 
 // Alternative append helper (matches original spec)
 export function appendWorkoutHistoryEntry(entry: WorkoutHistoryEntry): void {
-  const history = loadWorkoutHistory();
+  const history = loadWorkoutHistoryLocal();
   history.entries.unshift(entry); // Newest first
-  saveWorkoutHistory(history);
+  saveWorkoutHistoryLocal(history);
 }
 
 // Get total workouts completed
