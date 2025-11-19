@@ -131,6 +131,7 @@ export interface WorkoutHistoryEntry {
   totalEstimatedCalories?: number;
   feedbackDifficulty?: DifficultyFeedback;
   rpe?: number; // Rate of Perceived Effort (1-10)
+  exercises?: Exercise[]; // Full exercise details for history detail view
 }
 
 export interface WorkoutHistory {

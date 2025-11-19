@@ -12,6 +12,7 @@ import WorkoutPlayer from "./pages/WorkoutPlayer";
 import WorkoutComplete from "./pages/WorkoutComplete";
 import Feedback from "./pages/Feedback";
 import History from "./pages/History";
+import WorkoutDetail from "./pages/WorkoutDetail";
 import Stats from "./pages/Stats";
 import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/workout/complete" element={<ProtectedRoute><WorkoutComplete /></ProtectedRoute>} />
             <Route path="/feedback" element={<ProtectedRoute><Feedback /></ProtectedRoute>} />
             <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
+            <Route path="/history/:workoutId" element={<ProtectedRoute><WorkoutDetail /></ProtectedRoute>} />
             <Route path="/stats" element={<ProtectedRoute><Stats /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

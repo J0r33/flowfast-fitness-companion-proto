@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MobileNav } from '@/components/MobileNav';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, Flame, Dumbbell, TrendingUp, Activity } from 'lucide-react';
+import { Calendar, Clock, Flame, Dumbbell, TrendingUp, Activity, ChevronRight } from 'lucide-react';
 import { loadWorkoutHistoryUnified } from '@/utils/workoutHistory';
 import { WorkoutHistoryEntry } from '@/types/workout';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,6 +17,7 @@ import {
 
 export default function History() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [entries, setEntries] = useState<WorkoutHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -83,7 +85,11 @@ export default function History() {
               const difficultyInfo = formatDifficultyFromRPE(entry.rpe);
 
               return (
-                <Card key={entry.id} className="p-4 hover:shadow-md transition-shadow">
+                <Card 
+                  key={entry.id} 
+                  className="p-4 hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => navigate(`/history/${entry.id}`)}
+                >
                   {/* Header: Date and Energy */}
                   <div className="flex items-start justify-between mb-3">
                     <div>
@@ -157,6 +163,7 @@ export default function History() {
                     </div>
                   </div>
 
+
                   {/* Equipment (if any) */}
                   {entry.equipment.length > 0 && (
                     <div className="pt-2">
@@ -165,6 +172,14 @@ export default function History() {
                       </div>
                     </div>
                   )}
+
+                  {/* Footer */}
+                  <div className="pt-3 border-t border-border flex items-center justify-between">
+                    <div className="text-xs text-muted-foreground">
+                      {entry.rpe ? `RPE: ${entry.rpe}/10` : 'View details'}
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </div>
                 </Card>
               );
             })}
