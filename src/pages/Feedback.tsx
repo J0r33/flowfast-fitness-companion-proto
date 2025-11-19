@@ -65,7 +65,7 @@ export default function Feedback() {
         totalEstimatedCalories: totalEstimatedCalories > 0 ? totalEstimatedCalories : undefined,
         feedbackDifficulty: difficultyFeedback,
         rpe: rpe ?? undefined,
-        exercises: workout.exercises,
+        exercises: workout.exercises, // Already includes weights from WorkoutPlayer
       };
 
       try {

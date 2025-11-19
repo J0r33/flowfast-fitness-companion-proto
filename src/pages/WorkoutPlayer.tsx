@@ -5,6 +5,7 @@ import { loadWorkoutSession } from '@/utils/workoutSession';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { ArrowLeft, ArrowRight, Info, Pause, Play } from 'lucide-react';
 import {
   Dialog,
@@ -25,6 +26,7 @@ export default function WorkoutPlayer() {
   const [isPaused, setIsPaused] = useState(false);
   const [timerComplete, setTimerComplete] = useState(false);
   const [timerStarted, setTimerStarted] = useState(false);
+  const [exerciseWeights, setExerciseWeights] = useState<Map<string, number[]>>(new Map());
 
   useEffect(() => {
     const loaded = loadWorkoutSession();
@@ -133,6 +135,18 @@ export default function WorkoutPlayer() {
   const handleNext = () => {
     setSlideDirection('left');
     if (isLastStep) {
+      // Save weights to session before navigating to completion
+      const updatedSession = {
+        ...session,
+        workoutPlan: {
+          ...session.workoutPlan,
+          exercises: session.workoutPlan.exercises.map(ex => ({
+            ...ex,
+            weights: exerciseWeights.get(ex.name) || undefined
+          }))
+        }
+      };
+      localStorage.setItem('currentWorkoutSession', JSON.stringify(updatedSession));
       navigate('/workout/complete');
     } else {
       navigate(`/workout/${sessionId}/${currentStepIndex + 1}`);
@@ -144,6 +158,30 @@ export default function WorkoutPlayer() {
       setSlideDirection('right');
       navigate(`/workout/${sessionId}/${currentStepIndex - 1}`);
     }
+  };
+
+  const isWeightedExercise = (step: WorkoutStep): boolean => {
+    const exercise = session?.workoutPlan.exercises.find(e => e.name === step.exerciseName);
+    if (!exercise) return false;
+    
+    const weightEquipment = ['dumbbells', 'barbell', 'kettlebell', 'weight plate'];
+    return exercise.type === 'strength' || 
+           (exercise.equipment?.some(eq => weightEquipment.includes(eq.toLowerCase())) ?? false);
+  };
+
+  const getCurrentSetWeight = (exerciseName: string, setIndex: number): number | undefined => {
+    const weights = exerciseWeights.get(exerciseName);
+    return weights?.[setIndex - 1];
+  };
+
+  const handleWeightChange = (exerciseName: string, setIndex: number, weight: number) => {
+    setExerciseWeights(prev => {
+      const newMap = new Map(prev);
+      const weights = newMap.get(exerciseName) || [];
+      weights[setIndex - 1] = weight;
+      newMap.set(exerciseName, weights);
+      return newMap;
+    });
   };
 
   const renderSetDots = () => {
@@ -279,11 +317,34 @@ export default function WorkoutPlayer() {
               </>
             )}
             {currentStep.type === 'reps' && currentStep.reps && (
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Reps</span>
-                <span className="text-xl font-semibold text-foreground">
-                  {currentStep.reps}
-                </span>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Reps</span>
+                  <span className="text-xl font-semibold text-foreground">
+                    {currentStep.reps}
+                  </span>
+                </div>
+                
+                {/* Weight input for weighted exercises */}
+                {!currentStep.isRest && isWeightedExercise(currentStep) && (
+                  <div className="space-y-2">
+                    <label className="text-sm text-muted-foreground">
+                      Weight Used (optional)
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        step="0.5"
+                        min="0"
+                        placeholder="0"
+                        value={getCurrentSetWeight(currentStep.exerciseName, currentStep.setIndex) || ''}
+                        onChange={(e) => handleWeightChange(currentStep.exerciseName, currentStep.setIndex, parseFloat(e.target.value) || 0)}
+                        className="text-center text-lg"
+                      />
+                      <span className="text-sm text-muted-foreground">lbs</span>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
             <Dialog>

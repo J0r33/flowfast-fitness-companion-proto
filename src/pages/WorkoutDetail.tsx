@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { WorkoutHistoryEntry, Exercise } from '@/types/workout';
+import { toast } from 'sonner';
 import {
   formatDate,
   formatEnergy,
@@ -22,6 +24,8 @@ export default function WorkoutDetail() {
   const { user } = useAuth();
   const [entry, setEntry] = useState<WorkoutHistoryEntry | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedExercises, setEditedExercises] = useState<Exercise[]>([]);
 
   useEffect(() => {
     async function loadWorkout() {
@@ -65,19 +69,60 @@ export default function WorkoutDetail() {
     loadWorkout();
   }, [workoutId, user?.id]);
 
+  useEffect(() => {
+    if (entry?.exercises) {
+      setEditedExercises([...entry.exercises]);
+    }
+  }, [entry]);
+
+  const handleWeightEdit = (exerciseIndex: number, setIndex: number, weight: number) => {
+    setEditedExercises(prev => {
+      const updated = [...prev];
+      if (!updated[exerciseIndex].weights) {
+        updated[exerciseIndex].weights = [];
+      }
+      updated[exerciseIndex].weights![setIndex] = weight;
+      return updated;
+    });
+  };
+
+  const handleSaveEdits = async () => {
+    if (!workoutId || !user?.id) return;
+
+    try {
+      const { error } = await supabase
+        .from('workout_history')
+        .update({ exercises: editedExercises as any })
+        .eq('id', workoutId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      setEntry(prev => prev ? { ...prev, exercises: editedExercises } : null);
+      setIsEditing(false);
+      
+      toast.success('Weights updated successfully');
+    } catch (error) {
+      console.error('Failed to update weights:', error);
+      toast.error('Failed to update weights');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
         <header className="bg-card border-b border-border px-6 py-4">
-          <div className="max-w-2xl mx-auto flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate('/history')}
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <h1 className="text-xl font-bold text-foreground">Loading...</h1>
+          <div className="max-w-2xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate('/history')}
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <h1 className="text-xl font-bold text-foreground">Loading...</h1>
+            </div>
           </div>
         </header>
       </div>
@@ -88,15 +133,17 @@ export default function WorkoutDetail() {
     return (
       <div className="min-h-screen bg-background">
         <header className="bg-card border-b border-border px-6 py-4">
-          <div className="max-w-2xl mx-auto flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate('/history')}
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <h1 className="text-xl font-bold text-foreground">Workout Not Found</h1>
+          <div className="max-w-2xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate('/history')}
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <h1 className="text-xl font-bold text-foreground">Workout Not Found</h1>
+            </div>
           </div>
         </header>
       </div>
@@ -289,6 +336,35 @@ export default function WorkoutDetail() {
                             <>
                               {exercise.sets && <span>{exercise.sets} sets</span>}
                               {exercise.reps && <span>× {exercise.reps} reps</span>}
+                              
+                              {/* Weight display and edit */}
+                              {exercise.weights && exercise.weights.length > 0 && (
+                                <div className="w-full mt-2">
+                                  <span className="text-xs text-muted-foreground">Weights: </span>
+                                  <div className="flex flex-wrap gap-2 mt-1">
+                                    {exercise.weights.map((weight, idx) => (
+                                      isEditing ? (
+                                        <div key={idx} className="flex items-center gap-1">
+                                          <span className="text-xs">Set {idx + 1}:</span>
+                                          <Input
+                                            type="number"
+                                            step="0.5"
+                                            min="0"
+                                            value={editedExercises[index]?.weights?.[idx] || 0}
+                                            onChange={(e) => handleWeightEdit(index, idx, parseFloat(e.target.value) || 0)}
+                                            className="w-20 h-7 text-xs"
+                                          />
+                                          <span className="text-xs">lbs</span>
+                                        </div>
+                                      ) : (
+                                        <Badge key={idx} variant="outline" className="text-xs">
+                                          Set {idx + 1}: {weight} lbs
+                                        </Badge>
+                                      )
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
                             </>
                           ) : (
                             <>
