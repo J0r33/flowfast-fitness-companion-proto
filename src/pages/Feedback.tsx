@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { EnergyLevel } from '@/types/workout';
+import { EnergyLevel, WorkoutHistoryEntry } from '@/types/workout';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { MobileNav } from '@/components/MobileNav';
@@ -8,20 +8,22 @@ import { Card } from '@/components/ui/card';
 import { Star, Battery, BatteryMedium, BatteryFull } from 'lucide-react';
 import { toast } from 'sonner';
 import { recordWorkoutFeedback } from '@/utils/adaptationState';
-import { addWorkoutHistoryEntry } from '@/utils/workoutHistory';
+import { saveWorkoutHistoryEntryUnified } from '@/utils/workoutHistory';
 import { DifficultyFeedback } from '@/types/workout';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Feedback() {
   const navigate = useNavigate();
   const location = useLocation();
   const workout = location.state?.workout;
+  const { user } = useAuth();
 
   const [rating, setRating] = useState<number | null>(null);
   const [energyAfter, setEnergyAfter] = useState<EnergyLevel | null>(null);
   const [rpe, setRpe] = useState<number | null>(null);
   const [notes, setNotes] = useState('');
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (rating === null || energyAfter === null || rpe === null) return;
     
     // Derive difficulty feedback from rating
@@ -41,12 +43,42 @@ export default function Feedback() {
       difficultyFeedback = 'couldnt_finish';
     }
     
-    // Record feedback for adaptation with RPE
+    // Record feedback for adaptation with RPE (localStorage)
     recordWorkoutFeedback(rating, energyAfter, rpe);
     
-    // Add to workout history with RPE
+    // Build history entry and save to DB + localStorage
     if (workout) {
-      addWorkoutHistoryEntry(workout, difficultyFeedback, rpe);
+      // Calculate total sets
+      const totalSets = workout.exercises.reduce((sum: number, ex: any) => sum + (ex.sets || 0), 0);
+      
+      // Calculate total calories
+      const totalEstimatedCalories = workout.exercises.reduce(
+        (sum: number, ex: any) => sum + (ex.caloriesEstimate || 0), 
+        0
+      );
+      
+      const entry: WorkoutHistoryEntry = {
+        id: workout.id,
+        date: new Date().toISOString(),
+        energy: workout.context?.energy || 'medium',
+        timeMinutesPlanned: workout.context?.timeMinutes || workout.totalTime,
+        focusAreas: workout.context?.focusAreas || workout.focusAreas,
+        equipment: workout.context?.equipment || [],
+        exercisesCount: workout.exercises.length,
+        totalSets,
+        totalEstimatedCalories: totalEstimatedCalories > 0 ? totalEstimatedCalories : undefined,
+        feedbackDifficulty: difficultyFeedback,
+        rpe: rpe ?? undefined,
+      };
+
+      try {
+        await saveWorkoutHistoryEntryUnified(entry, user?.id);
+      } catch (error) {
+        console.error('Error saving workout history:', error);
+        toast.error('Failed to save to cloud', {
+          description: 'Workout saved locally',
+        });
+      }
     }
     
     console.log({ rating, energyAfter, rpe, notes, difficulty: difficultyFeedback });

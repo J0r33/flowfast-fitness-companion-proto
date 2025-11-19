@@ -8,34 +8,51 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { MobileNav } from '@/components/MobileNav';
 import { Sparkles, Activity, Zap } from 'lucide-react';
-import { computeWorkoutStats } from '@/utils/workoutHistory';
+import { loadWorkoutHistoryUnified, computeWorkoutStats } from '@/utils/workoutHistory';
 import { getTodayRecommendation } from '@/utils/todayRecommendation';
 import { formatMinutes, formatCalories } from '@/utils/formatters';
 import { UserProfile, WorkoutStatsSummary, TodayRecommendation } from '@/types/workout';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [todayWorkout] = useState(mockTodayWorkout);
   const [profile, setProfile] = useState<UserProfile>(mockUserProfile);
   const [stats, setStats] = useState<WorkoutStatsSummary | null>(null);
   const [todayRec, setTodayRec] = useState<TodayRecommendation | null>(null);
   
   useEffect(() => {
-    // Load unified stats
-    const workoutStats = computeWorkoutStats();
-    setStats(workoutStats);
-    
-    setProfile(prev => ({
-      ...prev,
-      totalWorkouts: workoutStats.totalWorkouts,
-      currentStreak: workoutStats.currentStreak,
-    }));
+    let isMounted = true;
 
-    // Load today's recommendation
-    const rec = getTodayRecommendation();
-    setTodayRec(rec);
-  }, []);
+    async function loadData() {
+      try {
+        // Load workout history from DB or localStorage
+        const history = await loadWorkoutHistoryUnified(user?.id);
+        const workoutStats = computeWorkoutStats(history);
+        
+        if (isMounted) {
+          setStats(workoutStats);
+          
+          setProfile(prev => ({
+            ...prev,
+            totalWorkouts: workoutStats.totalWorkouts,
+            currentStreak: workoutStats.currentStreak,
+          }));
+
+          // Load today's recommendation (still from localStorage for now)
+          const rec = getTodayRecommendation();
+          setTodayRec(rec);
+        }
+      } catch (error) {
+        console.error('Failed to load dashboard data:', error);
+      }
+    }
+
+    loadData();
+    return () => { isMounted = false; };
+  }, [user?.id]);
 
   return (
     <div className="min-h-screen bg-background pb-24">
