@@ -18,6 +18,7 @@ export interface Exercise {
   duration?: number; // in seconds
   notes?: string;
   caloriesEstimate?: number;
+  weights?: number[];       // NEW: weight tracking per set (e.g., [20, 20, 22.5])
 }
 
 export interface WorkoutPlan {
