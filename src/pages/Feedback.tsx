@@ -55,7 +55,6 @@ export default function Feedback() {
       );
       
       const entry: WorkoutHistoryEntry = {
-        id: workout.id,
         date: new Date().toISOString(),
         energy: workout.context?.energy || 'medium',
         timeMinutesPlanned: workout.context?.timeMinutes || workout.totalTime,

@@ -87,23 +87,30 @@ export async function saveWorkoutHistoryEntryToDb(
   entry: WorkoutHistoryEntry
 ): Promise<void> {
   try {
+    // Build insert data - only include id if it exists
+    const insertData: any = {
+      user_id: userId,
+      date: entry.date,
+      energy: entry.energy,
+      time_minutes_planned: entry.timeMinutesPlanned,
+      time_minutes_actual: entry.timeMinutesActual,
+      focus_areas: entry.focusAreas,
+      equipment: entry.equipment,
+      exercises_count: entry.exercisesCount,
+      total_sets: entry.totalSets,
+      total_estimated_calories: entry.totalEstimatedCalories,
+      feedback_difficulty: entry.feedbackDifficulty,
+      rpe: entry.rpe,
+    };
+
+    // Only include id if it exists (for backward compatibility)
+    if (entry.id) {
+      insertData.id = entry.id;
+    }
+
     const { error } = await supabase
       .from('workout_history')
-      .insert({
-        id: entry.id,
-        user_id: userId,
-        date: entry.date,
-        energy: entry.energy,
-        time_minutes_planned: entry.timeMinutesPlanned,
-        time_minutes_actual: entry.timeMinutesActual,
-        focus_areas: entry.focusAreas,
-        equipment: entry.equipment,
-        exercises_count: entry.exercisesCount,
-        total_sets: entry.totalSets,
-        total_estimated_calories: entry.totalEstimatedCalories,
-        feedback_difficulty: entry.feedbackDifficulty,
-        rpe: entry.rpe,
-      });
+      .insert(insertData);
 
     if (error) throw error;
   } catch (error) {

@@ -119,7 +119,7 @@ export interface PlannerHistorySnapshot {
 }
 
 export interface WorkoutHistoryEntry {
-  id: string;
+  id?: string;
   date: string;
   energy: EnergyLevel;
   timeMinutesPlanned: number;
