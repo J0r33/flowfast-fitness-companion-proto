@@ -46,13 +46,16 @@ export async function buildAutoTodayPlanInput(userId?: string): Promise<AutoToda
     loadGoals(),
   ]);
 
+  // Defensive fallback for entries
+  const entries = history?.entries ?? [];
+
   // Compute pure metrics from loaded history
   const metrics = computeAdaptationMetricsFromHistory(history);
   const plannerHistory = generatePlannerHistorySnapshotFromMetrics(metrics);
   const todayRec = getTodayRecommendationFromHistory(history, weeklyGoals);
 
   // Check if this is the user's first workout
-  const isFirstWorkout = history.entries.length === 0;
+  const isFirstWorkout = entries.length === 0;
 
   // --- Derive energy level ---
   const lastRPE = metrics.lastRpe ?? null;
@@ -75,7 +78,7 @@ export async function buildAutoTodayPlanInput(userId?: string): Promise<AutoToda
   const time_minutes = approx;
 
   // --- Build recent focus summary from last 3 entries ---
-  const lastSessions = history.entries.slice(0, 3); // newest first
+  const lastSessions = entries.slice(0, 3); // newest first
 
   // Initialize all focus areas to 0 for proper balancing
   const focus_counts: Record<string, number> = {};
