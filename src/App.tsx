@@ -27,8 +27,8 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/" element={<Auth />} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/adjust" element={<ProtectedRoute><AdjustWorkout /></ProtectedRoute>} />
             <Route path="/session" element={<ProtectedRoute><Session /></ProtectedRoute>} />
             <Route path="/workout/:sessionId/:stepIndex" element={<ProtectedRoute><WorkoutPlayer /></ProtectedRoute>} />
