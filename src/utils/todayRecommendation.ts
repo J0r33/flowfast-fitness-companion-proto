@@ -1,16 +1,16 @@
 import {
   computeWorkoutStats,
-  loadWorkoutHistory
+  loadWorkoutHistoryUnified
 } from "@/utils/workoutHistory";
-import { loadAdaptationState } from "@/utils/adaptationState";
-import { loadWeeklyGoals } from "@/utils/weeklyGoals";
+import { loadAdaptationStateUnified } from "@/utils/adaptationState";
+import { loadGoals } from "@/utils/profileSync";
 import { TodayRecommendation } from "@/types/workout";
 
-export function getTodayRecommendation(): TodayRecommendation {
-  const history = loadWorkoutHistory();
+export async function getTodayRecommendation(userId?: string): Promise<TodayRecommendation> {
+  const history = await loadWorkoutHistoryUnified(userId);
   const stats = computeWorkoutStats(history);
-  const adaptation = loadAdaptationState();
-  const goals = loadWeeklyGoals();
+  const adaptation = await loadAdaptationStateUnified(userId);
+  const goals = await loadGoals();
 
   // --- Collect Inputs ---
   const workoutsThisWeek = stats.thisWeekWorkouts;

@@ -7,7 +7,6 @@ import { MobileNav } from '@/components/MobileNav';
 import { Card } from '@/components/ui/card';
 import { Star, Battery, BatteryMedium, BatteryFull } from 'lucide-react';
 import { toast } from 'sonner';
-import { recordWorkoutFeedback } from '@/utils/adaptationState';
 import { saveWorkoutHistoryEntryUnified } from '@/utils/workoutHistory';
 import { DifficultyFeedback } from '@/types/workout';
 import { useAuth } from '@/contexts/AuthContext';
@@ -43,10 +42,8 @@ export default function Feedback() {
       difficultyFeedback = 'couldnt_finish';
     }
     
-    // Record feedback for adaptation with RPE (localStorage)
-    recordWorkoutFeedback(rating, energyAfter, rpe);
-    
     // Build history entry and save to DB + localStorage
+    // Note: adaptation state is now derived from workout_history, no separate recording needed
     if (workout) {
       // Calculate total sets
       const totalSets = workout.exercises.reduce((sum: number, ex: any) => sum + (ex.sets || 0), 0);

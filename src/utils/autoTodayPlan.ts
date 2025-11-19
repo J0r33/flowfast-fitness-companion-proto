@@ -1,8 +1,8 @@
-import { loadAdaptationState, generatePlannerHistorySnapshot } from "@/utils/adaptationState";
-import { loadWorkoutHistory } from "@/utils/workoutHistory";
+import { loadAdaptationStateUnified, generatePlannerHistorySnapshotUnified } from "@/utils/adaptationState";
+import { loadWorkoutHistoryUnified } from "@/utils/workoutHistory";
 import { getTodayRecommendation } from "@/utils/todayRecommendation";
 import { loadGoals } from "@/utils/profileSync";
-import { TodayRecommendation, FocusArea } from "@/types/workout";
+import { TodayRecommendation, FocusArea, PlannerHistorySnapshot } from "@/types/workout";
 
 interface RecentFocusSummary {
   last_sessions: {
@@ -18,7 +18,7 @@ export interface AutoTodayPlanInput {
   focus_areas: string[];
   goal_text: string;
   primary_goal: string;
-  history: ReturnType<typeof generatePlannerHistorySnapshot>;
+  history: PlannerHistorySnapshot;
   today_recommendation: TodayRecommendation;
   recent_focus_summary: RecentFocusSummary;
 }
@@ -39,11 +39,11 @@ const ALL_FOCUS_AREAS: FocusArea[] = [
  * Build input for Auto Today mode - automatically derives workout parameters
  * from user history, goals, and current state.
  */
-export async function buildAutoTodayPlanInput(): Promise<AutoTodayPlanInput> {
+export async function buildAutoTodayPlanInput(userId?: string): Promise<AutoTodayPlanInput> {
   const weeklyGoals = await loadGoals();
-  const adaptation = loadAdaptationState();
-  const history = loadWorkoutHistory();
-  const todayRec = getTodayRecommendation();
+  const adaptation = await loadAdaptationStateUnified(userId);
+  const history = await loadWorkoutHistoryUnified(userId);
+  const todayRec = await getTodayRecommendation(userId);
 
   // Check if this is the user's first workout
   const isFirstWorkout = history.entries.length === 0;
@@ -116,7 +116,7 @@ export async function buildAutoTodayPlanInput(): Promise<AutoTodayPlanInput> {
   }
 
   const primary_goal = weeklyGoals.primaryGoal;
-  const historySnapshot = generatePlannerHistorySnapshot();
+  const historySnapshot = await generatePlannerHistorySnapshotUnified(userId);
 
   // --- Build goal_text ---
   let goal_text: string;
