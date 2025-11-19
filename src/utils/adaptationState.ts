@@ -25,7 +25,7 @@ const DEFAULT_STATE: AdaptationState = {
 export function computeAdaptationMetricsFromHistory(
   history: WorkoutHistory
 ): AdaptationMetrics {
-  const entries = history.entries || [];
+  const entries = history?.entries ?? [];
   
   if (entries.length === 0) {
     return {
