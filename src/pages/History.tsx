@@ -4,7 +4,7 @@ import { MobileNav } from '@/components/MobileNav';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, Flame, Dumbbell, TrendingUp, Activity, ChevronRight } from 'lucide-react';
-import { loadWorkoutHistoryUnified } from '@/utils/workoutHistory';
+import { loadWorkoutHistory } from '@/utils/workoutHistory';
 import { WorkoutHistoryEntry } from '@/types/workout';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -26,7 +26,9 @@ export default function History() {
 
     async function loadData() {
       try {
-        const history = await loadWorkoutHistoryUnified(user?.id);
+        if (!user?.id) return;
+        
+        const history = await loadWorkoutHistory(user.id);
         if (isMounted) {
           setEntries(history.entries);
         }

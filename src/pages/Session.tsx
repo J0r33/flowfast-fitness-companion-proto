@@ -7,7 +7,7 @@ import {
   computeAdaptationMetricsFromHistory,
   generatePlannerHistorySnapshotFromMetrics 
 } from '@/utils/adaptationState';
-import { loadWorkoutHistoryUnified } from '@/utils/workoutHistory';
+import { loadWorkoutHistory } from '@/utils/workoutHistory';
 import { getTodayRecommendation } from '@/utils/todayRecommendation';
 import { buildAutoTodayPlanInput } from '@/utils/autoTodayPlan';
 import { loadEquipment, loadGoals } from '@/utils/profileSync';
@@ -35,8 +35,12 @@ export default function Session() {
         // Auto Today mode - derive all inputs automatically
         setIsGenerating(true);
         try {
+          if (!user?.id) {
+            throw new Error('User not authenticated');
+          }
+          
           const userEquipment = await loadEquipment();
-          const autoInput = await buildAutoTodayPlanInput(user?.id);
+          const autoInput = await buildAutoTodayPlanInput(user.id);
 
           const response = await fetch(
             `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-workout-plan`,
@@ -93,13 +97,15 @@ export default function Session() {
           });
 
           // Fallback to mock workout using auto-derived inputs
-          const autoInput = await buildAutoTodayPlanInput(user?.id);
-          const fallbackWorkout = generateMockWorkout(
-            autoInput.energy,
-            autoInput.time_minutes,
-            autoInput.focus_areas
-          );
-          setWorkout(fallbackWorkout);
+          if (user?.id) {
+            const autoInput = await buildAutoTodayPlanInput(user.id);
+            const fallbackWorkout = generateMockWorkout(
+              autoInput.energy,
+              autoInput.time_minutes,
+              autoInput.focus_areas
+            );
+            setWorkout(fallbackWorkout);
+          }
         } finally {
           setIsGenerating(false);
         }
@@ -109,11 +115,15 @@ export default function Session() {
         const userEquipment = await loadEquipment();
         
         try {
+          if (!user?.id) {
+            throw new Error('User not authenticated');
+          }
+          
           // Build goal text from focus areas
           const goalText = `Focus on ${state.focusAreas.join(', ')} training`;
           
           // Load history and derive snapshot using pure functions
-          const workoutHistory = await loadWorkoutHistoryUnified(user?.id);
+          const workoutHistory = await loadWorkoutHistory(user.id);
           const metrics = computeAdaptationMetricsFromHistory(workoutHistory);
           const historySnapshot = generatePlannerHistorySnapshotFromMetrics(metrics);
           
@@ -122,7 +132,7 @@ export default function Session() {
           const primaryGoal = weeklyGoals.primaryGoal;
 
           // Load today's coaching recommendation
-          const todayRec = await getTodayRecommendation(user?.id);
+          const todayRec = await getTodayRecommendation(user.id);
 
           const response = await fetch(
             `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-workout-plan`,
