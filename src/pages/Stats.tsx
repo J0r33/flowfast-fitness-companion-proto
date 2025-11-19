@@ -24,7 +24,8 @@ import {
 } from '@/types/workout';
 
 import {
-  generatePlannerHistorySnapshot,
+  computeAdaptationMetricsFromHistory,
+  generatePlannerHistorySnapshotFromMetrics,
 } from '@/utils/adaptationState';
 
 import {
@@ -62,8 +63,9 @@ export default function Stats() {
           setWeeklyMinutes(weekly.weeklyMinutes);
           setWeeklyCalories(weekly.weeklyCalories);
 
-          // Load RPE data from adaptation state (still from localStorage for now)
-          const snapshot = generatePlannerHistorySnapshot();
+          // Derive RPE from DB-backed history
+          const metrics = computeAdaptationMetricsFromHistory(history);
+          const snapshot = generatePlannerHistorySnapshotFromMetrics(metrics);
           setAvgRpe(snapshot.avg_rpe);
           setLastRpe(snapshot.last_rpe);
         }
