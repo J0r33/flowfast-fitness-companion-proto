@@ -97,6 +97,18 @@ export interface AdaptationState {
   rpeCount?: number;       // Number of sessions with valid RPE
 }
 
+// Pure adaptation metrics derived from workout history
+export interface AdaptationMetrics {
+  totalSessions: number;
+  tooEasyCount: number;
+  tooHardCount: number;
+  couldntFinishCount: number;
+  lastFeedback?: DifficultyFeedback;
+  lastWorkoutDate?: string; // ISO date string
+  lastRpe?: number;         // Most recent RPE score (1-10)
+  avgRpe?: number;          // Average RPE across all sessions
+}
+
 export interface PlannerHistorySnapshot {
   sessions_completed: number;
   difficulty_bias: -1 | 0 | 1; // -1 = too hard, 0 = balanced, 1 = too easy

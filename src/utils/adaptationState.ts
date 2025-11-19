@@ -1,4 +1,4 @@
-import { AdaptationState, PlannerHistorySnapshot, DifficultyFeedback } from '@/types/workout';
+import { AdaptationState, AdaptationMetrics, PlannerHistorySnapshot, DifficultyFeedback, WorkoutHistory } from '@/types/workout';
 import { supabase } from '@/integrations/supabase/client';
 
 const STORAGE_KEY = 'flowfast_adaptation_state';
@@ -15,10 +15,135 @@ const DEFAULT_STATE: AdaptationState = {
 };
 
 // ============================================================
+// PURE HELPER FUNCTIONS (NEW - USE THESE!)
+// ============================================================
+
+/**
+ * Pure function: Compute adaptation metrics from workout history.
+ * No side effects, no async, no localStorage, no DB calls.
+ */
+export function computeAdaptationMetricsFromHistory(
+  history: WorkoutHistory
+): AdaptationMetrics {
+  const entries = history.entries || [];
+  
+  if (entries.length === 0) {
+    return {
+      totalSessions: 0,
+      tooEasyCount: 0,
+      tooHardCount: 0,
+      couldntFinishCount: 0,
+      lastFeedback: undefined,
+      lastWorkoutDate: undefined,
+      lastRpe: undefined,
+      avgRpe: undefined,
+    };
+  }
+
+  let tooEasyCount = 0;
+  let tooHardCount = 0;
+  let couldntFinishCount = 0;
+  let lastFeedback: DifficultyFeedback | undefined = undefined;
+
+  let rpeSum = 0;
+  let rpeCount = 0;
+  let lastRpe: number | undefined = undefined;
+
+  // Assuming entries are in reverse-chronological order (newest first)
+  for (const entry of entries) {
+    if (entry.feedbackDifficulty) {
+      lastFeedback ??= entry.feedbackDifficulty;
+
+      if (entry.feedbackDifficulty === 'too_easy') tooEasyCount++;
+      if (entry.feedbackDifficulty === 'too_hard') tooHardCount++;
+      if (entry.feedbackDifficulty === 'couldnt_finish') couldntFinishCount++;
+    }
+
+    if (typeof entry.rpe === 'number') {
+      rpeSum += entry.rpe;
+      rpeCount++;
+      if (lastRpe === undefined) {
+        lastRpe = entry.rpe;
+      }
+    }
+  }
+
+  const lastEntry = entries[0];
+  const lastWorkoutDate = lastEntry?.date;
+
+  const avgRpe = rpeCount > 0 ? rpeSum / rpeCount : undefined;
+
+  return {
+    totalSessions: entries.length,
+    tooEasyCount,
+    tooHardCount,
+    couldntFinishCount,
+    lastFeedback,
+    lastWorkoutDate,
+    lastRpe,
+    avgRpe,
+  };
+}
+
+/**
+ * Pure function: Generate planner history snapshot from adaptation metrics.
+ * No side effects, no async, no localStorage, no DB calls.
+ */
+export function generatePlannerHistorySnapshotFromMetrics(
+  metrics: AdaptationMetrics
+): PlannerHistorySnapshot {
+  const { 
+    totalSessions,
+    tooEasyCount,
+    tooHardCount,
+    couldntFinishCount,
+    lastFeedback,
+    lastWorkoutDate,
+    lastRpe,
+    avgRpe
+  } = metrics;
+
+  // Calculate difficulty bias
+  // If couldn't finish recently, definitely too hard
+  let difficulty_bias: -1 | 0 | 1 = 0;
+  if (couldntFinishCount > 0 && couldntFinishCount >= tooEasyCount) {
+    difficulty_bias = -1;
+  } else {
+    // Calculate net difficulty score
+    const netScore = tooEasyCount - (tooHardCount + couldntFinishCount);
+    
+    // Thresholds
+    if (netScore >= 2) {
+      difficulty_bias = 1;  // Too easy
+    } else if (netScore <= -2) {
+      difficulty_bias = -1; // Too hard
+    } else {
+      difficulty_bias = 0; // Balanced
+    }
+  }
+
+  // Calculate days since last workout
+  const days_since_last_workout = lastWorkoutDate
+    ? Math.floor((Date.now() - new Date(lastWorkoutDate).getTime()) / 86400000)
+    : null;
+
+  return {
+    sessions_completed: totalSessions,
+    difficulty_bias,
+    days_since_last_workout,
+    last_feedback: lastFeedback,
+    avg_rpe: avgRpe,
+    last_rpe: lastRpe,
+  };
+}
+
+// ============================================================
 // DEPRECATED LOCAL STORAGE FUNCTIONS (for backward compatibility)
 // ============================================================
 
-// Read from localStorage (DEPRECATED - use loadAdaptationStateFromDb)
+/**
+ * @deprecated Use computeAdaptationMetricsFromHistory with loadWorkoutHistoryUnified instead
+ */
 export function loadAdaptationStateLocal(): AdaptationState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -30,7 +155,9 @@ export function loadAdaptationStateLocal(): AdaptationState {
   }
 }
 
-// Write to localStorage (DEPRECATED - no longer needed)
+/**
+ * @deprecated Adaptation state is now derived from workout_history
+ */
 export function saveAdaptationStateLocal(state: AdaptationState): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -39,7 +166,9 @@ export function saveAdaptationStateLocal(state: AdaptationState): void {
   }
 }
 
-// DEPRECATED - adaptation state is now derived from workout_history
+/**
+ * @deprecated Adaptation state is now derived from workout_history
+ */
 export function recordWorkoutFeedback(
   rating: number,
   energyAfter: string,
@@ -50,10 +179,12 @@ export function recordWorkoutFeedback(
 }
 
 // ============================================================
-// DATABASE-BACKED FUNCTIONS
+// DATABASE-BACKED FUNCTIONS (DEPRECATED - use pure functions above)
 // ============================================================
 
-// Calculate adaptation state from workout_history table
+/**
+ * @deprecated Use computeAdaptationMetricsFromHistory with loadWorkoutHistoryUnified instead
+ */
 export async function loadAdaptationStateFromDb(userId: string): Promise<AdaptationState> {
   try {
     const { data, error } = await supabase
@@ -111,7 +242,9 @@ export async function loadAdaptationStateFromDb(userId: string): Promise<Adaptat
   }
 }
 
-// Unified loader with fallback
+/**
+ * @deprecated Use computeAdaptationMetricsFromHistory with loadWorkoutHistoryUnified instead
+ */
 export async function loadAdaptationStateUnified(userId?: string): Promise<AdaptationState> {
   if (!userId) {
     return loadAdaptationStateLocal();
@@ -160,7 +293,9 @@ function calculateDaysSinceLastWorkout(lastWorkoutDate?: string): number | null 
   return diffDays;
 }
 
-// Generate snapshot for planner (async DB version)
+/**
+ * @deprecated Use generatePlannerHistorySnapshotFromMetrics with computeAdaptationMetricsFromHistory instead
+ */
 export async function generatePlannerHistorySnapshotFromDb(userId: string): Promise<PlannerHistorySnapshot> {
   const state = await loadAdaptationStateFromDb(userId);
   
@@ -180,7 +315,9 @@ export async function generatePlannerHistorySnapshotFromDb(userId: string): Prom
   };
 }
 
-// Generate snapshot for planner (with fallback)
+/**
+ * @deprecated Use generatePlannerHistorySnapshotFromMetrics with computeAdaptationMetricsFromHistory instead
+ */
 export async function generatePlannerHistorySnapshotUnified(userId?: string): Promise<PlannerHistorySnapshot> {
   if (!userId) {
     const state = loadAdaptationStateLocal();
@@ -220,7 +357,9 @@ export async function generatePlannerHistorySnapshotUnified(userId?: string): Pr
   }
 }
 
-// Legacy sync function for backward compatibility
+/**
+ * @deprecated Use generatePlannerHistorySnapshotFromMetrics with computeAdaptationMetricsFromHistory instead
+ */
 export function generatePlannerHistorySnapshot(): PlannerHistorySnapshot {
   const state = loadAdaptationStateLocal();
   

@@ -1,8 +1,8 @@
-import { loadAdaptationStateUnified, generatePlannerHistorySnapshotUnified } from "@/utils/adaptationState";
+import { computeAdaptationMetricsFromHistory, generatePlannerHistorySnapshotFromMetrics } from "@/utils/adaptationState";
 import { loadWorkoutHistoryUnified } from "@/utils/workoutHistory";
-import { getTodayRecommendation } from "@/utils/todayRecommendation";
+import { getTodayRecommendationFromHistory } from "@/utils/todayRecommendation";
 import { loadGoals } from "@/utils/profileSync";
-import { TodayRecommendation, FocusArea, PlannerHistorySnapshot } from "@/types/workout";
+import { TodayRecommendation, FocusArea, PlannerHistorySnapshot, WeeklyGoals, WorkoutHistory } from "@/types/workout";
 
 interface RecentFocusSummary {
   last_sessions: {
@@ -40,16 +40,22 @@ const ALL_FOCUS_AREAS: FocusArea[] = [
  * from user history, goals, and current state.
  */
 export async function buildAutoTodayPlanInput(userId?: string): Promise<AutoTodayPlanInput> {
-  const weeklyGoals = await loadGoals();
-  const adaptation = await loadAdaptationStateUnified(userId);
-  const history = await loadWorkoutHistoryUnified(userId);
-  const todayRec = await getTodayRecommendation(userId);
+  // Load data from DB (or localStorage fallback)
+  const [history, weeklyGoals] = await Promise.all([
+    loadWorkoutHistoryUnified(userId),
+    loadGoals(),
+  ]);
+
+  // Compute pure metrics from loaded history
+  const metrics = computeAdaptationMetricsFromHistory(history);
+  const plannerHistory = generatePlannerHistorySnapshotFromMetrics(metrics);
+  const todayRec = getTodayRecommendationFromHistory(history, weeklyGoals);
 
   // Check if this is the user's first workout
   const isFirstWorkout = history.entries.length === 0;
 
   // --- Derive energy level ---
-  const lastRPE = adaptation.lastRpe ?? null;
+  const lastRPE = metrics.lastRpe ?? null;
   let energy: "low" | "medium" | "high" = "medium";
 
   if (todayRec === "recovery") {
@@ -116,7 +122,6 @@ export async function buildAutoTodayPlanInput(userId?: string): Promise<AutoToda
   }
 
   const primary_goal = weeklyGoals.primaryGoal;
-  const historySnapshot = await generatePlannerHistorySnapshotUnified(userId);
 
   // --- Build goal_text ---
   let goal_text: string;
@@ -134,7 +139,7 @@ export async function buildAutoTodayPlanInput(userId?: string): Promise<AutoToda
     focus_areas,
     goal_text,
     primary_goal,
-    history: historySnapshot,
+    history: plannerHistory,
     today_recommendation: todayRec,
     recent_focus_summary,
   };
