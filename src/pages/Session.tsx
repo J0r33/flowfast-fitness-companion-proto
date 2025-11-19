@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { WorkoutPlan } from '@/types/workout';
 import { generateMockWorkout } from '@/data/mockWorkouts';
 import { buildWorkoutSession, saveWorkoutSession } from '@/utils/workoutSession';
-import { generatePlannerHistorySnapshot } from '@/utils/adaptationState';
+import { generatePlannerHistorySnapshotUnified } from '@/utils/adaptationState';
 import { getTodayRecommendation } from '@/utils/todayRecommendation';
 import { buildAutoTodayPlanInput } from '@/utils/autoTodayPlan';
 import { loadEquipment, loadGoals } from '@/utils/profileSync';
@@ -13,12 +13,14 @@ import { MobileNav } from '@/components/MobileNav';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Play, Edit, Clock, Flame, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Session() {
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as any;
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const [workout, setWorkout] = useState<WorkoutPlan | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -30,7 +32,7 @@ export default function Session() {
         setIsGenerating(true);
         try {
           const userEquipment = await loadEquipment();
-          const autoInput = await buildAutoTodayPlanInput();
+          const autoInput = await buildAutoTodayPlanInput(user?.id);
 
           const response = await fetch(
             `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-workout-plan`,
@@ -87,7 +89,7 @@ export default function Session() {
           });
 
           // Fallback to mock workout using auto-derived inputs
-          const autoInput = await buildAutoTodayPlanInput();
+          const autoInput = await buildAutoTodayPlanInput(user?.id);
           const fallbackWorkout = generateMockWorkout(
             autoInput.energy,
             autoInput.time_minutes,
@@ -107,14 +109,14 @@ export default function Session() {
           const goalText = `Focus on ${state.focusAreas.join(', ')} training`;
           
           // Generate history snapshot for adaptation
-          const history = generatePlannerHistorySnapshot();
+          const history = await generatePlannerHistorySnapshotUnified(user?.id);
           
           // Load primary goal from weekly goals
           const weeklyGoals = await loadGoals();
           const primaryGoal = weeklyGoals.primaryGoal;
 
           // Load today's coaching recommendation
-          const todayRec = getTodayRecommendation();
+          const todayRec = await getTodayRecommendation(user?.id);
 
           const response = await fetch(
             `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-workout-plan`,

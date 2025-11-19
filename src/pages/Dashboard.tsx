@@ -41,8 +41,8 @@ export default function Dashboard() {
             currentStreak: workoutStats.currentStreak,
           }));
 
-          // Load today's recommendation (still from localStorage for now)
-          const rec = getTodayRecommendation();
+          // Load today's recommendation from DB
+          const rec = await getTodayRecommendation(user?.id);
           setTodayRec(rec);
         }
       } catch (error) {
