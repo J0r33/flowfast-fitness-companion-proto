@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { MobileNav } from '@/components/MobileNav';
 import { Sparkles, Activity, Zap } from 'lucide-react';
-import { loadWorkoutHistoryUnified, computeWorkoutStats } from '@/utils/workoutHistory';
+import { loadWorkoutHistory, computeWorkoutStats } from '@/utils/workoutHistory';
 import { getTodayRecommendation } from '@/utils/todayRecommendation';
 import { formatMinutes, formatCalories } from '@/utils/formatters';
 import { UserProfile, WorkoutStatsSummary, TodayRecommendation } from '@/types/workout';
@@ -22,18 +22,22 @@ export default function Dashboard() {
   const [profile, setProfile] = useState<UserProfile>(mockUserProfile);
   const [stats, setStats] = useState<WorkoutStatsSummary | null>(null);
   const [todayRec, setTodayRec] = useState<TodayRecommendation | null>(null);
+  const [workoutsThisWeek, setWorkoutsThisWeek] = useState(0);
   
   useEffect(() => {
     let isMounted = true;
 
     async function loadData() {
       try {
-        // Load workout history from DB or localStorage
-        const history = await loadWorkoutHistoryUnified(user?.id);
+        if (!user?.id) return;
+        
+        // Load workout history from DB
+        const history = await loadWorkoutHistory(user.id);
         const workoutStats = computeWorkoutStats(history);
         
         if (isMounted) {
           setStats(workoutStats);
+          setWorkoutsThisWeek(workoutStats.thisWeekWorkouts);
           
           setProfile(prev => ({
             ...prev,
@@ -42,7 +46,7 @@ export default function Dashboard() {
           }));
 
           // Load today's recommendation from DB
-          const rec = await getTodayRecommendation(user?.id);
+          const rec = await getTodayRecommendation(user.id);
           setTodayRec(rec);
         }
       } catch (error) {
@@ -67,7 +71,7 @@ export default function Dashboard() {
       {/* Content */}
       <main className="max-w-md mx-auto px-6 py-6 space-y-6">
         {/* Stats */}
-        <ProgressStats profile={profile} />
+        <ProgressStats profile={profile} workoutsThisWeek={workoutsThisWeek} />
 
         {/* Weekly Highlights */}
         {stats && stats.totalWorkouts > 0 && (

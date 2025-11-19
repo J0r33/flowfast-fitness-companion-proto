@@ -7,7 +7,7 @@ import { MobileNav } from '@/components/MobileNav';
 import { Card } from '@/components/ui/card';
 import { Star, Battery, BatteryMedium, BatteryFull } from 'lucide-react';
 import { toast } from 'sonner';
-import { saveWorkoutHistoryEntryUnified } from '@/utils/workoutHistory';
+import { saveWorkoutHistoryEntry } from '@/utils/workoutHistory';
 import { DifficultyFeedback } from '@/types/workout';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -69,12 +69,16 @@ export default function Feedback() {
       };
 
       try {
-        await saveWorkoutHistoryEntryUnified(entry, user?.id);
+        if (!user?.id) {
+          console.error('User not authenticated');
+          toast.error('Please log in to save workouts');
+          return;
+        }
+        
+        await saveWorkoutHistoryEntry(user.id, entry);
       } catch (error) {
         console.error('Error saving workout history:', error);
-        toast.error('Failed to save to cloud', {
-          description: 'Workout saved locally',
-        });
+        toast.error('Failed to save workout');
       }
     }
     

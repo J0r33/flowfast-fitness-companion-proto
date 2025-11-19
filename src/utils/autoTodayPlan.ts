@@ -1,5 +1,5 @@
 import { computeAdaptationMetricsFromHistory, generatePlannerHistorySnapshotFromMetrics } from "@/utils/adaptationState";
-import { loadWorkoutHistoryUnified } from "@/utils/workoutHistory";
+import { loadWorkoutHistory } from "@/utils/workoutHistory";
 import { getTodayRecommendationFromHistory } from "@/utils/todayRecommendation";
 import { loadGoals } from "@/utils/profileSync";
 import { TodayRecommendation, FocusArea, PlannerHistorySnapshot, WeeklyGoals, WorkoutHistory } from "@/types/workout";
@@ -39,10 +39,10 @@ const ALL_FOCUS_AREAS: FocusArea[] = [
  * Build input for Auto Today mode - automatically derives workout parameters
  * from user history, goals, and current state.
  */
-export async function buildAutoTodayPlanInput(userId?: string): Promise<AutoTodayPlanInput> {
-  // Load data from DB (or localStorage fallback)
+export async function buildAutoTodayPlanInput(userId: string): Promise<AutoTodayPlanInput> {
+  // Load data from DB
   const [history, weeklyGoals] = await Promise.all([
-    loadWorkoutHistoryUnified(userId),
+    loadWorkoutHistory(userId),
     loadGoals(),
   ]);
 

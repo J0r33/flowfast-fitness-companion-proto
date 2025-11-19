@@ -1,5 +1,5 @@
 import { WorkoutHistory, WeeklyGoals, TodayRecommendation } from '@/types/workout';
-import { computeWorkoutStats, loadWorkoutHistoryUnified } from '@/utils/workoutHistory';
+import { computeWorkoutStats, loadWorkoutHistory } from '@/utils/workoutHistory';
 import { computeAdaptationMetricsFromHistory } from '@/utils/adaptationState';
 import { loadGoals } from '@/utils/profileSync';
 
@@ -59,8 +59,8 @@ export function getTodayRecommendationFromHistory(
  * Async wrapper: Load data and compute today's recommendation.
  * @deprecated Prefer getTodayRecommendationFromHistory with pre-loaded data for better separation of concerns.
  */
-export async function getTodayRecommendation(userId?: string): Promise<TodayRecommendation> {
-  const history = await loadWorkoutHistoryUnified(userId);
+export async function getTodayRecommendation(userId: string): Promise<TodayRecommendation> {
+  const history = await loadWorkoutHistory(userId);
   const goals = await loadGoals();
   return getTodayRecommendationFromHistory(history, goals);
 }

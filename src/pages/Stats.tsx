@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 
 import {
-  loadWorkoutHistoryUnified,
+  loadWorkoutHistory,
   computeWorkoutStats,
 } from '@/utils/workoutHistory';
 
@@ -51,8 +51,10 @@ export default function Stats() {
 
     async function loadData() {
       try {
-        // Load workout history from DB or localStorage
-        const history = await loadWorkoutHistoryUnified(user?.id);
+        if (!user?.id) return;
+        
+        // Load workout history from DB
+        const history = await loadWorkoutHistory(user.id);
         
         if (isMounted) {
           const summary = computeWorkoutStats(history);
