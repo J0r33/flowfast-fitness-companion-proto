@@ -53,6 +53,7 @@ export type Database = {
           date: string
           energy: string | null
           equipment: string[] | null
+          exercises: Json | null
           exercises_count: number | null
           feedback_difficulty: string | null
           focus_areas: string[] | null
@@ -69,6 +70,7 @@ export type Database = {
           date?: string
           energy?: string | null
           equipment?: string[] | null
+          exercises?: Json | null
           exercises_count?: number | null
           feedback_difficulty?: string | null
           focus_areas?: string[] | null
@@ -85,6 +87,7 @@ export type Database = {
           date?: string
           energy?: string | null
           equipment?: string[] | null
+          exercises?: Json | null
           exercises_count?: number | null
           feedback_difficulty?: string | null
           focus_areas?: string[] | null

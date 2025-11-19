@@ -72,6 +72,7 @@ export async function loadWorkoutHistoryFromDb(userId: string): Promise<WorkoutH
       totalEstimatedCalories: row.total_estimated_calories,
       feedbackDifficulty: row.feedback_difficulty as any,
       rpe: row.rpe,
+      exercises: (row.exercises || []) as any[],
     }));
 
     return { entries };
@@ -101,6 +102,7 @@ export async function saveWorkoutHistoryEntryToDb(
       total_estimated_calories: entry.totalEstimatedCalories,
       feedback_difficulty: entry.feedbackDifficulty,
       rpe: entry.rpe,
+      exercises: entry.exercises ?? [],
     };
 
     // Only include id if it exists (for backward compatibility)
