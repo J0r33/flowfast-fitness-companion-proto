@@ -277,7 +277,7 @@ export default function Session() {
       {/* Content */}
       <main className="max-w-md mx-auto px-6 py-6 space-y-6">
         {/* Workout Summary */}
-        <section className="bg-gradient-primary text-primary-foreground p-6 rounded-2xl shadow-medium">
+        <section className="bg-gradient-primary p-6 rounded-2xl shadow-medium text-foreground">
           <h2 className="text-2xl font-bold mb-4">Adapted Just for You</h2>
           <div className="flex gap-3 mb-3">
             <Badge variant="secondary" className="gap-1">
@@ -288,7 +288,7 @@ export default function Session() {
               <Flame className="h-4 w-4" />~{totalCalories} calories
             </Badge>
           </div>
-          <p className="text-sm text-primary-foreground/90">
+          <p className="text-sm text-muted-foreground">
             Based on your {workout.adaptedFor?.energy} energy and {workout.adaptedFor?.availableTime} minute time frame
           </p>
         </section>
