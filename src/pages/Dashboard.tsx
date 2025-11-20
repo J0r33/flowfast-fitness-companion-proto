@@ -133,42 +133,12 @@ export default function Dashboard() {
         <section>
           <h2 className="text-xl font-bold text-foreground mb-3">Today&apos;s Plan</h2>
 
-          <div
-            className={cn(
-              "rounded-lg transition-all",
-              todayRec === "push" &&
-                "ring-2 ring-orange-500/30 bg-gradient-to-br from-orange-50/30 to-transparent dark:from-orange-950/20",
-              todayRec === "recovery" &&
-                "ring-2 ring-blue-500/30 bg-gradient-to-br from-blue-50/30 to-transparent dark:from-blue-950/20",
-              todayRec === "catch_up" &&
-                "ring-2 ring-yellow-500/30 bg-gradient-to-br from-yellow-50/30 to-transparent dark:from-yellow-950/20",
-            )}
-          >
-            {todayRec && (
-              <div className="mb-3 px-1 pt-1">
-                <Badge
-                  variant={todayRec === "push" ? "default" : todayRec === "recovery" ? "secondary" : "outline"}
-                  className={cn(
-                    todayRec === "push" && "bg-orange-500 hover:bg-orange-600 text-white border-transparent",
-                    todayRec === "catch_up" && "bg-yellow-500 hover:bg-yellow-600 text-foreground border-transparent",
-                  )}
-                >
-                  {todayRec === "push" && "🔥 Push Day"}
-                  {todayRec === "maintain" && "⚡ Maintain Day"}
-                  {todayRec === "recovery" && "🧘 Recovery Day"}
-                  {todayRec === "catch_up" && "🎯 Catch-Up Day"}
-                </Badge>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Smart recommendation based on your recent activity and goals
-                </p>
-              </div>
-            )}
-
-            <WorkoutCard
-              workout={todayWorkout}
-              onClick={() => navigate("/session", { state: { mode: "today_auto" } })}
-            />
-          </div>
+          <WorkoutCard
+            workout={todayWorkout}
+            onClick={() => navigate("/session", { state: { mode: "today_auto" } })}
+            recommendation={todayRec}
+            showRecommendation={true}
+          />
         </section>
 
         {/* Adjust Button */}
