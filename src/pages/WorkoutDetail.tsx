@@ -231,16 +231,14 @@ export default function WorkoutDetail() {
                     setEditedExercises([...entry.exercises]);
                     setIsEditing(false);
                   }}
-                  className="text-secondary-foreground border-secondary-foreground hover:bg-secondary-foreground/10"
                 >
                   Cancel
                 </Button>
               )}
               <Button
-                variant={isEditing ? "default" : "outline"}
+                variant="secondary"
                 size="sm"
                 onClick={isEditing ? handleSaveEdits : () => setIsEditing(true)}
-                className="text-secondary-foreground border-secondary-foreground hover:bg-secondary-foreground/10"
               >
                 {isEditing ? 'Save' : 'Edit Weights'}
               </Button>
