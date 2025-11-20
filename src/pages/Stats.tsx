@@ -105,7 +105,10 @@ export default function Stats() {
               </div>
               <span className="text-lg font-semibold text-primary-foreground">FlowFast</span>
             </div>
-            <h1 className="text-2xl font-bold text-primary-foreground">Stats</h1>
+            <h1 className="text-2xl font-bold text-primary-foreground">Your Training Stats</h1>
+            <p className="text-sm text-primary-foreground/80 mt-1">
+              Track your progress, volume, and intensity over time
+            </p>
           </div>
         </header>
         <MobileNav />
@@ -125,7 +128,7 @@ export default function Stats() {
               </div>
               <span className="text-lg font-semibold text-primary-foreground">FlowFast</span>
             </div>
-            <h1 className="text-2xl font-bold text-primary-foreground">Stats</h1>
+            <h1 className="text-2xl font-bold text-primary-foreground">Your Training Stats</h1>
             <p className="text-sm text-primary-foreground/80 mt-1">
               Track your progress, volume, and intensity over time
             </p>
