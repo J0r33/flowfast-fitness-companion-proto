@@ -347,11 +347,17 @@ export default function WorkoutDetail() {
                                         <div key={idx} className="flex items-center gap-1">
                                           <span className="text-xs">Set {idx + 1}:</span>
                                           <Input
-                                            type="number"
-                                            step="0.5"
-                                            min="0"
+                                            type="text"
+                                            inputMode="decimal"
                                             value={editedExercises[index]?.weights?.[idx] || 0}
-                                            onChange={(e) => handleWeightEdit(index, idx, parseFloat(e.target.value) || 0)}
+                                            onChange={(e) => {
+                                              const value = e.target.value;
+                                              if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                                                const numValue = parseFloat(value) || 0;
+                                                handleWeightEdit(index, idx, numValue);
+                                              }
+                                            }}
+                                            onWheel={(e) => e.currentTarget.blur()}
                                             className="w-20 h-7 text-xs"
                                           />
                                           <span className="text-xs">lbs</span>

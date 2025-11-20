@@ -333,12 +333,18 @@ export default function WorkoutPlayer() {
                     </label>
                     <div className="flex items-center gap-2">
                       <Input
-                        type="number"
-                        step="0.5"
-                        min="0"
+                        type="text"
+                        inputMode="decimal"
                         placeholder="0"
                         value={getCurrentSetWeight(currentStep.exerciseName, currentStep.setIndex) || ''}
-                        onChange={(e) => handleWeightChange(currentStep.exerciseName, currentStep.setIndex, parseFloat(e.target.value) || 0)}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                            const numValue = parseFloat(value) || 0;
+                            handleWeightChange(currentStep.exerciseName, currentStep.setIndex, numValue);
+                          }
+                        }}
+                        onWheel={(e) => e.currentTarget.blur()}
                         className="text-center text-lg"
                       />
                       <span className="text-sm text-muted-foreground">lbs</span>
