@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, ArrowRight, Info, Pause, Play, Activity } from "lucide-react";
+import { ArrowLeft, ArrowRight, Info, Pause, Play } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -47,12 +47,12 @@ export default function WorkoutPlayer() {
       } else {
         setCurrentStepIndex(index);
 
+        // Initialize timer for timed exercises and rest periods
         const step = session.steps[index];
         if ((step.type === "time" || step.type === "rest") && step.durationSeconds) {
           setRemainingSeconds(step.durationSeconds);
           setIsPaused(false);
           setTimerComplete(false);
-
           // Auto-start rest periods
           setTimerStarted(step.type === "rest");
         } else {
@@ -73,9 +73,11 @@ export default function WorkoutPlayer() {
     const timer = setInterval(() => {
       setRemainingSeconds((prev) => {
         if (prev === null || prev <= 1) {
+          // Timer complete
           setTimerComplete(true);
           playCompletionSound();
 
+          // Auto-advance for rest periods
           const step = session.steps[currentStepIndex];
           if (step.type === "rest") {
             setTimeout(() => {
@@ -127,13 +129,14 @@ export default function WorkoutPlayer() {
   if (!session) return null;
 
   const currentStep: WorkoutStep = session.steps[currentStepIndex];
+  const progressPercentage = ((currentStepIndex + 1) / session.steps.length) * 100;
   const isFirstStep = currentStepIndex === 0;
   const isLastStep = currentStepIndex === session.steps.length - 1;
-  const progressPercentage = ((currentStepIndex + 1) / session.steps.length) * 100;
 
   const handleNext = () => {
     setSlideDirection("left");
     if (isLastStep) {
+      // Save weights to session before navigating to completion
       const updatedSession = {
         ...session,
         workoutPlan: {
@@ -163,10 +166,13 @@ export default function WorkoutPlayer() {
     if (!exercise) return false;
 
     const weightEquipment = ["dumbbells", "barbell", "kettlebell", "weight plate"];
-    return exercise.type === "strength" || exercise.equipment?.some((eq) => weightEquipment.includes(eq.toLowerCase()));
+    return (
+      exercise.type === "strength" ||
+      (exercise.equipment?.some((eq) => weightEquipment.includes(eq.toLowerCase())) ?? false)
+    );
   };
 
-  const getCurrentSetWeight = (exerciseName: string, setIndex: number) => {
+  const getCurrentSetWeight = (exerciseName: string, setIndex: number): number | undefined => {
     const weights = exerciseWeights.get(exerciseName);
     return weights?.[setIndex - 1];
   };
@@ -181,19 +187,34 @@ export default function WorkoutPlayer() {
     });
   };
 
+  const renderSetDots = () => {
+    if (currentStep.totalSets <= 1) return null;
+
+    return (
+      <div className="flex items-center justify-center gap-2 mb-4">
+        <span className="text-sm text-muted-foreground">Sets:</span>
+        {Array.from({ length: currentStep.totalSets }).map((_, idx) => (
+          <div
+            key={idx}
+            className={`h-2 w-2 rounded-full transition-colors ${
+              idx + 1 === currentStep.setIndex
+                ? "bg-primary"
+                : idx + 1 < currentStep.setIndex
+                  ? "bg-primary/50"
+                  : "bg-muted"
+            }`}
+          />
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* 🌟 REPLACED WITH CYAN FLOWFAST HEADER */}
-      <header className="bg-primary text-primary-foreground px-6 pt-8 pb-6 rounded-b-3xl shadow-lg sticky top-0 z-10">
+      {/* Header - cyan, no logo, not sticky */}
+      <header className="bg-primary text-primary-foreground px-6 pt-8 pb-6 rounded-b-3xl shadow-lg">
         <div className="max-w-md mx-auto">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="h-8 w-8 rounded-full bg-primary-foreground/10 flex items-center justify-center">
-              <Activity className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <span className="text-lg font-semibold">FlowFast</span>
-          </div>
-
-          <h1 className="text-2xl font-bold mt-2">{session.title}</h1>
+          <h1 className="text-2xl font-bold">{session.title}</h1>
         </div>
       </header>
 
@@ -211,9 +232,10 @@ export default function WorkoutPlayer() {
             </Badge>
           )}
 
-          {/* Exercise Name */}
+          {/* Exercise Name + Sets */}
           <div>
             <h2 className="text-3xl font-bold text-foreground mb-2">{currentStep.exerciseName}</h2>
+            {renderSetDots()}
           </div>
 
           {/* Animation Placeholder */}
@@ -230,13 +252,33 @@ export default function WorkoutPlayer() {
 
           {/* Exercise Details */}
           <div className="bg-card border border-border rounded-xl p-6 space-y-3">
-            {/* Time-based exercises */}
+            {/* Rest step */}
+            {currentStep.type === "rest" && currentStep.durationSeconds && (
+              <div className="flex flex-col items-center gap-4">
+                <span className="text-sm text-muted-foreground">
+                  {timerComplete ? "Rest Complete - Moving to next exercise..." : "Rest Time"}
+                </span>
+                <span
+                  className={`text-6xl font-bold tabular-nums ${timerComplete ? "text-green-500" : "text-primary"}`}
+                >
+                  {remainingSeconds !== null
+                    ? `${Math.floor(remainingSeconds / 60)}:${String(remainingSeconds % 60).padStart(2, "0")}`
+                    : `${Math.floor(currentStep.durationSeconds / 60)}:${String(
+                        currentStep.durationSeconds % 60,
+                      ).padStart(2, "0")}`}
+                </span>
+                <p className="text-sm text-muted-foreground text-center">
+                  Catch your breath and prepare for the next challenge
+                </p>
+              </div>
+            )}
+
+            {/* Time-based exercise */}
             {currentStep.type === "time" && currentStep.durationSeconds && (
               <div className="flex flex-col items-center gap-4">
                 <span className="text-sm text-muted-foreground">
                   {timerComplete ? "Time Complete!" : !timerStarted ? "Ready" : isPaused ? "Paused" : "Time Remaining"}
                 </span>
-
                 <span
                   className={`text-6xl font-bold tabular-nums ${timerComplete ? "text-green-500" : "text-primary"}`}
                 >
@@ -258,11 +300,13 @@ export default function WorkoutPlayer() {
                       <Button variant="outline" size="lg" onClick={togglePause} className="w-full">
                         {isPaused ? (
                           <>
-                            <Play className="mr-2 h-5 w-5" /> Resume
+                            <Play className="mr-2 h-5 w-5" />
+                            Resume
                           </>
                         ) : (
                           <>
-                            <Pause className="mr-2 h-5 w-5" /> Pause
+                            <Pause className="mr-2 h-5 w-5" />
+                            Pause
                           </>
                         )}
                       </Button>
@@ -272,7 +316,7 @@ export default function WorkoutPlayer() {
               </div>
             )}
 
-            {/* Rep-based exercises */}
+            {/* Reps-based exercise */}
             {currentStep.type === "reps" && currentStep.reps && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -280,8 +324,8 @@ export default function WorkoutPlayer() {
                   <span className="text-xl font-semibold text-foreground">{currentStep.reps}</span>
                 </div>
 
-                {/* Weight input */}
-                {isWeightedExercise(currentStep) && (
+                {/* Weight input for weighted exercises */}
+                {!currentStep.isRest && isWeightedExercise(currentStep) && (
                   <div className="space-y-2">
                     <label className="text-sm text-muted-foreground">Weight Used (optional)</label>
                     <div className="flex items-center gap-2">
@@ -307,27 +351,7 @@ export default function WorkoutPlayer() {
               </div>
             )}
 
-            {/* Rest */}
-            {currentStep.type === "rest" && currentStep.durationSeconds && (
-              <div className="flex flex-col items-center gap-4">
-                <span className="text-sm text-muted-foreground">
-                  {timerComplete ? "Rest Complete - Moving to next exercise..." : "Rest Time"}
-                </span>
-                <span
-                  className={`text-6xl font-bold tabular-nums ${timerComplete ? "text-green-500" : "text-primary"}`}
-                >
-                  {remainingSeconds !== null
-                    ? `${Math.floor(remainingSeconds / 60)}:${String(remainingSeconds % 60).padStart(2, "0")}`
-                    : `${Math.floor(currentStep.durationSeconds / 60)}:${String(
-                        currentStep.durationSeconds % 60,
-                      ).padStart(2, "0")}`}
-                </span>
-                <p className="text-sm text-muted-foreground text-center">
-                  Catch your breath and prepare for the next challenge
-                </p>
-              </div>
-            )}
-
+            {/* How to do this exercise */}
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="outline" className="w-full" size="sm">
@@ -348,7 +372,8 @@ export default function WorkoutPlayer() {
         {/* Navigation */}
         <div className="flex gap-3 mt-8">
           <Button variant="outline" size="lg" onClick={handleBack} disabled={isFirstStep} className="flex-1">
-            <ArrowLeft className="mr-2 h-5 w-5" /> Back
+            <ArrowLeft className="mr-2 h-5 w-5" />
+            Back
           </Button>
           <Button variant="default" size="lg" onClick={handleNext} className="flex-1">
             {isLastStep ? "Finish" : "Next"}
