@@ -247,7 +247,7 @@ export default function WorkoutDetail() {
                   </Button>
                 )}
                 <Button
-                  variant="secondary"
+                  variant="outline"
                   size="sm"
                   className="text-foreground"
                   onClick={
