@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { mockUserProfile } from "@/data/mockWorkouts";
 import { ProgressStats } from "@/components/ProgressStats";
@@ -161,30 +161,40 @@ export default function Dashboard() {
                   </Badge>
 
                   <p className="text-xs text-muted-foreground mt-1">
-                    Smart recommendation based on your recent activity and goals.
+                    Smart recommendation based on your recent activity and weekly goals.
                   </p>
                 </div>
               </div>
             )}
 
-            <p className="text-sm text-foreground mb-4">
-              {todayRec
-                ? "Tap below to generate a fresh workout tailored to today’s focus."
-                : "We’ll generate a workout based on your recent training and goals."}
+            <p className="text-sm text-foreground mb-1">Choose how you want to train today:</p>
+            <p className="text-xs text-muted-foreground mb-4">
+              <strong>Smart auto plan</strong> uses your recent workouts and goals to build a session for you.{" "}
+              <strong>Customize today&apos;s workout</strong> lets you set your current energy, time available, and
+              target areas.
             </p>
 
-            <Button className="w-full" onClick={() => navigate("/session", { state: { mode: "today_auto" } })}>
-              <Sparkles className="mr-2 h-4 w-4" />
-              Generate today&apos;s workout
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-2">
+              {/* Auto plan – based on history & goals */}
+              <Button
+                className="w-full sm:w-1/2"
+                onClick={() => navigate("/session", { state: { mode: "today_auto" } })}
+              >
+                <Sparkles className="mr-2 h-4 w-4" />
+                Start smart auto plan
+              </Button>
+
+              {/* Customize – based on today’s energy/time/focus areas */}
+              <Button
+                variant="outline"
+                className="w-full sm:w-1/2 bg-orange-500 hover:bg-orange-600 text-white border-transparent"
+                onClick={() => navigate("/adjust")}
+              >
+                Customize today&apos;s workout
+              </Button>
+            </div>
           </Card>
         </section>
-
-        {/* Adjust Button */}
-        <Button variant="default" size="lg" className="w-full" onClick={() => navigate("/adjust")}>
-          <Sparkles className="mr-2 h-5 w-5" />
-          Adjust My Workout
-        </Button>
 
         {/* Empty State for new users */}
         {stats && stats.totalWorkouts === 0 && (
