@@ -149,4 +149,18 @@ All colors MUST be HSL.
   p {
     @apply leading-relaxed;
   }
+  
+  /* Calendar workout day indicator */
+  .workout-day {
+    @apply relative;
+  }
+  
+  .workout-day::after {
+    content: '';
+    @apply absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary;
+  }
+  
+  .workout-day:hover::after {
+    @apply w-1.5 h-1.5;
+  }
 }
