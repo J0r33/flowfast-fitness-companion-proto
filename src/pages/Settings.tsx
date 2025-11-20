@@ -121,11 +121,11 @@ export default function Settings() {
         <div className="max-w-md mx-auto">
           <div className="flex items-center gap-2 mb-4">
             <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-              <Activity className="h-4 w-4 text-primary" />
+              <Activity className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="text-lg font-semibold">FlowFast</span>
+            <span className="text-lg font-semibold text-primary-foreground">FlowFast</span>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Settings</h1>
+          <h1 className="text-2xl font-bold text-primary-foreground">Settings</h1>
         </div>
       </header>
 
@@ -206,7 +206,12 @@ export default function Settings() {
                   <Label htmlFor="primaryGoal">Primary Goal</Label>
                   <Select
                     value={weeklyGoals.primaryGoal}
-                    onValueChange={(value) => setWeeklyGoals({ ...weeklyGoals, primaryGoal: value as TrainingGoal })}
+                    onValueChange={(value) =>
+                      setWeeklyGoals({
+                        ...weeklyGoals,
+                        primaryGoal: value as TrainingGoal,
+                      })
+                    }
                   >
                     <SelectTrigger id="primaryGoal">
                       <SelectValue />
@@ -217,7 +222,7 @@ export default function Settings() {
                       <SelectItem value="endurance">Build Endurance</SelectItem>
                       <SelectItem value="weight_loss">Lose Weight</SelectItem>
                       <SelectItem value="general_fitness">General Fitness</SelectItem>
-                      <SelectItem value="flexibility">Flexibility & Mobility</SelectItem>
+                      <SelectItem value="flexibility">Flexibility &amp; Mobility</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
