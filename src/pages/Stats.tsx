@@ -1,74 +1,23 @@
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { MobileNav } from "@/components/MobileNav";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Activity, Clock, Flame, Trophy, Calendar, TrendingUp, Sparkles } from "lucide-react";
-
-import { loadWorkoutHistory, computeWorkoutStats } from "@/utils/workoutHistory";
-
-import { WorkoutStatsSummary, WorkoutHistory } from "@/types/workout";
-
+import { computeWorkoutStats } from "@/utils/workoutHistory";
+import { WorkoutHistory } from "@/types/workout";
 import {
   computeAdaptationMetricsFromHistory,
   generatePlannerHistorySnapshotFromMetrics,
 } from "@/utils/adaptationState";
-
 import { formatMinutes, formatCalories, formatRPE } from "@/utils/formatters";
-
-import { useAuth } from "@/contexts/AuthContext";
+import { useWorkoutHistory } from "@/hooks/useWorkoutHistory";
 
 export default function Stats() {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const [stats, setStats] = useState<WorkoutStatsSummary | null>(null);
-  const [avgRpe, setAvgRpe] = useState<number | undefined>(undefined);
-  const [lastRpe, setLastRpe] = useState<number | undefined>(undefined);
-  const [weeklyMinutes, setWeeklyMinutes] = useState(0);
-  const [weeklyCalories, setWeeklyCalories] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const { data: history, isLoading } = useWorkoutHistory();
 
-  useEffect(() => {
-    let isMounted = true;
-
-    async function loadData() {
-      try {
-        if (!user?.id) return;
-
-        // Load workout history from DB
-        const history = await loadWorkoutHistory(user.id);
-
-        if (isMounted) {
-          const summary = computeWorkoutStats(history);
-          setStats(summary);
-
-          // Calculate weekly stats
-          const weekly = calculateWeeklyStats(history);
-          setWeeklyMinutes(weekly.weeklyMinutes);
-          setWeeklyCalories(weekly.weeklyCalories);
-
-          // Derive RPE from DB-backed history
-          const metrics = computeAdaptationMetricsFromHistory(history);
-          const snapshot = generatePlannerHistorySnapshotFromMetrics(metrics);
-          setAvgRpe(snapshot.avg_rpe);
-          setLastRpe(snapshot.last_rpe);
-        }
-      } catch (error) {
-        console.error("Failed to load stats:", error);
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    }
-
-    loadData();
-    return () => {
-      isMounted = false;
-    };
-  }, [user?.id]);
-
-  // Calculate weekly minutes and calories
+  // Calculate weekly stats
   const calculateWeeklyStats = (history: WorkoutHistory) => {
     const now = new Date();
     const startOfWeek = new Date(now);
@@ -94,7 +43,24 @@ export default function Stats() {
     return { weeklyMinutes, weeklyCalories };
   };
 
-  if (loading || !stats) {
+  const stats = useMemo(() => {
+    if (!history) return null;
+    return computeWorkoutStats(history);
+  }, [history]);
+
+  const { weeklyMinutes, weeklyCalories } = useMemo(() => {
+    if (!history) return { weeklyMinutes: 0, weeklyCalories: 0 };
+    return calculateWeeklyStats(history);
+  }, [history]);
+
+  const { avgRpe, lastRpe } = useMemo(() => {
+    if (!history) return { avgRpe: undefined, lastRpe: undefined };
+    const metrics = computeAdaptationMetricsFromHistory(history);
+    const snapshot = generatePlannerHistorySnapshotFromMetrics(metrics);
+    return { avgRpe: snapshot.avg_rpe, lastRpe: snapshot.last_rpe };
+  }, [history]);
+
+  if (isLoading || !stats) {
     return (
       <div className="min-h-screen bg-background pb-24">
         <header className="bg-primary text-primary-foreground px-6 pt-6 pb-6 rounded-b-3xl shadow-lg">
