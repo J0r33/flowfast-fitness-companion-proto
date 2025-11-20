@@ -25,7 +25,7 @@ export default function Dashboard() {
   const [todayRec, setTodayRec] = useState<TodayRecommendation | null>(null);
   const [workoutsThisWeek, setWorkoutsThisWeek] = useState(0);
 
-  // 🔢 Load stats & recommendation (still done here)
+  // 🔢 Load stats & recommendation
   useEffect(() => {
     let isMounted = true;
 
@@ -60,7 +60,7 @@ export default function Dashboard() {
     };
   }, [user?.id]);
 
-  // 🧠 Compute displayName: ONLY once profile is ready
+  // 🧠 Compute displayName from account profile (no type error now)
   const displayName = profile?.displayName || (!profileLoading && user?.email?.split("@")[0]) || undefined;
 
   return (
@@ -80,7 +80,7 @@ export default function Dashboard() {
           {displayName ? (
             <h1 className="text-3xl font-bold mb-1">Hi, {displayName}! 👋</h1>
           ) : (
-            // optional skeleton while name resolves (no wrong name flicker)
+            // subtle skeleton instead of wrong name flicker
             <div className="h-8 w-40 rounded bg-primary-foreground/10 mb-1" />
           )}
           <p className="text-primary-foreground/90">Ready to move today?</p>

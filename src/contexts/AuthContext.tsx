@@ -1,15 +1,22 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, Session, AuthError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { UserProfile } from "@/types/workout";
 import { loadUserProfile } from "@/utils/profileSync";
+import { WeeklyGoals } from "@/types/workout";
+
+// 🔹 This matches what loadUserProfile() actually returns
+export interface AccountProfile {
+  equipment: string[];
+  goals: WeeklyGoals;
+  displayName?: string;
+}
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
-  loading: boolean; // auth loading (Supabase)
-  profile: UserProfile | null;
-  profileLoading: boolean; // profile loading (your app profile)
+  loading: boolean; // auth (Supabase) loading
+  profile: AccountProfile | null;
+  profileLoading: boolean; // account/profile loading
   signUp: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
@@ -22,7 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [profile, setProfile] = useState<AccountProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
 
   // 🔐 Auth state (Supabase)
@@ -44,12 +51,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  // 👤 App profile state (your profile table)
+  // 👤 Account profile (equipment, goals, displayName)
   useEffect(() => {
     let cancelled = false;
 
     async function fetchProfile() {
-      // Not logged in → no profile
       if (!user) {
         setProfile(null);
         setProfileLoading(false);
@@ -58,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       setProfileLoading(true);
       try {
-        const p = await loadUserProfile();
+        const p = await loadUserProfile(); // { equipment, goals, displayName }
         if (!cancelled) {
           setProfile(p);
         }
@@ -75,11 +81,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     fetchProfile();
-
     return () => {
       cancelled = true;
     };
-  }, [user?.id]); // refetch when the logged-in user changes
+  }, [user?.id]);
 
   const signUp = async (email: string, password: string) => {
     const redirectUrl = `${window.location.origin}/dashboard`;
