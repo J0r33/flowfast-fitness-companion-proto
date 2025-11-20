@@ -178,26 +178,55 @@ export default function WorkoutDetail() {
     <div className="min-h-screen bg-background pb-8">
       {/* Header */}
       <header className="bg-gradient-secondary text-secondary-foreground px-6 py-4 sticky top-0 z-10 shadow-sm">
-        <div className="max-w-2xl mx-auto flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate('/history')}
-            className="text-secondary-foreground hover:bg-secondary-foreground/10"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div className="flex-1">
-            <h1 className="text-xl font-bold">{formatDate(entry.date)}</h1>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="text-sm">{energyInfo.emoji} {energyInfo.label} Energy</span>
-              {difficultyInfo && (
-                <Badge variant={difficultyInfo.variant} className="text-xs">
-                  {difficultyInfo.emoji} {difficultyInfo.label}
-                </Badge>
-              )}
+        <div className="max-w-2xl mx-auto flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/history')}
+              className="text-secondary-foreground hover:bg-secondary-foreground/10"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div className="flex-1">
+              <h1 className="text-xl font-bold">{formatDate(entry.date)}</h1>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-sm">{energyInfo.emoji} {energyInfo.label} Energy</span>
+                {difficultyInfo && (
+                  <Badge variant={difficultyInfo.variant} className="text-xs">
+                    {difficultyInfo.emoji} {difficultyInfo.label}
+                  </Badge>
+                )}
+              </div>
             </div>
           </div>
+          
+          {/* Edit/Save button - only show if workout has exercises with weights */}
+          {entry.exercises && entry.exercises.some(ex => ex.weights && ex.weights.length > 0) && (
+            <div className="flex gap-2">
+              {isEditing && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setEditedExercises([...entry.exercises]);
+                    setIsEditing(false);
+                  }}
+                  className="text-secondary-foreground border-secondary-foreground hover:bg-secondary-foreground/10"
+                >
+                  Cancel
+                </Button>
+              )}
+              <Button
+                variant={isEditing ? "default" : "outline"}
+                size="sm"
+                onClick={isEditing ? handleSaveEdits : () => setIsEditing(true)}
+                className="text-secondary-foreground border-secondary-foreground hover:bg-secondary-foreground/10"
+              >
+                {isEditing ? 'Save' : 'Edit Weights'}
+              </Button>
+            </div>
+          )}
         </div>
       </header>
 
