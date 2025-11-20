@@ -14,6 +14,7 @@ import { formatMinutes, formatCalories } from '@/utils/formatters';
 import { UserProfile, WorkoutStatsSummary, TodayRecommendation } from '@/types/workout';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { loadUserProfile } from '@/utils/profileSync';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState<WorkoutStatsSummary | null>(null);
   const [todayRec, setTodayRec] = useState<TodayRecommendation | null>(null);
   const [workoutsThisWeek, setWorkoutsThisWeek] = useState(0);
+  const [displayName, setDisplayName] = useState<string>('User');
   
   useEffect(() => {
     let isMounted = true;
@@ -31,11 +33,17 @@ export default function Dashboard() {
       try {
         if (!user?.id) return;
         
+        // Load user profile (including display name)
+        const userProfile = await loadUserProfile();
+        
         // Load workout history from DB
         const history = await loadWorkoutHistory(user.id);
         const workoutStats = computeWorkoutStats(history);
         
         if (isMounted) {
+          // Update display name
+          setDisplayName(userProfile.displayName || user.email?.split('@')[0] || 'User');
+          
           setStats(workoutStats);
           setWorkoutsThisWeek(workoutStats.thisWeekWorkouts);
           
@@ -56,7 +64,7 @@ export default function Dashboard() {
 
     loadData();
     return () => { isMounted = false; };
-  }, [user?.id]);
+  }, [user?.id, user?.email]);
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -72,7 +80,7 @@ export default function Dashboard() {
           </div>
           
           {/* Greeting */}
-          <h1 className="text-3xl font-bold mb-1">Hi, {profile.name}! 👋</h1>
+          <h1 className="text-3xl font-bold mb-1">Hi, {displayName}! 👋</h1>
           <p className="text-primary-foreground/90">Ready to move today?</p>
         </div>
       </header>
