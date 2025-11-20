@@ -249,6 +249,7 @@ export default function WorkoutDetail() {
                 <Button
                   variant="secondary"
                   size="sm"
+                  className="text-foreground"
                   onClick={
                     isEditing
                       ? handleSaveEdits
