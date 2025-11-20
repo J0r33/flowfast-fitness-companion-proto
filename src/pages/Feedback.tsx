@@ -171,7 +171,12 @@ export default function Feedback() {
         </section>
 
         {/* Submit */}
-        <Button variant="success" size="lg" className="w-full" onClick={handleSubmit} disabled={!canSubmit}>
+        <Button
+          size="lg"
+          className="w-full bg-orange-500 hover:bg-orange-600 text-white border-transparent"
+          onClick={handleSubmit}
+          disabled={!canSubmit}
+        >
           Save Feedback
         </Button>
       </main>
