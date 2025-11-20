@@ -24,7 +24,7 @@ export default function Session() {
   const location = useLocation();
   const state = location.state as any;
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, session } = useAuth();
 
   const [workout, setWorkout] = useState<WorkoutPlan | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -48,7 +48,7 @@ export default function Session() {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+                Authorization: `Bearer ${session?.access_token}`,
               },
               body: JSON.stringify({
                 energy: autoInput.energy,
@@ -140,7 +140,7 @@ export default function Session() {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+                'Authorization': `Bearer ${session?.access_token}`,
               },
               body: JSON.stringify({
                 energy: state.energy,
