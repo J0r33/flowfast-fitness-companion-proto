@@ -26,7 +26,7 @@ export function MobileNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border px-4 py-3 safe-area-inset-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-lg border-t border-border px-4 py-3 safe-area-inset-bottom shadow-lg">
       <div className="flex justify-around items-center max-w-md mx-auto">
         {navItems.map(({ path, icon: Icon, label }) => {
           const isActive = location.pathname === path;
@@ -34,9 +34,10 @@ export function MobileNav() {
             <button
               key={path}
               onClick={() => navigate(path)}
-              className={`flex flex-col items-center gap-1 transition-smooth ${
-                isActive ? 'text-primary' : 'text-muted-foreground'
+              className={`flex flex-col items-center gap-1 transition-all min-h-[44px] min-w-[44px] justify-center rounded-lg ${
+                isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
               }`}
+              aria-label={label}
             >
               <Icon className="h-6 w-6" />
               <span className="text-xs font-medium">{label}</span>
@@ -45,7 +46,8 @@ export function MobileNav() {
         })}
         <button
           onClick={handleSignOut}
-          className="flex flex-col items-center gap-1 transition-smooth text-muted-foreground hover:text-foreground"
+          className="flex flex-col items-center gap-1 transition-all text-muted-foreground hover:text-foreground hover:bg-muted min-h-[44px] min-w-[44px] justify-center rounded-lg"
+          aria-label="Sign Out"
         >
           <LogOut className="h-6 w-6" />
           <span className="text-xs font-medium">Sign Out</span>

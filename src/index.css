@@ -8,53 +8,73 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
+    /* Backgrounds - high contrast */
+    --background: 0 0% 100%;
     --foreground: 222 47% 11%;
 
-    --card: 0 0% 100%;
+    /* Cards with subtle elevation */
+    --card: 210 17% 98%;
     --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    /* Energetic cyan/teal primary */
-    --primary: 188 94% 43%;
+    /* Primary - Vibrant teal with WCAG AA contrast (4.5:1 minimum) */
+    --primary: 186 100% 35%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 188 94% 65%;
+    --primary-hover: 186 100% 30%;
+    --primary-light: 186 100% 92%;
 
-    /* Coral secondary for intensity */
-    --secondary: 14 91% 62%;
+    /* Secondary - Coral adjusted for readability */
+    --secondary: 14 85% 52%;
     --secondary-foreground: 0 0% 100%;
+    --secondary-hover: 14 85% 47%;
+    --secondary-light: 14 85% 95%;
 
     /* Subtle muted backgrounds */
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 210 17% 95%;
+    --muted-foreground: 215 25% 35%;
 
     /* Purple accent for recovery/focus */
-    --accent: 262 52% 47%;
+    --accent: 262 60% 45%;
     --accent-foreground: 0 0% 100%;
+    --accent-hover: 262 60% 40%;
+    --accent-light: 262 60% 95%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
+    --destructive-light: 0 70% 95%;
 
     /* Success green for completion */
-    --success: 142 76% 36%;
+    --success: 142 70% 35%;
     --success-foreground: 0 0% 100%;
+    --success-light: 142 70% 95%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 188 94% 43%;
+    --border: 214 20% 88%;
+    --input: 214 20% 88%;
+    --ring: 186 100% 35%;
 
-    --radius: 1rem;
+    /* Modern spacing scale */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-2xl: 3rem;
 
-    /* Gradients for energy */
-    --gradient-primary: linear-gradient(135deg, hsl(188 94% 43%) 0%, hsl(188 94% 65%) 100%);
-    --gradient-secondary: linear-gradient(135deg, hsl(14 91% 62%) 0%, hsl(14 91% 72%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(262 52% 47%) 0%, hsl(262 52% 62%) 100%);
+    /* Border radius - varied for hierarchy */
+    --radius-sm: 0.5rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1rem;
+    --radius-xl: 1.5rem;
+    --radius-2xl: 2rem;
     
-    /* Shadows */
-    --shadow-soft: 0 2px 8px -2px hsl(188 94% 43% / 0.15);
-    --shadow-medium: 0 8px 24px -4px hsl(188 94% 43% / 0.2);
+    /* Modern shadows */
+    --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
     
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -62,36 +82,44 @@ All colors MUST be HSL.
 
   .dark {
     --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
+    --foreground: 210 17% 98%;
 
-    --card: 217 33% 17%;
-    --card-foreground: 210 40% 98%;
+    --card: 222 47% 14%;
+    --card-foreground: 210 17% 98%;
 
-    --popover: 217 33% 17%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 222 47% 14%;
+    --popover-foreground: 210 17% 98%;
 
-    --primary: 188 94% 43%;
-    --primary-foreground: 0 0% 100%;
-    --primary-glow: 188 94% 65%;
+    /* Dark mode - adjusted for contrast */
+    --primary: 186 100% 45%;
+    --primary-foreground: 222 47% 11%;
+    --primary-hover: 186 100% 50%;
+    --primary-light: 186 100% 15%;
 
-    --secondary: 14 91% 62%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 14 85% 58%;
+    --secondary-foreground: 222 47% 11%;
+    --secondary-hover: 14 85% 63%;
+    --secondary-light: 14 85% 15%;
 
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 222 47% 17%;
+    --muted-foreground: 215 20% 70%;
 
-    --accent: 262 52% 47%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 262 60% 55%;
+    --accent-foreground: 222 47% 11%;
+    --accent-hover: 262 60% 60%;
+    --accent-light: 262 60% 15%;
 
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 222 47% 11%;
+    --destructive-light: 0 70% 15%;
 
-    --success: 142 76% 36%;
-    --success-foreground: 0 0% 100%;
+    --success: 142 70% 45%;
+    --success-foreground: 222 47% 11%;
+    --success-light: 142 70% 15%;
 
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 188 94% 43%;
+    --border: 222 47% 20%;
+    --input: 222 47% 20%;
+    --ring: 186 100% 45%;
   }
 }
 
@@ -102,5 +130,23 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: 'cv11', 'ss01';
+    font-variant-numeric: tabular-nums;
+  }
+  
+  h1 {
+    @apply text-3xl font-bold tracking-tight;
+  }
+  
+  h2 {
+    @apply text-2xl font-semibold tracking-tight;
+  }
+  
+  h3 {
+    @apply text-xl font-semibold;
+  }
+  
+  p {
+    @apply leading-relaxed;
   }
 }

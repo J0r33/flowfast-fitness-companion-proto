@@ -177,7 +177,7 @@ export default function WorkoutDetail() {
   return (
     <div className="min-h-screen bg-background pb-8">
       {/* Header */}
-      <header className="bg-gradient-secondary text-secondary-foreground px-6 py-4 sticky top-0 z-10 shadow-sm">
+      <header className="bg-secondary text-secondary-foreground px-6 py-4 sticky top-0 z-10 shadow-lg">
         <div className="max-w-2xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <Button

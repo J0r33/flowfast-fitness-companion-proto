@@ -384,7 +384,7 @@ export default function WorkoutPlayer() {
             <ArrowLeft className="mr-2 h-5 w-5" />
             Back
           </Button>
-          <Button variant="fitness" size="lg" onClick={handleNext} className="flex-1">
+          <Button variant="default" size="lg" onClick={handleNext} className="flex-1">
             {isLastStep ? 'Finish' : 'Next'}
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>

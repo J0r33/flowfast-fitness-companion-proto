@@ -61,7 +61,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
-      <header className="bg-gradient-primary text-primary-foreground px-6 pt-8 pb-6 rounded-b-3xl shadow-medium">
+      <header className="bg-primary text-primary-foreground px-6 pt-8 pb-6 rounded-b-3xl shadow-lg">
         <div className="max-w-md mx-auto">
           <h1 className="text-3xl font-bold mb-1">Hi, {profile.name}! 👋</h1>
           <p className="text-primary-foreground/90">Ready to move today?</p>
@@ -150,7 +150,7 @@ export default function Dashboard() {
 
         {/* Adjust Button */}
         <Button
-          variant="fitness"
+          variant="default"
           size="lg"
           className="w-full"
           onClick={() => navigate('/adjust')}
@@ -170,7 +170,7 @@ export default function Dashboard() {
               Complete your first workout to see your progress here!
             </p>
             <Button
-              variant="fitness"
+              variant="default"
               onClick={() => navigate('/adjust')}
             >
               Get Started
