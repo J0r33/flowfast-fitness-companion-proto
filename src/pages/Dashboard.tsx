@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { MobileNav } from "@/components/MobileNav";
-import { Sparkles, Activity, Zap } from "lucide-react";
+import { Sparkles, Activity, Zap, Shuffle } from "lucide-react";
 import { computeWorkoutStats } from "@/utils/workoutHistory";
 import { getTodayRecommendationFromHistory } from "@/utils/todayRecommendation";
 import { formatMinutes, formatCalories } from "@/utils/formatters";
