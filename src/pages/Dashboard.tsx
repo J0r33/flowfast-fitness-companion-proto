@@ -14,21 +14,18 @@ import { formatMinutes, formatCalories } from "@/utils/formatters";
 import { UserProfile, WorkoutStatsSummary, TodayRecommendation } from "@/types/workout";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
-import { loadUserProfile } from "@/utils/profileSync";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { user } = useAuth();
-
-  // ✅ Seed displayName synchronously from auth so there's no "Hi, User" flicker
-  const [displayName, setDisplayName] = useState<string>(() => user?.email?.split("@")[0] || "User");
+  const { user, profile, profileLoading } = useAuth();
 
   const [todayWorkout] = useState(mockTodayWorkout);
-  const [profile, setProfile] = useState<UserProfile>(mockUserProfile);
+  const [profileState, setProfileState] = useState<UserProfile>(mockUserProfile);
   const [stats, setStats] = useState<WorkoutStatsSummary | null>(null);
   const [todayRec, setTodayRec] = useState<TodayRecommendation | null>(null);
   const [workoutsThisWeek, setWorkoutsThisWeek] = useState(0);
 
+  // 🔢 Load stats & recommendation (still done here)
   useEffect(() => {
     let isMounted = true;
 
@@ -36,28 +33,20 @@ export default function Dashboard() {
       try {
         if (!user?.id) return;
 
-        // Load user profile (including display name)
-        const userProfile = await loadUserProfile();
-
-        // Load workout history from DB
         const history = await loadWorkoutHistory(user.id);
         const workoutStats = computeWorkoutStats(history);
 
         if (!isMounted) return;
 
-        // ✅ Refine the name once profile is loaded, but keep fallback logic consistent
-        setDisplayName(userProfile.displayName || user?.email?.split("@")[0] || "User");
-
         setStats(workoutStats);
         setWorkoutsThisWeek(workoutStats.thisWeekWorkouts);
 
-        setProfile((prev) => ({
+        setProfileState((prev) => ({
           ...prev,
           totalWorkouts: workoutStats.totalWorkouts,
           currentStreak: workoutStats.currentStreak,
         }));
 
-        // Load today's recommendation from DB
         const rec = await getTodayRecommendation(user.id);
         setTodayRec(rec);
       } catch (error) {
@@ -69,7 +58,10 @@ export default function Dashboard() {
     return () => {
       isMounted = false;
     };
-  }, [user?.id, user?.email]);
+  }, [user?.id]);
+
+  // 🧠 Compute displayName: ONLY once profile is ready
+  const displayName = profile?.displayName || (!profileLoading && user?.email?.split("@")[0]) || undefined;
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -85,7 +77,12 @@ export default function Dashboard() {
           </div>
 
           {/* Greeting */}
-          <h1 className="text-3xl font-bold mb-1">Hi, {displayName}! 👋</h1>
+          {displayName ? (
+            <h1 className="text-3xl font-bold mb-1">Hi, {displayName}! 👋</h1>
+          ) : (
+            // optional skeleton while name resolves (no wrong name flicker)
+            <div className="h-8 w-40 rounded bg-primary-foreground/10 mb-1" />
+          )}
           <p className="text-primary-foreground/90">Ready to move today?</p>
         </div>
       </header>
@@ -93,7 +90,7 @@ export default function Dashboard() {
       {/* Content */}
       <main className="max-w-md mx-auto px-6 py-6 space-y-6">
         {/* Stats */}
-        <ProgressStats profile={profile} workoutsThisWeek={workoutsThisWeek} />
+        <ProgressStats profile={profileState} workoutsThisWeek={workoutsThisWeek} />
 
         {/* Weekly Highlights */}
         {stats && stats.totalWorkouts > 0 && (
