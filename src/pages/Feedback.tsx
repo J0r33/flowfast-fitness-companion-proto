@@ -175,7 +175,7 @@ export default function Feedback() {
               <Button
                 key={value}
                 size="sm"
-                variant={rpe === value ? "fitness" : "outline"}
+                variant={rpe === value ? "default" : "outline"}
                 onClick={() => setRpe(value)}
                 className="w-12 h-12 text-base font-semibold"
               >

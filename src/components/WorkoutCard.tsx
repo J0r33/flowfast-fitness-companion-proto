@@ -12,14 +12,14 @@ export function WorkoutCard({ workout, onClick }: WorkoutCardProps) {
   const totalCalories = workout.exercises.reduce((sum, ex) => sum + (ex.caloriesEstimate || 0), 0);
 
   const intensityColors = {
-    low: 'bg-accent/20 text-accent-foreground border-accent',
-    medium: 'bg-primary/20 text-primary border-primary',
-    high: 'bg-secondary/20 text-secondary border-secondary',
+    low: 'bg-accent-light text-accent border-accent/20',
+    medium: 'bg-primary-light text-primary border-primary/20',
+    high: 'bg-secondary-light text-secondary border-secondary/20',
   };
 
   return (
     <Card 
-      className={`cursor-pointer hover:shadow-medium transition-smooth ${workout.completed ? 'opacity-75' : ''}`}
+      className={`cursor-pointer hover:shadow-lg hover:scale-[1.01] transition-all ${workout.completed ? 'opacity-75' : ''}`}
       onClick={onClick}
     >
       <CardHeader>

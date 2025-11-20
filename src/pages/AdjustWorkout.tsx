@@ -95,7 +95,7 @@ export default function AdjustWorkout() {
           )}
 
           <div className="pt-6">
-            <Button variant="fitness" size="lg" className="w-full" onClick={handleNext} disabled={!canProceed}>
+            <Button variant="default" size="lg" className="w-full" onClick={handleNext} disabled={!canProceed}>
               {step === "goal" ? "Generate Workout" : "Continue"}
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>

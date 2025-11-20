@@ -113,7 +113,7 @@ export default function Stats() {
   if (loading || !stats) {
     return (
       <div className="min-h-screen bg-background pb-24">
-        <header className="bg-card border-b border-border px-6 py-6">
+        <header className="bg-card border-b border-border px-6 py-6 shadow-sm">
           <div className="max-w-md mx-auto">
             <h1 className="text-2xl font-bold text-foreground">Stats</h1>
           </div>

@@ -305,7 +305,7 @@ export default function Session() {
         {/* Actions */}
         <div className="space-y-3 pt-4">
           <Button
-            variant="fitness"
+            variant="default"
             size="lg"
             className="w-full"
             onClick={handleStartWorkout}
