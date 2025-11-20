@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dumbbell, Target } from 'lucide-react';
+import { Dumbbell, Target, Activity } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -99,6 +99,12 @@ export default function Settings() {
     <div className="min-h-screen bg-background pb-24">
       <header className="bg-card border-b border-border px-6 py-6">
         <div className="max-w-md mx-auto">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <Activity className="h-4 w-4 text-primary" />
+            </div>
+            <span className="text-lg font-semibold">FlowFast</span>
+          </div>
           <h1 className="text-2xl font-bold text-foreground">Settings</h1>
         </div>
       </header>

@@ -115,6 +115,12 @@ export default function Stats() {
       <div className="min-h-screen bg-background pb-24">
         <header className="bg-card border-b border-border px-6 py-6 shadow-sm">
           <div className="max-w-md mx-auto">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <Activity className="h-4 w-4 text-primary" />
+              </div>
+              <span className="text-lg font-semibold">FlowFast</span>
+            </div>
             <h1 className="text-2xl font-bold text-foreground">Stats</h1>
           </div>
         </header>
@@ -129,6 +135,12 @@ export default function Stats() {
       <div className="min-h-screen bg-background pb-24">
         <header className="bg-card border-b border-border px-6 py-6">
           <div className="max-w-md mx-auto">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <Activity className="h-4 w-4 text-primary" />
+              </div>
+              <span className="text-lg font-semibold">FlowFast</span>
+            </div>
             <h1 className="text-2xl font-bold text-foreground">Stats</h1>
             <p className="text-sm text-muted-foreground mt-1">
               Track your progress, volume, and intensity over time
@@ -161,6 +173,12 @@ export default function Stats() {
     <div className="min-h-screen bg-background pb-24">
       <header className="bg-card border-b border-border px-6 py-6">
         <div className="max-w-md mx-auto">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <Activity className="h-4 w-4 text-primary" />
+            </div>
+            <span className="text-lg font-semibold">FlowFast</span>
+          </div>
           <h1 className="text-2xl font-bold text-foreground">Your Training Stats</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Track your progress, volume, and intensity over time

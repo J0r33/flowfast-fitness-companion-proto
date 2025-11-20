@@ -48,11 +48,17 @@ export default function History() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background pb-24">
-        <header className="bg-card border-b border-border px-6 py-6">
-          <div className="max-w-md mx-auto">
-            <h1 className="text-2xl font-bold text-foreground">History</h1>
+      <header className="bg-card border-b border-border px-6 py-6">
+        <div className="max-w-md mx-auto">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <Activity className="h-4 w-4 text-primary" />
+            </div>
+            <span className="text-lg font-semibold">FlowFast</span>
           </div>
-        </header>
+          <h1 className="text-2xl font-bold text-foreground">History</h1>
+        </div>
+      </header>
         <MobileNav />
       </div>
     );
@@ -62,6 +68,12 @@ export default function History() {
     <div className="min-h-screen bg-background pb-24">
       <header className="bg-card border-b border-border px-6 py-6 shadow-sm">
         <div className="max-w-md mx-auto">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <Activity className="h-4 w-4 text-primary" />
+            </div>
+            <span className="text-lg font-semibold">FlowFast</span>
+          </div>
           <h1 className="text-2xl font-bold text-foreground">History</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {entries.length} workout{entries.length !== 1 ? 's' : ''} completed
