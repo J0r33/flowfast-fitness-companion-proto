@@ -61,8 +61,17 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
-      <header className="bg-primary text-primary-foreground px-6 pt-8 pb-6 rounded-b-3xl shadow-lg">
+      <header className="bg-primary text-primary-foreground px-6 pt-6 pb-6 rounded-b-3xl shadow-lg">
         <div className="max-w-md mx-auto">
+          {/* FlowFast Branding - Top Left */}
+          <div className="flex items-center gap-2 mb-6">
+            <div className="h-8 w-8 rounded-full bg-primary-foreground/10 flex items-center justify-center">
+              <Activity className="h-4 w-4 text-primary-foreground" />
+            </div>
+            <span className="text-lg font-semibold">FlowFast</span>
+          </div>
+          
+          {/* Greeting */}
           <h1 className="text-3xl font-bold mb-1">Hi, {profile.name}! 👋</h1>
           <p className="text-primary-foreground/90">Ready to move today?</p>
         </div>
