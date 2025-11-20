@@ -112,7 +112,13 @@ export default function WorkoutDetail() {
     return (
       <div className="min-h-screen bg-background">
         <header className="bg-card border-b border-border px-6 py-4">
-          <div className="max-w-2xl mx-auto flex items-center justify-between">
+          <div className="max-w-2xl mx-auto">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <Activity className="h-4 w-4 text-primary" />
+              </div>
+              <span className="text-lg font-semibold">FlowFast</span>
+            </div>
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
@@ -133,7 +139,13 @@ export default function WorkoutDetail() {
     return (
       <div className="min-h-screen bg-background">
         <header className="bg-card border-b border-border px-6 py-4">
-          <div className="max-w-2xl mx-auto flex items-center justify-between">
+          <div className="max-w-2xl mx-auto">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <Activity className="h-4 w-4 text-primary" />
+              </div>
+              <span className="text-lg font-semibold">FlowFast</span>
+            </div>
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
@@ -178,31 +190,38 @@ export default function WorkoutDetail() {
     <div className="min-h-screen bg-background pb-8">
       {/* Header */}
       <header className="bg-secondary text-secondary-foreground px-6 py-4 sticky top-0 z-10 shadow-lg">
-        <div className="max-w-2xl mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate('/history')}
-              className="text-secondary-foreground hover:bg-secondary-foreground/10"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div className="flex-1">
-              <h1 className="text-xl font-bold">{formatDate(entry.date)}</h1>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-sm">{energyInfo.emoji} {energyInfo.label} Energy</span>
-                {difficultyInfo && (
-                  <Badge variant={difficultyInfo.variant} className="text-xs">
-                    {difficultyInfo.emoji} {difficultyInfo.label}
-                  </Badge>
-                )}
+        <div className="max-w-2xl mx-auto">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="h-8 w-8 rounded-full bg-secondary-foreground/10 flex items-center justify-center">
+              <Activity className="h-4 w-4 text-secondary-foreground" />
+            </div>
+            <span className="text-lg font-semibold">FlowFast</span>
+          </div>
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate('/history')}
+                className="text-secondary-foreground hover:bg-secondary-foreground/10"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div className="flex-1">
+                <h1 className="text-xl font-bold">{formatDate(entry.date)}</h1>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-sm">{energyInfo.emoji} {energyInfo.label} Energy</span>
+                  {difficultyInfo && (
+                    <Badge variant={difficultyInfo.variant} className="text-xs">
+                      {difficultyInfo.emoji} {difficultyInfo.label}
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-          
-          {/* Edit/Save button - only show if workout has exercises with weights */}
-          {entry.exercises && entry.exercises.some(ex => ex.weights && ex.weights.length > 0) && (
+            
+            {/* Edit/Save button - only show if workout has exercises with weights */}
+            {entry.exercises && entry.exercises.some(ex => ex.weights && ex.weights.length > 0) && (
             <div className="flex gap-2">
               {isEditing && (
                 <Button
@@ -227,6 +246,7 @@ export default function WorkoutDetail() {
               </Button>
             </div>
           )}
+          </div>
         </div>
       </header>
 
