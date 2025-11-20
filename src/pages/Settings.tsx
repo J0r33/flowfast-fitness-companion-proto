@@ -79,7 +79,9 @@ export default function Settings() {
       await saveUserProfile(selectedEquipment, weeklyGoals);
       toast.success("Equipment preferences saved");
     } catch (error) {
-      toast.error("Failed to save equipment preferences");
+      console.error('Save equipment error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(`Failed to save equipment: ${errorMessage}`);
     }
   };
 
@@ -93,11 +95,19 @@ export default function Settings() {
       return;
     }
 
+    const validGoals: TrainingGoal[] = ['lose_weight', 'get_stronger', 'get_toned', 'general_fitness'];
+    if (!validGoals.includes(weeklyGoals.primaryGoal)) {
+      toast.error("Please select a valid training goal");
+      return;
+    }
+
     try {
       await saveUserProfile(selectedEquipment, weeklyGoals);
       toast.success("Weekly goals saved");
     } catch (error) {
-      toast.error("Failed to save weekly goals");
+      console.error('Save goals error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(`Failed to save goals: ${errorMessage}`);
     }
   };
 
@@ -111,7 +121,9 @@ export default function Settings() {
       await saveUserProfile(selectedEquipment, weeklyGoals, displayName.trim());
       toast.success("Profile updated successfully");
     } catch (error) {
-      toast.error("Failed to update profile");
+      console.error('Save profile error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(`Failed to update profile: ${errorMessage}`);
     }
   };
 
@@ -217,12 +229,10 @@ export default function Settings() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="strength">Build Strength</SelectItem>
-                      <SelectItem value="muscle">Build Muscle</SelectItem>
-                      <SelectItem value="endurance">Build Endurance</SelectItem>
-                      <SelectItem value="weight_loss">Lose Weight</SelectItem>
+                      <SelectItem value="get_stronger">Build Strength</SelectItem>
+                      <SelectItem value="get_toned">Build Muscle / Get Toned</SelectItem>
+                      <SelectItem value="lose_weight">Lose Weight</SelectItem>
                       <SelectItem value="general_fitness">General Fitness</SelectItem>
-                      <SelectItem value="flexibility">Flexibility &amp; Mobility</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
