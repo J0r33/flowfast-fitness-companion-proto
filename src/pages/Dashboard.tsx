@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { mockUserProfile, mockTodayWorkout } from "@/data/mockWorkouts";
-import { WorkoutCard } from "@/components/WorkoutCard";
+import { mockUserProfile } from "@/data/mockWorkouts";
 import { ProgressStats } from "@/components/ProgressStats";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +10,7 @@ import { Sparkles, Activity, Zap } from "lucide-react";
 import { computeWorkoutStats } from "@/utils/workoutHistory";
 import { getTodayRecommendationFromHistory } from "@/utils/todayRecommendation";
 import { formatMinutes, formatCalories } from "@/utils/formatters";
-import { UserProfile, WorkoutStatsSummary } from "@/types/workout";
+import { UserProfile } from "@/types/workout";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWorkoutHistory } from "@/hooks/useWorkoutHistory";
@@ -20,8 +19,6 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user, profile, profileLoading } = useAuth();
-
-  const [todayWorkout] = useState(mockTodayWorkout);
 
   // 🚀 Load data with React Query (cached, deduplicated)
   const { data: history, isLoading: historyLoading } = useWorkoutHistory();
@@ -38,11 +35,14 @@ export default function Dashboard() {
     return getTodayRecommendationFromHistory(history, userProfile.goals);
   }, [history, userProfile?.goals]);
 
-  const profileState = useMemo<UserProfile>(() => ({
-    ...mockUserProfile,
-    totalWorkouts: stats?.totalWorkouts ?? 0,
-    currentStreak: stats?.currentStreak ?? 0,
-  }), [stats]);
+  const profileState = useMemo<UserProfile>(
+    () => ({
+      ...mockUserProfile,
+      totalWorkouts: stats?.totalWorkouts ?? 0,
+      currentStreak: stats?.currentStreak ?? 0,
+    }),
+    [stats],
+  );
 
   const workoutsThisWeek = stats?.thisWeekWorkouts ?? 0;
 
@@ -133,12 +133,51 @@ export default function Dashboard() {
         <section>
           <h2 className="text-xl font-bold text-foreground mb-3">Today&apos;s Plan</h2>
 
-          <WorkoutCard
-            workout={todayWorkout}
-            onClick={() => navigate("/session", { state: { mode: "today_auto" } })}
-            recommendation={todayRec}
-            showRecommendation={true}
-          />
+          <Card
+            className={cn(
+              "p-4 border border-border rounded-xl",
+              todayRec === "push" &&
+                "ring-2 ring-orange-500/30 bg-gradient-to-br from-orange-50/40 to-transparent dark:from-orange-950/20",
+              todayRec === "recovery" &&
+                "ring-2 ring-blue-500/30 bg-gradient-to-br from-blue-50/40 to-transparent dark:from-blue-950/20",
+              todayRec === "catch_up" &&
+                "ring-2 ring-yellow-500/30 bg-gradient-to-br from-yellow-50/40 to-transparent dark:from-yellow-950/20",
+            )}
+          >
+            {todayRec && (
+              <div className="mb-3 flex items-start justify-between gap-2">
+                <div>
+                  <Badge
+                    variant={todayRec === "push" ? "default" : todayRec === "recovery" ? "secondary" : "outline"}
+                    className={cn(
+                      todayRec === "push" && "bg-orange-500 hover:bg-orange-600 text-white border-transparent",
+                      todayRec === "catch_up" && "bg-yellow-500 hover:bg-yellow-600 text-foreground border-transparent",
+                    )}
+                  >
+                    {todayRec === "push" && "🔥 Push Day"}
+                    {todayRec === "maintain" && "⚡ Maintain Day"}
+                    {todayRec === "recovery" && "🧘 Recovery Day"}
+                    {todayRec === "catch_up" && "🎯 Catch-Up Day"}
+                  </Badge>
+
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Smart recommendation based on your recent activity and goals.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <p className="text-sm text-foreground mb-4">
+              {todayRec
+                ? "Tap below to generate a fresh workout tailored to today’s focus."
+                : "We’ll generate a workout based on your recent training and goals."}
+            </p>
+
+            <Button className="w-full" onClick={() => navigate("/session", { state: { mode: "today_auto" } })}>
+              <Sparkles className="mr-2 h-4 w-4" />
+              Generate today&apos;s workout
+            </Button>
+          </Card>
         </section>
 
         {/* Adjust Button */}
