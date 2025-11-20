@@ -1,40 +1,22 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { MobileNav } from '@/components/MobileNav';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { 
-  Activity, 
-  Clock, 
-  Flame, 
-  Trophy, 
-  Calendar,
-  TrendingUp,
-  Sparkles 
-} from 'lucide-react';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { MobileNav } from "@/components/MobileNav";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Activity, Clock, Flame, Trophy, Calendar, TrendingUp, Sparkles } from "lucide-react";
 
-import {
-  loadWorkoutHistory,
-  computeWorkoutStats,
-} from '@/utils/workoutHistory';
+import { loadWorkoutHistory, computeWorkoutStats } from "@/utils/workoutHistory";
 
-import {
-  WorkoutStatsSummary,
-  WorkoutHistory,
-} from '@/types/workout';
+import { WorkoutStatsSummary, WorkoutHistory } from "@/types/workout";
 
 import {
   computeAdaptationMetricsFromHistory,
   generatePlannerHistorySnapshotFromMetrics,
-} from '@/utils/adaptationState';
+} from "@/utils/adaptationState";
 
-import {
-  formatMinutes,
-  formatCalories,
-  formatRPE,
-} from '@/utils/formatters';
+import { formatMinutes, formatCalories, formatRPE } from "@/utils/formatters";
 
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Stats() {
   const navigate = useNavigate();
@@ -52,10 +34,10 @@ export default function Stats() {
     async function loadData() {
       try {
         if (!user?.id) return;
-        
+
         // Load workout history from DB
         const history = await loadWorkoutHistory(user.id);
-        
+
         if (isMounted) {
           const summary = computeWorkoutStats(history);
           setStats(summary);
@@ -72,7 +54,7 @@ export default function Stats() {
           setLastRpe(snapshot.last_rpe);
         }
       } catch (error) {
-        console.error('Failed to load stats:', error);
+        console.error("Failed to load stats:", error);
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -81,7 +63,9 @@ export default function Stats() {
     }
 
     loadData();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [user?.id]);
 
   // Calculate weekly minutes and calories
@@ -113,7 +97,7 @@ export default function Stats() {
   if (loading || !stats) {
     return (
       <div className="min-h-screen bg-background pb-24">
-        <header className="bg-card border-b border-border px-6 py-6 shadow-sm">
+        <header className="bg-primary text-primary-foreground px-6 pt-6 pb-6 rounded-b-3xl shadow-lg">
           <div className="max-w-md mx-auto">
             <div className="flex items-center gap-2 mb-4">
               <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
@@ -142,9 +126,7 @@ export default function Stats() {
               <span className="text-lg font-semibold">FlowFast</span>
             </div>
             <h1 className="text-2xl font-bold text-foreground">Stats</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Track your progress, volume, and intensity over time
-            </p>
+            <p className="text-sm text-muted-foreground mt-1">Track your progress, volume, and intensity over time</p>
           </div>
         </header>
 
@@ -155,7 +137,7 @@ export default function Stats() {
             <p className="text-sm text-muted-foreground mb-4">
               Complete your first workout to start tracking your progress
             </p>
-            <Button onClick={() => navigate('/adjust')} className="mt-2">
+            <Button onClick={() => navigate("/adjust")} className="mt-2">
               Start a Workout
             </Button>
           </Card>
@@ -180,29 +162,21 @@ export default function Stats() {
             <span className="text-lg font-semibold">FlowFast</span>
           </div>
           <h1 className="text-2xl font-bold text-foreground">Your Training Stats</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Track your progress, volume, and intensity over time
-          </p>
+          <p className="text-sm text-muted-foreground mt-1">Track your progress, volume, and intensity over time</p>
         </div>
       </header>
 
       <main className="max-w-md mx-auto px-6 py-6 space-y-6">
         {/* Lifetime Summary */}
         <section>
-          <h2 className="text-lg font-semibold text-foreground mb-3">
-            Lifetime Summary
-          </h2>
+          <h2 className="text-lg font-semibold text-foreground mb-3">Lifetime Summary</h2>
           <div className="grid grid-cols-2 gap-3">
             <Card className="p-4">
               <div className="flex items-center gap-3">
                 <Trophy className="h-5 w-5 text-primary" />
                 <div>
-                  <div className="text-2xl font-bold text-foreground">
-                    {stats.totalWorkouts}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    Total Workouts
-                  </div>
+                  <div className="text-2xl font-bold text-foreground">{stats.totalWorkouts}</div>
+                  <div className="text-xs text-muted-foreground">Total Workouts</div>
                 </div>
               </div>
             </Card>
@@ -214,9 +188,7 @@ export default function Stats() {
                   <div className="text-2xl font-bold text-foreground">
                     {formatMinutes(stats.totalMinutesPlanned || 0)}
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    Total Minutes
-                  </div>
+                  <div className="text-xs text-muted-foreground">Total Minutes</div>
                 </div>
               </div>
             </Card>
@@ -228,9 +200,7 @@ export default function Stats() {
                   <div className="text-2xl font-bold text-foreground">
                     {formatCalories(stats.totalEstimatedCalories || 0)}
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    Total Calories
-                  </div>
+                  <div className="text-xs text-muted-foreground">Total Calories</div>
                 </div>
               </div>
             </Card>
@@ -239,12 +209,8 @@ export default function Stats() {
               <div className="flex items-center gap-3">
                 <Calendar className="h-5 w-5 text-primary" />
                 <div>
-                  <div className="text-2xl font-bold text-foreground">
-                    {stats.currentStreak}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    Day Streak
-                  </div>
+                  <div className="text-2xl font-bold text-foreground">{stats.currentStreak}</div>
+                  <div className="text-xs text-muted-foreground">Day Streak</div>
                 </div>
               </div>
             </Card>
@@ -253,20 +219,14 @@ export default function Stats() {
 
         {/* This Week */}
         <section>
-          <h2 className="text-lg font-semibold text-foreground mb-3">
-            This Week
-          </h2>
+          <h2 className="text-lg font-semibold text-foreground mb-3">This Week</h2>
           <div className="grid grid-cols-2 gap-3">
             <Card className="p-4">
               <div className="flex items-center gap-3">
                 <Activity className="h-5 w-5 text-primary" />
                 <div>
-                  <div className="text-2xl font-bold text-foreground">
-                    {stats.thisWeekWorkouts}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    Workouts
-                  </div>
+                  <div className="text-2xl font-bold text-foreground">{stats.thisWeekWorkouts}</div>
+                  <div className="text-xs text-muted-foreground">Workouts</div>
                 </div>
               </div>
             </Card>
@@ -275,12 +235,8 @@ export default function Stats() {
               <div className="flex items-center gap-3">
                 <Clock className="h-5 w-5 text-primary" />
                 <div>
-                  <div className="text-2xl font-bold text-foreground">
-                    {formatMinutes(weeklyMinutes)}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    Minutes
-                  </div>
+                  <div className="text-2xl font-bold text-foreground">{formatMinutes(weeklyMinutes)}</div>
+                  <div className="text-xs text-muted-foreground">Minutes</div>
                 </div>
               </div>
             </Card>
@@ -289,9 +245,7 @@ export default function Stats() {
 
         {/* Effort Insights (RPE) */}
         <section>
-          <h2 className="text-lg font-semibold text-foreground mb-3">
-            Effort Insights
-          </h2>
+          <h2 className="text-lg font-semibold text-foreground mb-3">Effort Insights</h2>
           {!avgRpe && !lastRpe ? (
             <Card className="p-6 text-center">
               <Activity className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
@@ -306,12 +260,10 @@ export default function Stats() {
                   <div className="flex items-center gap-3">
                     <TrendingUp className="h-5 w-5 text-primary" />
                     <div>
-                      <div className={`text-2xl font-bold ${avgRpeInfo?.color || 'text-foreground'}`}>
+                      <div className={`text-2xl font-bold ${avgRpeInfo?.color || "text-foreground"}`}>
                         {avgRpeInfo?.emoji} {avgRpe.toFixed(1)}
                       </div>
-                      <div className="text-xs text-muted-foreground">
-                        Average RPE
-                      </div>
+                      <div className="text-xs text-muted-foreground">Average RPE</div>
                     </div>
                   </div>
                 </Card>
@@ -322,12 +274,10 @@ export default function Stats() {
                   <div className="flex items-center gap-3">
                     <Activity className="h-5 w-5 text-primary" />
                     <div>
-                      <div className={`text-2xl font-bold ${lastRpeInfo?.color || 'text-foreground'}`}>
+                      <div className={`text-2xl font-bold ${lastRpeInfo?.color || "text-foreground"}`}>
                         {lastRpeInfo?.emoji} {lastRpe}
                       </div>
-                      <div className="text-xs text-muted-foreground">
-                        Last Session
-                      </div>
+                      <div className="text-xs text-muted-foreground">Last Session</div>
                     </div>
                   </div>
                 </Card>
