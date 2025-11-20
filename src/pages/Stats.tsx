@@ -101,11 +101,11 @@ export default function Stats() {
           <div className="max-w-md mx-auto">
             <div className="flex items-center gap-2 mb-4">
               <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <Activity className="h-4 w-4 text-primary" />
+                <Activity className="h-4 w-4 text-primary-foreground" />
               </div>
-              <span className="text-lg font-semibold">FlowFast</span>
+              <span className="text-lg font-semibold text-primary-foreground">FlowFast</span>
             </div>
-            <h1 className="text-2xl font-bold text-foreground">Stats</h1>
+            <h1 className="text-2xl font-bold text-primary-foreground">Stats</h1>
           </div>
         </header>
         <MobileNav />
@@ -117,16 +117,18 @@ export default function Stats() {
   if (stats.totalWorkouts === 0) {
     return (
       <div className="min-h-screen bg-background pb-24">
-        <header className="bg-card border-b border-border px-6 py-6">
+        <header className="bg-primary text-primary-foreground px-6 pt-6 pb-6 rounded-b-3xl shadow-lg">
           <div className="max-w-md mx-auto">
             <div className="flex items-center gap-2 mb-4">
               <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <Activity className="h-4 w-4 text-primary" />
+                <Activity className="h-4 w-4 text-primary-foreground" />
               </div>
-              <span className="text-lg font-semibold">FlowFast</span>
+              <span className="text-lg font-semibold text-primary-foreground">FlowFast</span>
             </div>
-            <h1 className="text-2xl font-bold text-foreground">Stats</h1>
-            <p className="text-sm text-muted-foreground mt-1">Track your progress, volume, and intensity over time</p>
+            <h1 className="text-2xl font-bold text-primary-foreground">Stats</h1>
+            <p className="text-sm text-primary-foreground/80 mt-1">
+              Track your progress, volume, and intensity over time
+            </p>
           </div>
         </header>
 
@@ -153,16 +155,18 @@ export default function Stats() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <header className="bg-card border-b border-border px-6 py-6">
+      <header className="bg-primary text-primary-foreground px-6 pt-6 pb-6 rounded-b-3xl shadow-lg">
         <div className="max-w-md mx-auto">
           <div className="flex items-center gap-2 mb-4">
             <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-              <Activity className="h-4 w-4 text-primary" />
+              <Activity className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="text-lg font-semibold">FlowFast</span>
+            <span className="text-lg font-semibold text-primary-foreground">FlowFast</span>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Your Training Stats</h1>
-          <p className="text-sm text-muted-foreground mt-1">Track your progress, volume, and intensity over time</p>
+          <h1 className="text-2xl font-bold text-primary-foreground">Your Training Stats</h1>
+          <p className="text-sm text-primary-foreground/80 mt-1">
+            Track your progress, volume, and intensity over time
+          </p>
         </div>
       </header>
 
