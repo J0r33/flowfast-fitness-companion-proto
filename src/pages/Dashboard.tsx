@@ -190,6 +190,7 @@ export default function Dashboard() {
                 className="w-full sm:w-1/2 bg-orange-500 hover:bg-orange-600 text-white border-transparent"
                 onClick={() => navigate("/adjust")}
               >
+                <Shuffle className="mr-2 h-4 w-4" />
                 Customize Today&apos;s Workout
               </Button>
             </div>
