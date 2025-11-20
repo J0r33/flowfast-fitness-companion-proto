@@ -181,7 +181,7 @@ export default function Dashboard() {
                 onClick={() => navigate("/session", { state: { mode: "today_auto" } })}
               >
                 <Sparkles className="mr-2 h-4 w-4" />
-                Start smart auto plan
+                Start Smart Auto Plan
               </Button>
 
               {/* Customize – based on today’s energy/time/focus areas */}
@@ -190,7 +190,7 @@ export default function Dashboard() {
                 className="w-full sm:w-1/2 bg-orange-500 hover:bg-orange-600 text-white border-transparent"
                 onClick={() => navigate("/adjust")}
               >
-                Customize today&apos;s workout
+                Customize Today&apos;s Workout
               </Button>
             </div>
           </Card>
