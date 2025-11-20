@@ -117,7 +117,7 @@ export default function WorkoutDetail() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <header className="bg-card border-b border-border px-6 py-4">
+        <header className="bg-primary text-primary-foreground px-6 pt-6 pb-6 rounded-b-3xl shadow-lg">
           <div className="max-w-2xl mx-auto">
             <div className="flex items-center gap-2 mb-4">
               <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
