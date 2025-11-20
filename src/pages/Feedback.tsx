@@ -32,14 +32,14 @@ export default function Feedback() {
     }
 
     // Derive difficulty feedback
-    let difficultyFeedback: DifficultyFeedback;
-    if (rating <= 2) difficultyFeedback = "too_hard";
-    else if (rating === 3) difficultyFeedback = "just_right";
-    else difficultyFeedback = "too_easy";
+    let feedbackDifficulty: DifficultyFeedback;
+    if (rating <= 2) feedbackDifficulty = "too_hard";
+    else if (rating === 3) feedbackDifficulty = "just_right";
+    else feedbackDifficulty = "too_easy";
 
     // Low energy + low rating = couldn't finish
     if (energyAfter === "low" && rating <= 3) {
-      difficultyFeedback = "couldnt_finish";
+      feedbackDifficulty = "couldnt_finish";
     }
 
     if (workout) {
