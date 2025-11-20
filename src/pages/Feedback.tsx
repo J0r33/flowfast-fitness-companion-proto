@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { MobileNav } from "@/components/MobileNav";
 import { Card } from "@/components/ui/card";
-import { Star, Battery, BatteryMedium, BatteryFull, Activity } from "lucide-react";
+import { Star, Battery, BatteryMedium, BatteryFull } from "lucide-react";
 import { toast } from "sonner";
 import { saveWorkoutHistoryEntry } from "@/utils/workoutHistory";
 import { DifficultyFeedback } from "@/types/workout";
@@ -23,7 +23,13 @@ export default function Feedback() {
   const [notes, setNotes] = useState("");
 
   const handleSubmit = async () => {
-    if (rating === null || energyAfter === null || rpe === null) return;
+    // ✅ Explicit validation with feedback instead of silent return
+    if (rating === null || energyAfter === null || rpe === null) {
+      toast.error("Almost there!", {
+        description: "Please rate the workout, choose how you feel now, and select an RPE.",
+      });
+      return;
+    }
 
     // Derive difficulty feedback
     let difficultyFeedback: DifficultyFeedback;
@@ -32,7 +38,9 @@ export default function Feedback() {
     else difficultyFeedback = "too_easy";
 
     // Low energy + low rating = couldn't finish
-    if (energyAfter === "low" && rating <= 3) difficultyFeedback = "couldnt_finish";
+    if (energyAfter === "low" && rating <= 3) {
+      difficultyFeedback = "couldnt_finish";
+    }
 
     if (workout) {
       const totalSets = workout.exercises.reduce((sum: number, ex: any) => sum + (ex.sets || 0), 0);
@@ -81,11 +89,9 @@ export default function Feedback() {
     { level: "high" as EnergyLevel, label: "High", icon: BatteryFull },
   ];
 
-  const canSubmit = rating !== null && energyAfter !== null && rpe !== null;
-
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* ✅ Cyan Header (Matches rest of app) */}
+      {/* ✅ Cyan Header */}
       <header className="bg-primary text-primary-foreground px-6 pt-12 pb-8 rounded-b-3xl shadow-lg text-center">
         <div className="max-w-md mx-auto">
           <div className="text-6xl mb-3">🎉</div>
@@ -175,7 +181,6 @@ export default function Feedback() {
           size="lg"
           className="w-full bg-orange-500 hover:bg-orange-600 text-white border-transparent"
           onClick={handleSubmit}
-          disabled={!canSubmit}
         >
           Save Feedback
         </Button>
