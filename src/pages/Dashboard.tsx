@@ -174,7 +174,7 @@ export default function Dashboard() {
               target areas.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex flex-col gap-2">
               {/* Auto plan – based on history & goals */}
               <Button
                 className="w-full sm:w-1/2"
