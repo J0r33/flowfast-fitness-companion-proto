@@ -172,13 +172,13 @@ export default function Dashboard() {
 
             {/* Buttons fill the full card width, with equal spacing to edges */}
             <div className="space-y-2">
-              {/* Auto plan */}
+              {/* Auto plan – based on history & goals */}
               <Button className="w-full" onClick={() => navigate("/session", { state: { mode: "today_auto" } })}>
                 <Sparkles className="mr-2 h-4 w-4" />
                 Start Smart Auto Plan
               </Button>
 
-              {/* Customize */}
+              {/* Customize – user goes to Adjust flow to pick energy/time/focus */}
               <Button
                 variant="outline"
                 className="w-full bg-orange-500 hover:bg-orange-600 text-white border-transparent"

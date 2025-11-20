@@ -73,7 +73,14 @@ export default function Session() {
 
           console.log("LLM Context:", data.llm_context);
 
-          const workoutWithContext = {
+          const workoutWithContext: WorkoutPlan & {
+            context?: {
+              energy?: string;
+              timeMinutes?: number;
+              focusAreas?: string[];
+              equipment?: string[];
+            };
+          } = {
             ...data.workout,
             context: {
               energy: autoInput.energy,
@@ -162,7 +169,14 @@ export default function Session() {
           console.log("LLM Context:", data.llm_context);
 
           // Add context to workout plan
-          const workoutWithContext = {
+          const workoutWithContext: WorkoutPlan & {
+            context?: {
+              energy?: string;
+              timeMinutes?: number;
+              focusAreas?: string[];
+              equipment?: string[];
+            };
+          } = {
             ...data.workout,
             context: {
               energy: state.energy,
@@ -187,7 +201,14 @@ export default function Session() {
           const fallbackWorkout = generateMockWorkout(state.energy, state.time, state.focusAreas);
 
           // Add context to fallback workout
-          const fallbackWithContext = {
+          const fallbackWithContext: WorkoutPlan & {
+            context?: {
+              energy?: string;
+              timeMinutes?: number;
+              focusAreas?: string[];
+              equipment?: string[];
+            };
+          } = {
             ...fallbackWorkout,
             context: {
               energy: state.energy,
@@ -202,7 +223,7 @@ export default function Session() {
           setIsGenerating(false);
         }
       } else if (state?.workout) {
-        // Use today's workout from Dashboard
+        // Use today's workout from Dashboard (if ever passed directly)
         setWorkout(state.workout);
       } else {
         // No workout provided, go back to home
@@ -246,6 +267,23 @@ export default function Session() {
 
   const totalCalories = workout.exercises.reduce((sum, ex) => sum + (ex.caloriesEstimate || 0), 0);
 
+  // Figure out which copy to show in the summary line
+  const context: {
+    energy?: string;
+    timeMinutes?: number;
+    availableTime?: number;
+  } = (workout as any).context || (workout as any).adaptedFor || {};
+
+  const effectiveEnergy = context.energy;
+  const effectiveTime = context.timeMinutes ?? context.availableTime;
+
+  const summaryText =
+    state?.mode === "today_auto"
+      ? "Based on your recent workouts and goals"
+      : effectiveEnergy && effectiveTime
+        ? `Based on your ${effectiveEnergy} energy and ${effectiveTime} minute time frame`
+        : undefined;
+
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
@@ -288,9 +326,7 @@ export default function Session() {
               <Flame className="h-4 w-4" />~{totalCalories} calories
             </Badge>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Based on your {workout.adaptedFor?.energy} energy and {workout.adaptedFor?.availableTime} minute time frame
-          </p>
+          {summaryText && <p className="text-sm text-muted-foreground">{summaryText}</p>}
         </section>
 
         {/* Exercise List */}
