@@ -159,10 +159,6 @@ export default function Dashboard() {
                     {todayRec === "recovery" && "🧘 Recovery Day"}
                     {todayRec === "catch_up" && "🎯 Catch-Up Day"}
                   </Badge>
-
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Smart recommendation based on your recent activity and weekly goals.
-                  </p>
                 </div>
               </div>
             )}
