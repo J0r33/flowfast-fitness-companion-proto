@@ -1,22 +1,16 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, Clock, Flame, Dumbbell, Timer, Repeat, Activity } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Input } from '@/components/ui/input';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { WorkoutHistoryEntry, Exercise } from '@/types/workout';
-import { toast } from 'sonner';
-import {
-  formatDate,
-  formatEnergy,
-  formatMinutes,
-  formatCalories,
-  formatDifficultyFromRPE,
-} from '@/utils/formatters';
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft, Calendar, Clock, Flame, Dumbbell, Timer, Repeat, Activity } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { WorkoutHistoryEntry, Exercise } from "@/types/workout";
+import { toast } from "sonner";
+import { formatDate, formatEnergy, formatMinutes, formatCalories, formatDifficultyFromRPE } from "@/utils/formatters";
 
 export default function WorkoutDetail() {
   const { workoutId } = useParams<{ workoutId: string }>();
@@ -33,10 +27,10 @@ export default function WorkoutDetail() {
 
       try {
         const { data, error } = await supabase
-          .from('workout_history')
-          .select('*')
-          .eq('id', workoutId)
-          .eq('user_id', user.id)
+          .from("workout_history")
+          .select("*")
+          .eq("id", workoutId)
+          .eq("user_id", user.id)
           .single();
 
         if (error) throw error;
@@ -60,7 +54,7 @@ export default function WorkoutDetail() {
           setEntry(workoutEntry);
         }
       } catch (error) {
-        console.error('Failed to load workout:', error);
+        console.error("Failed to load workout:", error);
       } finally {
         setLoading(false);
       }
@@ -76,24 +70,26 @@ export default function WorkoutDetail() {
   }, [entry]);
 
   const handleWeightEdit = (exerciseIndex: number, setIndex: number, weight: number) => {
-    setEditedExercises(prev => {
+    setEditedExercises((prev) => {
       const updated = [...prev];
       const exercise = updated[exerciseIndex];
-      
+
       // Initialize weights array if it doesn't exist
       if (!exercise.weights) {
         exercise.weights = Array(exercise.sets || 0).fill(0);
       }
-      
+
       exercise.weights[setIndex] = weight;
       return updated;
     });
   };
 
   const isWeightedExercise = (exercise: Exercise): boolean => {
-    const weightEquipment = ['dumbbells', 'barbell', 'kettlebell', 'weight plate'];
-    return exercise.type === 'strength' || 
-           (exercise.equipment?.some(eq => weightEquipment.includes(eq.toLowerCase())) ?? false);
+    const weightEquipment = ["dumbbells", "barbell", "kettlebell", "weight plate"];
+    return (
+      exercise.type === "strength" ||
+      (exercise.equipment?.some((eq) => weightEquipment.includes(eq.toLowerCase())) ?? false)
+    );
   };
 
   const handleSaveEdits = async () => {
@@ -101,20 +97,20 @@ export default function WorkoutDetail() {
 
     try {
       const { error } = await supabase
-        .from('workout_history')
+        .from("workout_history")
         .update({ exercises: editedExercises as any })
-        .eq('id', workoutId)
-        .eq('user_id', user.id);
+        .eq("id", workoutId)
+        .eq("user_id", user.id);
 
       if (error) throw error;
 
-      setEntry(prev => prev ? { ...prev, exercises: editedExercises } : null);
+      setEntry((prev) => (prev ? { ...prev, exercises: editedExercises } : null));
       setIsEditing(false);
-      
-      toast.success('Weights updated successfully');
+
+      toast.success("Weights updated successfully");
     } catch (error) {
-      console.error('Failed to update weights:', error);
-      toast.error('Failed to update weights');
+      console.error("Failed to update weights:", error);
+      toast.error("Failed to update weights");
     }
   };
 
@@ -130,11 +126,7 @@ export default function WorkoutDetail() {
               <span className="text-lg font-semibold">FlowFast</span>
             </div>
             <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => navigate('/history')}
-              >
+              <Button variant="ghost" size="icon" onClick={() => navigate("/history")}>
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <h1 className="text-xl font-bold text-foreground">Loading...</h1>
@@ -157,11 +149,7 @@ export default function WorkoutDetail() {
               <span className="text-lg font-semibold">FlowFast</span>
             </div>
             <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => navigate('/history')}
-              >
+              <Button variant="ghost" size="icon" onClick={() => navigate("/history")}>
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <h1 className="text-xl font-bold text-foreground">Workout Not Found</h1>
@@ -177,11 +165,11 @@ export default function WorkoutDetail() {
 
   const getExerciseIcon = (type: string) => {
     switch (type) {
-      case 'strength':
+      case "strength":
         return Dumbbell;
-      case 'cardio':
+      case "cardio":
         return Timer;
-      case 'stretch':
+      case "stretch":
         return Activity;
       default:
         return Activity;
@@ -189,11 +177,11 @@ export default function WorkoutDetail() {
   };
 
   const getRpeColor = (rpe?: number) => {
-    if (!rpe) return 'bg-muted';
-    if (rpe <= 3) return 'bg-success';
-    if (rpe <= 6) return 'bg-warning';
-    if (rpe <= 8) return 'bg-orange-500';
-    return 'bg-destructive';
+    if (!rpe) return "bg-muted";
+    if (rpe <= 3) return "bg-success";
+    if (rpe <= 6) return "bg-warning";
+    if (rpe <= 8) return "bg-orange-500";
+    return "bg-destructive";
   };
 
   return (
@@ -212,7 +200,7 @@ export default function WorkoutDetail() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => navigate('/history')}
+                onClick={() => navigate("/history")}
                 className="text-secondary-foreground hover:bg-secondary-foreground/10"
               >
                 <ArrowLeft className="h-5 w-5" />
@@ -220,7 +208,9 @@ export default function WorkoutDetail() {
               <div className="flex-1">
                 <h1 className="text-xl font-bold">{formatDate(entry.date)}</h1>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-sm">{energyInfo.emoji} {energyInfo.label} Energy</span>
+                  <span className="text-sm">
+                    {energyInfo.emoji} {energyInfo.label} Energy
+                  </span>
                   {difficultyInfo && (
                     <Badge variant={difficultyInfo.variant} className="text-xs">
                       {difficultyInfo.emoji} {difficultyInfo.label}
@@ -229,41 +219,46 @@ export default function WorkoutDetail() {
                 </div>
               </div>
             </div>
-            
+
             {/* Edit/Save button - show if workout has any exercises */}
             {entry.exercises && entry.exercises.length > 0 && (
-            <div className="flex gap-2">
-              {isEditing && (
+              <div className="flex gap-2">
+                {isEditing && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-foreground"
+                    onClick={() => {
+                      setEditedExercises([...entry.exercises]);
+                      setIsEditing(false);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                )}
                 <Button
-                  variant="outline"
+                  variant="secondary"
                   size="sm"
-                  onClick={() => {
-                    setEditedExercises([...entry.exercises]);
-                    setIsEditing(false);
-                  }}
+                  onClick={
+                    isEditing
+                      ? handleSaveEdits
+                      : () => {
+                          // Initialize weights for weighted exercises that don't have them
+                          const initialized = entry.exercises.map((ex) => {
+                            if (isWeightedExercise(ex) && !ex.weights && ex.sets) {
+                              return { ...ex, weights: Array(ex.sets).fill(0) };
+                            }
+                            return ex;
+                          });
+                          setEditedExercises(initialized);
+                          setIsEditing(true);
+                        }
+                  }
                 >
-                  Cancel
+                  {isEditing ? "Save" : "Edit Weights"}
                 </Button>
-              )}
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={isEditing ? handleSaveEdits : () => {
-                  // Initialize weights for weighted exercises that don't have them
-                  const initialized = entry.exercises.map(ex => {
-                    if (isWeightedExercise(ex) && !ex.weights && ex.sets) {
-                      return { ...ex, weights: Array(ex.sets).fill(0) };
-                    }
-                    return ex;
-                  });
-                  setEditedExercises(initialized);
-                  setIsEditing(true);
-                }}
-              >
-                {isEditing ? 'Save' : 'Edit Weights'}
-              </Button>
-            </div>
-          )}
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -313,7 +308,7 @@ export default function WorkoutDetail() {
                 <div>
                   <div className="text-sm text-muted-foreground">Calories</div>
                   <div className="font-semibold">
-                    {entry.totalEstimatedCalories ? formatCalories(entry.totalEstimatedCalories) : 'N/A'}
+                    {entry.totalEstimatedCalories ? formatCalories(entry.totalEstimatedCalories) : "N/A"}
                   </div>
                 </div>
               </div>
@@ -326,7 +321,7 @@ export default function WorkoutDetail() {
                 <div className="flex flex-wrap gap-2">
                   {entry.focusAreas.map((area) => (
                     <Badge key={area} variant="secondary">
-                      {area.replace('-', ' ')}
+                      {area.replace("-", " ")}
                     </Badge>
                   ))}
                 </div>
@@ -359,9 +354,7 @@ export default function WorkoutDetail() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-2xl font-bold">{entry.rpe}/10</span>
-                  <Badge variant={difficultyInfo?.variant}>
-                    {difficultyInfo?.label}
-                  </Badge>
+                  <Badge variant={difficultyInfo?.variant}>{difficultyInfo?.label}</Badge>
                 </div>
                 <Progress value={entry.rpe * 10} className={`h-3 ${getRpeColor(entry.rpe)}`} />
                 <div className="flex justify-between text-xs text-muted-foreground">
@@ -384,7 +377,7 @@ export default function WorkoutDetail() {
               <div className="space-y-4">
                 {entry.exercises.map((exercise, index) => {
                   const ExerciseIcon = getExerciseIcon(exercise.type);
-                  const isRepsMode = exercise.mode === 'reps' || (exercise.reps && !exercise.duration);
+                  const isRepsMode = exercise.mode === "reps" || (exercise.reps && !exercise.duration);
 
                   return (
                     <div
@@ -403,17 +396,17 @@ export default function WorkoutDetail() {
                             <>
                               {exercise.sets && <span>{exercise.sets} sets</span>}
                               {exercise.reps && <span>× {exercise.reps} reps</span>}
-                              
+
                               {/* Weight display and edit - only for weighted exercises */}
                               {isWeightedExercise(exercise) && exercise.sets && (
                                 <div className="w-full mt-2">
                                   <span className="text-xs text-muted-foreground">Weights: </span>
                                   <div className="flex flex-wrap gap-2 mt-1">
                                     {Array.from({ length: exercise.sets }).map((_, idx) => {
-                                      const weight = isEditing 
+                                      const weight = isEditing
                                         ? (editedExercises[index]?.weights?.[idx] ?? 0)
                                         : (exercise.weights?.[idx] ?? 0);
-                                      
+
                                       return isEditing ? (
                                         <div key={idx} className="flex items-center gap-1">
                                           <span className="text-xs">Set {idx + 1}:</span>
@@ -423,7 +416,7 @@ export default function WorkoutDetail() {
                                             value={weight}
                                             onChange={(e) => {
                                               const value = e.target.value;
-                                              if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                                              if (value === "" || /^\d*\.?\d*$/.test(value)) {
                                                 const numValue = parseFloat(value) || 0;
                                                 handleWeightEdit(index, idx, numValue);
                                               }
@@ -447,7 +440,10 @@ export default function WorkoutDetail() {
                             <>
                               {exercise.sets && <span>{exercise.sets} sets</span>}
                               {exercise.duration && (
-                                <span>× {Math.floor(exercise.duration / 60)}:{String(exercise.duration % 60).padStart(2, '0')}</span>
+                                <span>
+                                  × {Math.floor(exercise.duration / 60)}:
+                                  {String(exercise.duration % 60).padStart(2, "0")}
+                                </span>
                               )}
                             </>
                           )}
@@ -465,15 +461,12 @@ export default function WorkoutDetail() {
 
                         {exercise.caloriesEstimate && (
                           <div className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                            <Flame className="h-3 w-3" />
-                            ~{exercise.caloriesEstimate} cal
+                            <Flame className="h-3 w-3" />~{exercise.caloriesEstimate} cal
                           </div>
                         )}
 
                         {exercise.notes && (
-                          <div className="text-xs text-muted-foreground mt-2 italic">
-                            {exercise.notes}
-                          </div>
+                          <div className="text-xs text-muted-foreground mt-2 italic">{exercise.notes}</div>
                         )}
                       </div>
 
