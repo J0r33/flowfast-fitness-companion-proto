@@ -165,8 +165,8 @@ export default function Dashboard() {
 
             <p className="text-sm text-foreground mb-1">Choose how you want to train today:</p>
             <p className="text-xs text-muted-foreground mb-4">
-              <strong>Smart auto plan</strong> uses your recent workouts and goals to build a session for you.{" "}
-              <strong>Customize today&apos;s workout</strong> lets you set your current energy, time available, and
+              <strong>Smart auto plan</strong> uses your recent workouts, goals, and equipment to build a session for
+              you. <strong>Customize today&apos;s workout</strong> lets you set your current energy, time available, and
               target areas.
             </p>
 
