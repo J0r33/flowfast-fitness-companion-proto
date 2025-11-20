@@ -53,6 +53,9 @@ export default function History() {
               <span className="text-lg font-semibold text-primary-foreground">FlowFast</span>
             </div>
             <h1 className="text-2xl font-bold text-primary-foreground">History</h1>
+            <p className="text-sm text-primary-foreground/80 mt-1">
+              Loading your workouts...
+            </p>
           </div>
         </header>
         <MobileNav />
