@@ -20,16 +20,17 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { user, profile, profileLoading } = useAuth();
 
-  // 🚀 Load data with React Query (cached, deduplicated)
+  // 🚀 Load data with React Query (cached)
   const { data: history, isLoading: historyLoading } = useWorkoutHistory();
   const { data: userProfile } = useUserProfile();
 
-  // 🔢 Compute stats and recommendation from cached data
+  // 🔢 Compute stats
   const stats = useMemo(() => {
     if (!history) return null;
     return computeWorkoutStats(history);
   }, [history]);
 
+  // 🔮 Today’s recommendation
   const todayRec = useMemo(() => {
     if (!history || !userProfile?.goals) return null;
     return getTodayRecommendationFromHistory(history, userProfile.goals);
@@ -46,10 +47,10 @@ export default function Dashboard() {
 
   const workoutsThisWeek = stats?.thisWeekWorkouts ?? 0;
 
-  // 🧠 Compute displayName from account profile
+  // 🧠 Display name
   const displayName = profile?.displayName || (!profileLoading && user?.email?.split("@")[0]) || undefined;
 
-  // Show loading state if data is still loading
+  // Loading state
   if (historyLoading) {
     return (
       <div className="min-h-screen bg-background pb-24">
@@ -75,7 +76,7 @@ export default function Dashboard() {
       {/* Header */}
       <header className="bg-primary text-primary-foreground px-6 pt-6 pb-6 rounded-b-3xl shadow-lg">
         <div className="max-w-md mx-auto">
-          {/* FlowFast Branding - Top Left */}
+          {/* Branding */}
           <div className="flex items-center gap-2 mb-6">
             <div className="h-8 w-8 rounded-full bg-primary-foreground/10 flex items-center justify-center">
               <Activity className="h-4 w-4 text-primary-foreground" />
@@ -87,7 +88,6 @@ export default function Dashboard() {
           {displayName ? (
             <h1 className="text-3xl font-bold mb-1">Hi, {displayName}! 👋</h1>
           ) : (
-            // subtle skeleton instead of wrong name flicker
             <div className="h-8 w-40 rounded bg-primary-foreground/10 mb-1" />
           )}
           <p className="text-primary-foreground/90">Ready to move today?</p>
@@ -174,20 +174,18 @@ export default function Dashboard() {
               target areas.
             </p>
 
-            <div className="flex flex-col gap-2">
-              {/* Auto plan – based on history & goals */}
-              <Button
-                className="w-full sm:w-1/2"
-                onClick={() => navigate("/session", { state: { mode: "today_auto" } })}
-              >
+            {/* Buttons fill the full card width, with equal spacing to edges */}
+            <div className="space-y-2">
+              {/* Auto plan */}
+              <Button className="w-full" onClick={() => navigate("/session", { state: { mode: "today_auto" } })}>
                 <Sparkles className="mr-2 h-4 w-4" />
                 Start Smart Auto Plan
               </Button>
 
-              {/* Customize – based on today’s energy/time/focus areas */}
+              {/* Customize */}
               <Button
                 variant="outline"
-                className="w-full sm:w-1/2 bg-orange-500 hover:bg-orange-600 text-white border-transparent"
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white border-transparent"
                 onClick={() => navigate("/adjust")}
               >
                 <Shuffle className="mr-2 h-4 w-4" />
@@ -197,7 +195,7 @@ export default function Dashboard() {
           </Card>
         </section>
 
-        {/* Empty State for new users */}
+        {/* Empty State */}
         {stats && stats.totalWorkouts === 0 && (
           <Card className="p-6 text-center border-dashed">
             <Sparkles className="h-10 w-10 mx-auto mb-3 text-primary" />
