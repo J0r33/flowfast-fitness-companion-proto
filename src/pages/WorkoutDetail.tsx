@@ -120,16 +120,21 @@ export default function WorkoutDetail() {
         <header className="bg-primary text-primary-foreground px-6 pt-6 pb-6 rounded-b-3xl shadow-lg">
           <div className="max-w-2xl mx-auto">
             <div className="flex items-center gap-2 mb-4">
-              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <Activity className="h-4 w-4 text-primary" />
+              <div className="h-8 w-8 rounded-full bg-primary-foreground/10 flex items-center justify-center">
+                <Activity className="h-4 w-4 text-primary-foreground" />
               </div>
-              <span className="text-lg font-semibold">FlowFast</span>
+              <span className="text-lg font-semibold text-primary-foreground">FlowFast</span>
             </div>
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" onClick={() => navigate("/history")}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate("/history")}
+                className="text-primary-foreground hover:bg-primary-foreground/10"
+              >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
-              <h1 className="text-xl font-bold text-foreground">Loading...</h1>
+              <h1 className="text-xl font-bold text-primary-foreground">Loading...</h1>
             </div>
           </div>
         </header>
@@ -140,19 +145,24 @@ export default function WorkoutDetail() {
   if (!entry) {
     return (
       <div className="min-h-screen bg-background">
-        <header className="bg-card border-b border-border px-6 py-4">
+        <header className="bg-primary text-primary-foreground px-6 pt-6 pb-6 rounded-b-3xl shadow-lg">
           <div className="max-w-2xl mx-auto">
             <div className="flex items-center gap-2 mb-4">
-              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <Activity className="h-4 w-4 text-primary" />
+              <div className="h-8 w-8 rounded-full bg-primary-foreground/10 flex items-center justify-center">
+                <Activity className="h-4 w-4 text-primary-foreground" />
               </div>
-              <span className="text-lg font-semibold">FlowFast</span>
+              <span className="text-lg font-semibold text-primary-foreground">FlowFast</span>
             </div>
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" onClick={() => navigate("/history")}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate("/history")}
+                className="text-primary-foreground hover:bg-primary-foreground/10"
+              >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
-              <h1 className="text-xl font-bold text-foreground">Workout Not Found</h1>
+              <h1 className="text-xl font-bold text-primary-foreground">Workout Not Found</h1>
             </div>
           </div>
         </header>
@@ -187,13 +197,13 @@ export default function WorkoutDetail() {
   return (
     <div className="min-h-screen bg-background pb-8">
       {/* Header */}
-      <header className="bg-secondary text-secondary-foreground px-6 py-4 sticky top-0 z-10 shadow-lg">
+      <header className="bg-primary text-primary-foreground px-6 pt-6 pb-6 rounded-b-3xl shadow-lg sticky top-0 z-10">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center gap-2 mb-3">
-            <div className="h-8 w-8 rounded-full bg-secondary-foreground/10 flex items-center justify-center">
-              <Activity className="h-4 w-4 text-secondary-foreground" />
+            <div className="h-8 w-8 rounded-full bg-primary-foreground/10 flex items-center justify-center">
+              <Activity className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="text-lg font-semibold">FlowFast</span>
+            <span className="text-lg font-semibold text-primary-foreground">FlowFast</span>
           </div>
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4">
@@ -201,14 +211,14 @@ export default function WorkoutDetail() {
                 variant="ghost"
                 size="icon"
                 onClick={() => navigate("/history")}
-                className="text-secondary-foreground hover:bg-secondary-foreground/10"
+                className="text-primary-foreground hover:bg-primary-foreground/10"
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div className="flex-1">
-                <h1 className="text-xl font-bold">{formatDate(entry.date)}</h1>
+                <h1 className="text-xl font-bold text-primary-foreground">{formatDate(entry.date)}</h1>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-sm">
+                  <span className="text-sm text-primary-foreground/90">
                     {energyInfo.emoji} {energyInfo.label} Energy
                   </span>
                   {difficultyInfo && (
@@ -402,7 +412,9 @@ export default function WorkoutDetail() {
                                 <div className="w-full mt-2">
                                   <span className="text-xs text-muted-foreground">Weights: </span>
                                   <div className="flex flex-wrap gap-2 mt-1">
-                                    {Array.from({ length: exercise.sets }).map((_, idx) => {
+                                    {Array.from({
+                                      length: exercise.sets,
+                                    }).map((_, idx) => {
                                       const weight = isEditing
                                         ? (editedExercises[index]?.weights?.[idx] ?? 0)
                                         : (exercise.weights?.[idx] ?? 0);
@@ -484,7 +496,7 @@ export default function WorkoutDetail() {
             <CardContent className="py-8 text-center">
               <Calendar className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">
-                Detailed exercise data isn't available for this older workout.
+                Detailed exercise data isn&apos;t available for this older workout.
               </p>
             </CardContent>
           </Card>
