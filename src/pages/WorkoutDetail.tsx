@@ -78,12 +78,22 @@ export default function WorkoutDetail() {
   const handleWeightEdit = (exerciseIndex: number, setIndex: number, weight: number) => {
     setEditedExercises(prev => {
       const updated = [...prev];
-      if (!updated[exerciseIndex].weights) {
-        updated[exerciseIndex].weights = [];
+      const exercise = updated[exerciseIndex];
+      
+      // Initialize weights array if it doesn't exist
+      if (!exercise.weights) {
+        exercise.weights = Array(exercise.sets || 0).fill(0);
       }
-      updated[exerciseIndex].weights![setIndex] = weight;
+      
+      exercise.weights[setIndex] = weight;
       return updated;
     });
+  };
+
+  const isWeightedExercise = (exercise: Exercise): boolean => {
+    const weightEquipment = ['dumbbells', 'barbell', 'kettlebell', 'weight plate'];
+    return exercise.type === 'strength' || 
+           (exercise.equipment?.some(eq => weightEquipment.includes(eq.toLowerCase())) ?? false);
   };
 
   const handleSaveEdits = async () => {
@@ -220,8 +230,8 @@ export default function WorkoutDetail() {
               </div>
             </div>
             
-            {/* Edit/Save button - only show if workout has exercises with weights */}
-            {entry.exercises && entry.exercises.some(ex => ex.weights && ex.weights.length > 0) && (
+            {/* Edit/Save button - show if workout has any exercises */}
+            {entry.exercises && entry.exercises.length > 0 && (
             <div className="flex gap-2">
               {isEditing && (
                 <Button
@@ -238,7 +248,17 @@ export default function WorkoutDetail() {
               <Button
                 variant="secondary"
                 size="sm"
-                onClick={isEditing ? handleSaveEdits : () => setIsEditing(true)}
+                onClick={isEditing ? handleSaveEdits : () => {
+                  // Initialize weights for weighted exercises that don't have them
+                  const initialized = entry.exercises.map(ex => {
+                    if (isWeightedExercise(ex) && !ex.weights && ex.sets) {
+                      return { ...ex, weights: Array(ex.sets).fill(0) };
+                    }
+                    return ex;
+                  });
+                  setEditedExercises(initialized);
+                  setIsEditing(true);
+                }}
               >
                 {isEditing ? 'Save' : 'Edit Weights'}
               </Button>
@@ -384,19 +404,23 @@ export default function WorkoutDetail() {
                               {exercise.sets && <span>{exercise.sets} sets</span>}
                               {exercise.reps && <span>× {exercise.reps} reps</span>}
                               
-                              {/* Weight display and edit */}
-                              {exercise.weights && exercise.weights.length > 0 && (
+                              {/* Weight display and edit - only for weighted exercises */}
+                              {isWeightedExercise(exercise) && exercise.sets && (
                                 <div className="w-full mt-2">
                                   <span className="text-xs text-muted-foreground">Weights: </span>
                                   <div className="flex flex-wrap gap-2 mt-1">
-                                    {exercise.weights.map((weight, idx) => (
-                                      isEditing ? (
+                                    {Array.from({ length: exercise.sets }).map((_, idx) => {
+                                      const weight = isEditing 
+                                        ? (editedExercises[index]?.weights?.[idx] ?? 0)
+                                        : (exercise.weights?.[idx] ?? 0);
+                                      
+                                      return isEditing ? (
                                         <div key={idx} className="flex items-center gap-1">
                                           <span className="text-xs">Set {idx + 1}:</span>
                                           <Input
                                             type="text"
                                             inputMode="decimal"
-                                            value={editedExercises[index]?.weights?.[idx] || 0}
+                                            value={weight}
                                             onChange={(e) => {
                                               const value = e.target.value;
                                               if (value === '' || /^\d*\.?\d*$/.test(value)) {
@@ -413,8 +437,8 @@ export default function WorkoutDetail() {
                                         <Badge key={idx} variant="outline" className="text-xs">
                                           Set {idx + 1}: {weight} lbs
                                         </Badge>
-                                      )
-                                    ))}
+                                      );
+                                    })}
                                   </div>
                                 </div>
                               )}
