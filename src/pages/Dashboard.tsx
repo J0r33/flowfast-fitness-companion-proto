@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { mockUserProfile, mockTodayWorkout } from "@/data/mockWorkouts";
 import { WorkoutCard } from "@/components/WorkoutCard";
@@ -8,60 +8,67 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { MobileNav } from "@/components/MobileNav";
 import { Sparkles, Activity, Zap } from "lucide-react";
-import { loadWorkoutHistory, computeWorkoutStats } from "@/utils/workoutHistory";
-import { getTodayRecommendation } from "@/utils/todayRecommendation";
+import { computeWorkoutStats } from "@/utils/workoutHistory";
+import { getTodayRecommendationFromHistory } from "@/utils/todayRecommendation";
 import { formatMinutes, formatCalories } from "@/utils/formatters";
-import { UserProfile, WorkoutStatsSummary, TodayRecommendation } from "@/types/workout";
+import { UserProfile, WorkoutStatsSummary } from "@/types/workout";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { useWorkoutHistory } from "@/hooks/useWorkoutHistory";
+import { useUserProfile } from "@/hooks/useUserProfile";
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user, profile, profileLoading } = useAuth();
 
   const [todayWorkout] = useState(mockTodayWorkout);
-  const [profileState, setProfileState] = useState<UserProfile>(mockUserProfile);
-  const [stats, setStats] = useState<WorkoutStatsSummary | null>(null);
-  const [todayRec, setTodayRec] = useState<TodayRecommendation | null>(null);
-  const [workoutsThisWeek, setWorkoutsThisWeek] = useState(0);
 
-  // 🔢 Load stats & recommendation
-  useEffect(() => {
-    let isMounted = true;
+  // 🚀 Load data with React Query (cached, deduplicated)
+  const { data: history, isLoading: historyLoading } = useWorkoutHistory();
+  const { data: userProfile } = useUserProfile();
 
-    async function loadData() {
-      try {
-        if (!user?.id) return;
+  // 🔢 Compute stats and recommendation from cached data
+  const stats = useMemo(() => {
+    if (!history) return null;
+    return computeWorkoutStats(history);
+  }, [history]);
 
-        const history = await loadWorkoutHistory(user.id);
-        const workoutStats = computeWorkoutStats(history);
+  const todayRec = useMemo(() => {
+    if (!history || !userProfile?.goals) return null;
+    return getTodayRecommendationFromHistory(history, userProfile.goals);
+  }, [history, userProfile?.goals]);
 
-        if (!isMounted) return;
+  const profileState = useMemo<UserProfile>(() => ({
+    ...mockUserProfile,
+    totalWorkouts: stats?.totalWorkouts ?? 0,
+    currentStreak: stats?.currentStreak ?? 0,
+  }), [stats]);
 
-        setStats(workoutStats);
-        setWorkoutsThisWeek(workoutStats.thisWeekWorkouts);
+  const workoutsThisWeek = stats?.thisWeekWorkouts ?? 0;
 
-        setProfileState((prev) => ({
-          ...prev,
-          totalWorkouts: workoutStats.totalWorkouts,
-          currentStreak: workoutStats.currentStreak,
-        }));
-
-        const rec = await getTodayRecommendation(user.id);
-        setTodayRec(rec);
-      } catch (error) {
-        console.error("Failed to load dashboard data:", error);
-      }
-    }
-
-    loadData();
-    return () => {
-      isMounted = false;
-    };
-  }, [user?.id]);
-
-  // 🧠 Compute displayName from account profile (no type error now)
+  // 🧠 Compute displayName from account profile
   const displayName = profile?.displayName || (!profileLoading && user?.email?.split("@")[0]) || undefined;
+
+  // Show loading state if data is still loading
+  if (historyLoading) {
+    return (
+      <div className="min-h-screen bg-background pb-24">
+        <header className="bg-primary text-primary-foreground px-6 pt-6 pb-6 rounded-b-3xl shadow-lg">
+          <div className="max-w-md mx-auto">
+            <div className="flex items-center gap-2 mb-6">
+              <div className="h-8 w-8 rounded-full bg-primary-foreground/10 flex items-center justify-center">
+                <Activity className="h-4 w-4 text-primary-foreground" />
+              </div>
+              <span className="text-lg font-semibold">FlowFast</span>
+            </div>
+            <div className="h-8 w-40 rounded bg-primary-foreground/10 mb-1" />
+            <p className="text-primary-foreground/90">Loading your dashboard...</p>
+          </div>
+        </header>
+        <MobileNav />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-24">

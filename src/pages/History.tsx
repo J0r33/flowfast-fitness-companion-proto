@@ -1,47 +1,18 @@
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MobileNav } from "@/components/MobileNav";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, Flame, Dumbbell, TrendingUp, Activity, ChevronRight } from "lucide-react";
-import { loadWorkoutHistory } from "@/utils/workoutHistory";
-import { WorkoutHistoryEntry } from "@/types/workout";
-import { useAuth } from "@/contexts/AuthContext";
 import { formatDate, formatEnergy, formatMinutes, formatCalories, formatDifficultyFromRPE } from "@/utils/formatters";
+import { useWorkoutHistory } from "@/hooks/useWorkoutHistory";
 
 export default function History() {
-  const { user } = useAuth();
   const navigate = useNavigate();
-  const [entries, setEntries] = useState<WorkoutHistoryEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: history, isLoading } = useWorkoutHistory();
 
-  useEffect(() => {
-    let isMounted = true;
+  const entries = history?.entries ?? [];
 
-    async function loadData() {
-      try {
-        if (!user?.id) return;
-
-        const history = await loadWorkoutHistory(user.id);
-        if (isMounted) {
-          setEntries(history.entries);
-        }
-      } catch (error) {
-        console.error("Failed to load workout history:", error);
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    }
-
-    loadData();
-    return () => {
-      isMounted = false;
-    };
-  }, [user?.id]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background pb-24">
         <header className="bg-primary text-primary-foreground px-6 pt-6 pb-6 rounded-b-3xl shadow-lg">
