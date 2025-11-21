@@ -46,6 +46,15 @@ const Index = () => {
           <Button size="lg" onClick={() => navigate("/auth")} className="text-lg px-10 py-6 mt-4">
             Explore the Demo
           </Button>
+          
+          <Button 
+            size="lg" 
+            variant="outline" 
+            onClick={() => navigate("/case-study")} 
+            className="text-lg px-10 py-6"
+          >
+            View Success Stories
+          </Button>
 
           {/* Product Capabilities Section */}
           <div className="mt-20">
