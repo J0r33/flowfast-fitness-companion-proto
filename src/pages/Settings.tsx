@@ -82,8 +82,8 @@ export default function Settings() {
       await saveUserProfile(selectedEquipment, weeklyGoals);
       toast.success("Equipment preferences saved");
     } catch (error) {
-      console.error('Save equipment error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error("Save equipment error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
       toast.error(`Failed to save equipment: ${errorMessage}`);
     }
   };
@@ -98,7 +98,7 @@ export default function Settings() {
       return;
     }
 
-    const validGoals: TrainingGoal[] = ['lose_weight', 'get_stronger', 'get_toned', 'general_fitness'];
+    const validGoals: TrainingGoal[] = ["lose_weight", "get_stronger", "get_toned", "general_fitness"];
     if (!validGoals.includes(weeklyGoals.primaryGoal)) {
       toast.error("Please select a valid training goal");
       return;
@@ -108,8 +108,8 @@ export default function Settings() {
       await saveUserProfile(selectedEquipment, weeklyGoals);
       toast.success("Weekly goals saved");
     } catch (error) {
-      console.error('Save goals error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error("Save goals error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
       toast.error(`Failed to save goals: ${errorMessage}`);
     }
   };
@@ -124,8 +124,8 @@ export default function Settings() {
       await saveUserProfile(selectedEquipment, weeklyGoals, displayName.trim());
       toast.success("Profile updated successfully");
     } catch (error) {
-      console.error('Save profile error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error("Save profile error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
       toast.error(`Failed to update profile: ${errorMessage}`);
     }
   };
@@ -204,9 +204,7 @@ export default function Settings() {
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <Label htmlFor="darkMode">Dark Mode</Label>
-                      <p className="text-sm text-muted-foreground">
-                        Toggle between light and dark theme
-                      </p>
+                      <p className="text-sm text-muted-foreground">Toggle between light and dark theme</p>
                     </div>
                     <div className="flex items-center gap-2">
                       {theme === "dark" ? (
@@ -270,13 +268,15 @@ export default function Settings() {
                     type="number"
                     min="1"
                     max="7"
-                    value={weeklyGoals.targetWorkoutsPerWeek}
-                    onChange={(e) =>
+                    // Option B: display empty when state is 0
+                    value={weeklyGoals.targetWorkoutsPerWeek === 0 ? "" : weeklyGoals.targetWorkoutsPerWeek}
+                    onChange={(e) => {
+                      const raw = e.target.value;
                       setWeeklyGoals({
                         ...weeklyGoals,
-                        targetWorkoutsPerWeek: parseInt(e.target.value) || 0,
-                      })
-                    }
+                        targetWorkoutsPerWeek: raw === "" ? 0 : parseInt(raw),
+                      });
+                    }}
                   />
                 </div>
 
@@ -287,13 +287,15 @@ export default function Settings() {
                     type="number"
                     min="30"
                     max="500"
-                    value={weeklyGoals.targetMinutesPerWeek}
-                    onChange={(e) =>
+                    // Option B: display empty when state is 0
+                    value={weeklyGoals.targetMinutesPerWeek === 0 ? "" : weeklyGoals.targetMinutesPerWeek}
+                    onChange={(e) => {
+                      const raw = e.target.value;
                       setWeeklyGoals({
                         ...weeklyGoals,
-                        targetMinutesPerWeek: parseInt(e.target.value) || 0,
-                      })
-                    }
+                        targetMinutesPerWeek: raw === "" ? 0 : parseInt(raw),
+                      });
+                    }}
                   />
                 </div>
 
