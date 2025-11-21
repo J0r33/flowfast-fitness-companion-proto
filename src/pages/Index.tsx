@@ -32,9 +32,8 @@ const Index = () => {
           {/* Narrative Pitch */}
           <p className="text-lg text-muted-foreground max-w-2xl">
             FlowFast is a fully-featured AI fitness platform designed, architected, and built to demonstrate my ability
-            as a <span className="font-semibold text-foreground">technical Product Manager</span>
-            to rapidly prototype with AI, translate user needs into product capabilities, and ship end-to-end
-            experiences. <br />
+            as a <span className="font-semibold text-foreground">technical Product Manager</span> to rapidly prototype
+            with AI, translate user needs into product capabilities, and ship end-to-end experiences. <br />
             <br />
             The system dynamically generates strength-based workouts using adaptive models, personalization signals, and
             continuous feedback loops, showcasing a full product lifecycle from ideation to implementation.
