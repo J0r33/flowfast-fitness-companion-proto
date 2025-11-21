@@ -284,9 +284,6 @@ export default function CaseStudy() {
             <Button variant="default" onClick={() => navigate("/auth")}>
               Explore the live product
             </Button>
-            <Button variant="outline" onClick={() => navigate("/dashboard")}>
-              Jump into the app experience
-            </Button>
           </div>
         </section>
       </main>
