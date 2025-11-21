@@ -208,13 +208,15 @@ export default function Onboarding() {
                     type="number"
                     min="1"
                     max="7"
-                    value={weeklyGoals.targetWorkoutsPerWeek}
-                    onChange={(e) =>
+                    value={weeklyGoals.targetWorkoutsPerWeek === 0 ? "" : weeklyGoals.targetWorkoutsPerWeek}
+                    onChange={(e) => {
+                      const value = e.target.value;
                       setWeeklyGoals({
                         ...weeklyGoals,
-                        targetWorkoutsPerWeek: parseInt(e.target.value, 10) || 0,
-                      })
-                    }
+                        // allow empty string while typing, so no "0" shows when cleared
+                        targetWorkoutsPerWeek: value === "" ? ("" as any) : parseInt(value, 10),
+                      });
+                    }}
                   />
                 </div>
 
@@ -225,13 +227,15 @@ export default function Onboarding() {
                     type="number"
                     min="30"
                     max="500"
-                    value={weeklyGoals.targetMinutesPerWeek}
-                    onChange={(e) =>
+                    value={weeklyGoals.targetMinutesPerWeek === 0 ? "" : weeklyGoals.targetMinutesPerWeek}
+                    onChange={(e) => {
+                      const value = e.target.value;
                       setWeeklyGoals({
                         ...weeklyGoals,
-                        targetMinutesPerWeek: parseInt(e.target.value, 10) || 0,
-                      })
-                    }
+                        // allow empty string while typing, so no "0" shows when cleared
+                        targetMinutesPerWeek: value === "" ? ("" as any) : parseInt(value, 10),
+                      });
+                    }}
                   />
                 </div>
               </div>
