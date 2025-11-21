@@ -196,8 +196,8 @@ export default function WorkoutDetail() {
 
   return (
     <div className="min-h-screen bg-background pb-8">
-      {/* Header */}
-      <header className="bg-primary text-primary-foreground px-6 pt-6 pb-6 rounded-b-3xl shadow-lg sticky top-0 z-10">
+      {/* Header – now NON-sticky */}
+      <header className="bg-primary text-primary-foreground px-6 pt-6 pb-6 rounded-b-3xl shadow-lg">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center gap-2 mb-3">
             <div className="h-8 w-8 rounded-full bg-primary-foreground/10 flex items-center justify-center">
@@ -217,7 +217,6 @@ export default function WorkoutDetail() {
               </Button>
               <div className="flex-1">
                 <h1 className="text-xl font-bold text-primary-foreground">{formatDate(entry.date)}</h1>
-                {/* ❌ energy + difficulty removed from here to declutter */}
               </div>
             </div>
 
@@ -271,7 +270,7 @@ export default function WorkoutDetail() {
           <CardHeader>
             <CardTitle className="text-lg">Workout Summary</CardTitle>
 
-            {/* ✅ Energy + difficulty moved here */}
+            {/* Energy + difficulty moved into summary */}
             <div className="mt-3 flex items-center justify-between gap-3">
               <div className={`text-sm ${energyInfo.color} flex items-center gap-1`}>
                 <span>{energyInfo.emoji}</span>
