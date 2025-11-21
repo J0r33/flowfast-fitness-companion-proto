@@ -256,7 +256,7 @@ export default function Onboarding() {
                 <p className="text-sm text-muted-foreground">Select what you have access to</p>
               </div>
 
-              <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+              <div className="space-y-3">
                 {EQUIPMENT_OPTIONS.map((equipment) => (
                   <div key={equipment} className="flex items-center space-x-2">
                     <Checkbox
