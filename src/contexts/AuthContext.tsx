@@ -17,6 +17,7 @@ interface AuthContextType {
   loading: boolean; // auth (Supabase) loading
   profile: AccountProfile | null;
   profileLoading: boolean; // account/profile loading
+  needsOnboarding: boolean; // true if displayName is empty
   signUp: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
@@ -114,6 +115,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(null);
   };
 
+  const needsOnboarding = !profileLoading && profile !== null && (!profile.displayName || profile.displayName === 'User');
+
   return (
     <AuthContext.Provider
       value={{
@@ -122,6 +125,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         profile,
         profileLoading,
+        needsOnboarding,
         signUp,
         signIn,
         signOut,

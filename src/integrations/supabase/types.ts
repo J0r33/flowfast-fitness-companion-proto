@@ -17,7 +17,7 @@ export type Database = {
       user_profiles: {
         Row: {
           created_at: string
-          display_name: string | null
+          display_name: string
           equipment: string[] | null
           id: string
           primary_goal: string | null
@@ -27,7 +27,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          display_name?: string | null
+          display_name?: string
           equipment?: string[] | null
           id: string
           primary_goal?: string | null
@@ -37,7 +37,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          display_name?: string | null
+          display_name?: string
           equipment?: string[] | null
           id?: string
           primary_goal?: string | null
