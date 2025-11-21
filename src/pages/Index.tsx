@@ -20,8 +20,10 @@ const Index = () => {
       {/* 🌟 Cyan Header (non-sticky) */}
       <header className="bg-primary text-primary-foreground px-6 pt-10 pb-10 rounded-b-3xl shadow-lg">
         <div className="max-w-3xl mx-auto text-center space-y-2">
-          <Activity className="h-12 w-12 text-primary-foreground" />
-          <h1 className="text-5xl font-bold tracking-tight">FlowFast</h1>
+          <div className="flex items-center justify-center gap-3">
+            <Activity className="h-12 w-12 text-primary-foreground" />
+            <h1 className="text-5xl font-bold tracking-tight">FlowFast</h1>
+          </div>
           <p className="text-2xl font-semibold">AI-Driven Fitness, Powered by Product Thinking</p>
         </div>
       </header>
