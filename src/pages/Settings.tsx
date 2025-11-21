@@ -5,11 +5,13 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dumbbell, Target, Activity, User } from "lucide-react";
+import { Dumbbell, Target, Activity, User, Moon, Sun } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useTheme } from "next-themes";
 import { WeeklyGoals, TrainingGoal } from "@/types/workout";
 import { loadUserProfile, saveUserProfile } from "@/utils/profileSync";
 import { DEFAULT_WEEKLY_GOALS } from "@/utils/weeklyGoals";
@@ -41,6 +43,7 @@ const EQUIPMENT_OPTIONS = [
 export default function Settings() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { theme, setTheme } = useTheme();
   const [selectedEquipment, setSelectedEquipment] = useState<string[]>([]);
   const [weeklyGoals, setWeeklyGoals] = useState<WeeklyGoals>(DEFAULT_WEEKLY_GOALS);
   const [displayName, setDisplayName] = useState<string>("");
@@ -196,6 +199,29 @@ export default function Settings() {
                     <p className="text-sm text-muted-foreground">{format(new Date(user.created_at), "MMMM d, yyyy")}</p>
                   </div>
                 )}
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <Label htmlFor="darkMode">Dark Mode</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Toggle between light and dark theme
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {theme === "dark" ? (
+                        <Moon className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Sun className="h-4 w-4 text-muted-foreground" />
+                      )}
+                      <Switch
+                        id="darkMode"
+                        checked={theme === "dark"}
+                        onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+                      />
+                    </div>
+                  </div>
+                </div>
 
                 <Button onClick={handleSaveProfile} className="w-full">
                   Save Profile
