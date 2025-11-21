@@ -11,6 +11,28 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 
+type PasswordStrength = "weak" | "medium" | "strong";
+
+const calculatePasswordStrength = (password: string): PasswordStrength => {
+  if (password.length < 6) return "weak";
+  
+  let score = 0;
+  
+  // Length criteria
+  if (password.length >= 8) score++;
+  if (password.length >= 12) score++;
+  
+  // Character type criteria
+  if (/[a-z]/.test(password)) score++; // lowercase
+  if (/[A-Z]/.test(password)) score++; // uppercase
+  if (/[0-9]/.test(password)) score++; // numbers
+  if (/[^a-zA-Z0-9]/.test(password)) score++; // special chars
+  
+  if (score <= 2) return "weak";
+  if (score <= 4) return "medium";
+  return "strong";
+};
+
 const signUpSchema = z
   .object({
     email: z.string().trim().email("Invalid email address"),
@@ -46,6 +68,7 @@ export default function Auth() {
 
   const [resetEmail, setResetEmail] = useState("");
   const [showResetForm, setShowResetForm] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>("weak");
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -305,10 +328,57 @@ export default function Auth() {
                     type="password"
                     placeholder="••••••••"
                     value={signUpData.password}
-                    onChange={(e) => setSignUpData({ ...signUpData, password: e.target.value })}
+                    onChange={(e) => {
+                      const newPassword = e.target.value;
+                      setSignUpData({ ...signUpData, password: newPassword });
+                      setPasswordStrength(calculatePasswordStrength(newPassword));
+                    }}
                     required
                     disabled={isSubmitting}
                   />
+                  {signUpData.password && (
+                    <div className="space-y-1">
+                      <div className="flex gap-1">
+                        <div
+                          className={`h-1 flex-1 rounded-full transition-colors ${
+                            passwordStrength === "weak"
+                              ? "bg-destructive"
+                              : passwordStrength === "medium"
+                              ? "bg-warning"
+                              : "bg-success"
+                          }`}
+                        />
+                        <div
+                          className={`h-1 flex-1 rounded-full transition-colors ${
+                            passwordStrength === "medium"
+                              ? "bg-warning"
+                              : passwordStrength === "strong"
+                              ? "bg-success"
+                              : "bg-muted"
+                          }`}
+                        />
+                        <div
+                          className={`h-1 flex-1 rounded-full transition-colors ${
+                            passwordStrength === "strong" ? "bg-success" : "bg-muted"
+                          }`}
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Password strength:{" "}
+                        <span
+                          className={
+                            passwordStrength === "weak"
+                              ? "text-destructive font-medium"
+                              : passwordStrength === "medium"
+                              ? "text-warning font-medium"
+                              : "text-success font-medium"
+                          }
+                        >
+                          {passwordStrength.charAt(0).toUpperCase() + passwordStrength.slice(1)}
+                        </span>
+                      </p>
+                    </div>
+                  )}
                   <p className="text-xs text-muted-foreground">At least 6 characters</p>
                 </div>
 
