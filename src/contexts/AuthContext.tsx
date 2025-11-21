@@ -18,7 +18,7 @@ interface AuthContextType {
   profile: AccountProfile | null;
   profileLoading: boolean; // account/profile loading
   needsOnboarding: boolean; // true if displayName is empty
-  signUp: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+  signUp: (email: string, password: string, displayName: string) => Promise<{ error: AuthError | null }>;
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
 }
@@ -87,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [user?.id]);
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, displayName: string) => {
     const redirectUrl = `${window.location.origin}/dashboard`;
 
     const { error } = await supabase.auth.signUp({
@@ -95,6 +95,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password,
       options: {
         emailRedirectTo: redirectUrl,
+        data: {
+          displayName,
+        },
       },
     });
 
@@ -115,7 +118,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(null);
   };
 
-  const needsOnboarding = !profileLoading && profile !== null && (!profile.displayName || profile.displayName === 'User');
+  const needsOnboarding =
+    !profileLoading && profile !== null && (!profile.displayName || profile.displayName === "User");
 
   return (
     <AuthContext.Provider
