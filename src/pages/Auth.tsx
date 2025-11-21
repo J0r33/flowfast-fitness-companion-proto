@@ -16,7 +16,6 @@ const signUpSchema = z
     email: z.string().trim().email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string(),
-    displayName: z.string().trim().min(1, "Display name is required"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
@@ -38,7 +37,6 @@ export default function Auth() {
     email: "",
     password: "",
     confirmPassword: "",
-    displayName: "",
   });
 
   const [signInData, setSignInData] = useState({
@@ -71,11 +69,11 @@ export default function Auth() {
       return;
     }
 
-    const { email, password, displayName } = result.data;
+    const { email, password } = result.data;
 
     setIsSubmitting(true);
     try {
-      const { error } = await signUp(email, password, displayName.trim());
+      const { error } = await signUp(email, password);
 
       if (error) {
         if (error.message.includes("already registered")) {
@@ -295,19 +293,6 @@ export default function Auth() {
                     placeholder="you@example.com"
                     value={signUpData.email}
                     onChange={(e) => setSignUpData({ ...signUpData, email: e.target.value })}
-                    required
-                    disabled={isSubmitting}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="signup-name">Display Name</Label>
-                  <Input
-                    id="signup-name"
-                    type="text"
-                    placeholder="Your Name"
-                    value={signUpData.displayName}
-                    onChange={(e) => setSignUpData({ ...signUpData, displayName: e.target.value })}
                     required
                     disabled={isSubmitting}
                   />
