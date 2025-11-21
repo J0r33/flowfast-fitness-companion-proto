@@ -45,6 +45,11 @@ All colors MUST be HSL.
     --destructive-foreground: 0 0% 100%;
     --destructive-light: 0 70% 95%;
 
+    /* Warning yellow for caution */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --warning-light: 38 92% 95%;
+
     /* Success green for completion */
     --success: 142 70% 35%;
     --success-foreground: 0 0% 100%;
@@ -112,6 +117,10 @@ All colors MUST be HSL.
     --destructive: 0 70% 55%;
     --destructive-foreground: 222 47% 11%;
     --destructive-light: 0 70% 15%;
+
+    --warning: 38 92% 55%;
+    --warning-foreground: 222 47% 11%;
+    --warning-light: 38 92% 15%;
 
     --success: 142 70% 45%;
     --success-foreground: 222 47% 11%;
