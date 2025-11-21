@@ -21,6 +21,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, displayName: string) => Promise<{ error: AuthError | null }>;
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -52,20 +53,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  // 👤 Account profile (equipment, goals, displayName)
+  // Helper to fetch profile from DB
+  const refreshProfile = async () => {
+    if (!user) {
+      setProfile(null);
+      setProfileLoading(false);
+      return;
+    }
+
+    setProfileLoading(true);
+    try {
+      const p = await loadUserProfile(); // { equipment, goals, displayName }
+      setProfile(p);
+    } catch (err) {
+      console.error("Failed to load user profile:", err);
+      setProfile(null);
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+  // 👤 Load account profile when user changes
   useEffect(() => {
     let cancelled = false;
 
     async function fetchProfile() {
       if (!user) {
-        setProfile(null);
-        setProfileLoading(false);
+        if (!cancelled) {
+          setProfile(null);
+          setProfileLoading(false);
+        }
         return;
       }
 
       setProfileLoading(true);
       try {
-        const p = await loadUserProfile(); // { equipment, goals, displayName }
+        const p = await loadUserProfile();
         if (!cancelled) {
           setProfile(p);
         }
@@ -133,6 +156,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signUp,
         signIn,
         signOut,
+        refreshProfile,
       }}
     >
       {children}

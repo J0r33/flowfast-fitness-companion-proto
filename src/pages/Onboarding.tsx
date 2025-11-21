@@ -1,16 +1,17 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Dumbbell, Loader2, ChevronRight, ChevronLeft } from 'lucide-react';
-import { toast } from 'sonner';
-import { WeeklyGoals, TrainingGoal } from '@/types/workout';
-import { saveUserProfile } from '@/utils/profileSync';
-import { DEFAULT_WEEKLY_GOALS } from '@/utils/weeklyGoals';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Dumbbell, Loader2, ChevronRight, ChevronLeft } from "lucide-react";
+import { toast } from "sonner";
+import { WeeklyGoals, TrainingGoal } from "@/types/workout";
+import { saveUserProfile } from "@/utils/profileSync";
+import { DEFAULT_WEEKLY_GOALS } from "@/utils/weeklyGoals";
+import { useAuth } from "@/contexts/AuthContext";
 
 const EQUIPMENT_OPTIONS = [
   "Workout bands / Resistance bands",
@@ -36,11 +37,13 @@ const EQUIPMENT_OPTIONS = [
 
 export default function Onboarding() {
   const navigate = useNavigate();
+  const { refreshProfile } = useAuth();
+
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form state
-  const [displayName, setDisplayName] = useState('');
+  const [displayName, setDisplayName] = useState("");
   const [weeklyGoals, setWeeklyGoals] = useState<WeeklyGoals>(DEFAULT_WEEKLY_GOALS);
   const [selectedEquipment, setSelectedEquipment] = useState<string[]>([]);
 
@@ -64,18 +67,18 @@ export default function Onboarding() {
   const handleNext = () => {
     if (step === 1) {
       if (!displayName.trim()) {
-        toast.error('Please enter your display name');
+        toast.error("Please enter your display name");
         return;
       }
     }
 
     if (step === 2) {
       if (weeklyGoals.targetWorkoutsPerWeek < 1 || weeklyGoals.targetWorkoutsPerWeek > 7) {
-        toast.error('Workouts per week must be between 1 and 7');
+        toast.error("Workouts per week must be between 1 and 7");
         return;
       }
       if (weeklyGoals.targetMinutesPerWeek < 30 || weeklyGoals.targetMinutesPerWeek > 500) {
-        toast.error('Minutes per week must be between 30 and 500');
+        toast.error("Minutes per week must be between 30 and 500");
         return;
       }
     }
@@ -89,18 +92,22 @@ export default function Onboarding() {
 
   const handleComplete = async () => {
     if (selectedEquipment.length === 0) {
-      toast.error('Please select at least one equipment option');
+      toast.error("Please select at least one equipment option");
       return;
     }
 
     setIsSubmitting(true);
     try {
       await saveUserProfile(selectedEquipment, weeklyGoals, displayName.trim());
-      toast.success('Profile setup complete! Welcome to FlowFast.');
-      navigate('/dashboard', { replace: true });
+
+      // 🔁 Refresh profile in AuthContext so needsOnboarding becomes false
+      await refreshProfile();
+
+      toast.success("Profile setup complete! Welcome to FlowFast.");
+      navigate("/dashboard", { replace: true });
     } catch (error) {
-      console.error('Onboarding save error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error("Onboarding save error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
       toast.error(`Failed to save profile: ${errorMessage}`);
     } finally {
       setIsSubmitting(false);
@@ -118,7 +125,7 @@ export default function Onboarding() {
             </div>
           </div>
           <h1 className="text-3xl font-bold text-foreground">Welcome to FlowFast</h1>
-          <p className="text-muted-foreground">Let's personalize your fitness experience</p>
+          <p className="text-muted-foreground">Let&apos;s personalize your fitness experience</p>
         </div>
 
         {/* Progress indicator */}
@@ -127,15 +134,13 @@ export default function Onboarding() {
             <div
               key={i}
               className={`h-2 w-16 rounded-full transition-colors ${
-                i === step ? 'bg-primary' : i < step ? 'bg-primary/50' : 'bg-muted'
+                i === step ? "bg-primary" : i < step ? "bg-primary/50" : "bg-muted"
               }`}
             />
           ))}
         </div>
 
-        <p className="text-center text-sm text-muted-foreground">
-          Step {step} of 3
-        </p>
+        <p className="text-center text-sm text-muted-foreground">Step {step} of 3</p>
 
         {/* Step content */}
         <Card className="p-6">
@@ -143,9 +148,7 @@ export default function Onboarding() {
             <div className="space-y-6">
               <div className="space-y-2">
                 <h2 className="text-2xl font-bold">What should we call you?</h2>
-                <p className="text-sm text-muted-foreground">
-                  This will be displayed throughout the app
-                </p>
+                <p className="text-sm text-muted-foreground">This will be displayed throughout the app</p>
               </div>
 
               <div className="space-y-2">
@@ -171,9 +174,7 @@ export default function Onboarding() {
             <div className="space-y-6">
               <div className="space-y-2">
                 <h2 className="text-2xl font-bold">What are your goals?</h2>
-                <p className="text-sm text-muted-foreground">
-                  Tell us about your fitness objectives
-                </p>
+                <p className="text-sm text-muted-foreground">Tell us about your fitness objectives</p>
               </div>
 
               <div className="space-y-4">
@@ -189,7 +190,7 @@ export default function Onboarding() {
                     }
                   >
                     <SelectTrigger id="primaryGoal">
-                      <SelectValue />
+                      <SelectValue placeholder="Select your primary goal" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="get_stronger">Build Strength</SelectItem>
@@ -211,7 +212,7 @@ export default function Onboarding() {
                     onChange={(e) =>
                       setWeeklyGoals({
                         ...weeklyGoals,
-                        targetWorkoutsPerWeek: parseInt(e.target.value) || 0,
+                        targetWorkoutsPerWeek: parseInt(e.target.value, 10) || 0,
                       })
                     }
                   />
@@ -228,7 +229,7 @@ export default function Onboarding() {
                     onChange={(e) =>
                       setWeeklyGoals({
                         ...weeklyGoals,
-                        targetMinutesPerWeek: parseInt(e.target.value) || 0,
+                        targetMinutesPerWeek: parseInt(e.target.value, 10) || 0,
                       })
                     }
                   />
@@ -252,9 +253,7 @@ export default function Onboarding() {
             <div className="space-y-6">
               <div className="space-y-2">
                 <h2 className="text-2xl font-bold">Available Equipment</h2>
-                <p className="text-sm text-muted-foreground">
-                  Select what you have access to
-                </p>
+                <p className="text-sm text-muted-foreground">Select what you have access to</p>
               </div>
 
               <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
@@ -265,10 +264,7 @@ export default function Onboarding() {
                       checked={selectedEquipment.includes(equipment)}
                       onCheckedChange={() => handleToggleEquipment(equipment)}
                     />
-                    <Label
-                      htmlFor={`onboard-${equipment}`}
-                      className="text-sm font-normal cursor-pointer"
-                    >
+                    <Label htmlFor={`onboard-${equipment}`} className="text-sm font-normal cursor-pointer">
                       {equipment}
                     </Label>
                   </div>
@@ -287,7 +283,7 @@ export default function Onboarding() {
                       Saving...
                     </>
                   ) : (
-                    'Complete Setup'
+                    "Complete Setup"
                   )}
                 </Button>
               </div>
