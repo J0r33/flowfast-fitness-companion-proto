@@ -43,7 +43,7 @@ const EQUIPMENT_OPTIONS = [
 export default function Settings() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const [selectedEquipment, setSelectedEquipment] = useState<string[]>([]);
   const [weeklyGoals, setWeeklyGoals] = useState<WeeklyGoals>(DEFAULT_WEEKLY_GOALS);
   const [displayName, setDisplayName] = useState<string>("");
@@ -207,16 +207,16 @@ export default function Settings() {
                       <p className="text-sm text-muted-foreground">Toggle between light and dark theme</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      {theme === "dark" ? (
-                        <Moon className="h-4 w-4 text-muted-foreground" />
-                      ) : (
-                        <Sun className="h-4 w-4 text-muted-foreground" />
-                      )}
-                      <Switch
-                        id="darkMode"
-                        checked={theme === "dark"}
-                        onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
-                      />
+                {resolvedTheme === "dark" ? (
+                  <Moon className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <Sun className="h-4 w-4 text-muted-foreground" />
+                )}
+                <Switch
+                  id="darkMode"
+                  checked={resolvedTheme === "dark"}
+                  onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+                />
                     </div>
                   </div>
                 </div>
