@@ -37,7 +37,7 @@ const Index = () => {
             experiences. <br />
             <br />
             The system dynamically generates strength-based workouts using adaptive models, personalization signals, and
-            continuous feedback loops — showcasing a full product lifecycle from ideation to implementation.
+            continuous feedback loops, showcasing a full product lifecycle from ideation to implementation.
           </p>
 
           {/* CTA */}
@@ -49,7 +49,7 @@ const Index = () => {
           <div className="mt-20">
             <h2 className="text-3xl font-bold mb-6">What This Build Demonstrates</h2>
             <p className="text-muted-foreground max-w-3xl mx-auto mb-12 leading-relaxed">
-              FlowFast is not just a workout generator — it’s a hands-on example of how I approach AI-native product
+              FlowFast is not just a workout generator, it’s a hands-on example of how I approach AI-native product
               development. Every feature showcases product strategy, user-centric thinking, and execution across data,
               UX, and engineering.
             </p>
@@ -128,8 +128,8 @@ const Index = () => {
           </div>
 
           <p className="text-muted-foreground mt-12 max-w-2xl leading-relaxed">
-            This project was built to showcase my ability to turn ambiguous AI opportunities into clear product outcomes
-            — and to design systems that learn, adapt, and deliver real user value.
+            This project was built to showcase my ability to turn ambiguous AI opportunities into clear product
+            outcomes, and to design systems that learn, adapt, and deliver real user value.
           </p>
         </div>
       </div>
