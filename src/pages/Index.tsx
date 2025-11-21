@@ -128,7 +128,7 @@ const Index = () => {
           </div>
 
           <p className="text-muted-foreground mt-12 max-w-2xl leading-relaxed">
-            This project showcases how I turn ambiguous AI opportunities into clear product outcomes—and design systems
+            This project showcases how I turn ambiguous AI opportunities into clear product outcomes, and design systems
             that learn, adapt, and deliver real user value.
           </p>
         </div>
