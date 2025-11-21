@@ -17,23 +17,23 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted">
+      {/* 🌟 Cyan Header (non-sticky) */}
+      <header className="bg-primary text-primary-foreground px-6 pt-10 pb-10 rounded-b-3xl shadow-lg">
+        <div className="max-w-3xl mx-auto text-center space-y-2">
+          <h1 className="text-5xl font-bold tracking-tight">FlowFast</h1>
+          <p className="text-2xl font-semibold">AI-Driven Fitness, Powered by Product Thinking</p>
+        </div>
+      </header>
+
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="flex flex-col items-center text-center space-y-8 max-w-4xl mx-auto">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <Activity className="h-12 w-12 text-primary" />
-            <h1 className="text-5xl font-bold tracking-tight">FlowFast</h1>
-          </div>
-
-          {/* Tagline */}
-          <p className="text-2xl font-semibold text-muted-foreground">AI-Driven Fitness, Powered by Product Thinking</p>
-
           {/* Narrative Pitch */}
           <p className="text-lg text-muted-foreground max-w-2xl">
             FlowFast is a fully-featured AI fitness platform designed, architected, and built to demonstrate my ability
             as a <span className="font-semibold text-foreground">technical Product Manager</span> to rapidly prototype
-            with AI, translate user needs into product capabilities, and ship end-to-end experiences. <br />
+            with AI, translate user needs into product capabilities, and ship end-to-end experiences.
+            <br />
             <br />
             The system dynamically generates strength-based workouts using adaptive models, personalization signals, and
             continuous feedback loops, showcasing a full product lifecycle from ideation to implementation.
@@ -75,7 +75,7 @@ const Index = () => {
               </div>
               <h3 className="font-semibold text-lg">User Goal Segmentation</h3>
               <p className="text-sm text-muted-foreground">
-                System tailors exercises, difficulty, set/rep schemes, and movement types based on long-term goals.
+                Tailors exercises, difficulty, and session structure based on long-term goals.
               </p>
             </div>
 
@@ -86,8 +86,7 @@ const Index = () => {
               </div>
               <h3 className="font-semibold text-lg">Context-Aware Session Builder</h3>
               <p className="text-sm text-muted-foreground">
-                Uses constraints like available time, equipment, and target muscle groups to intelligently structure
-                sessions.
+                Considers time, equipment, and target areas to intelligently structure sessions.
               </p>
             </div>
 
@@ -96,9 +95,9 @@ const Index = () => {
               <div className="p-3 rounded-full bg-primary/10">
                 <Calendar className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="font-semibold text-lg">Full Workout History System</h3>
+              <h3 className="font-semibold text-lg">Workout History System</h3>
               <p className="text-sm text-muted-foreground">
-                Calendar views, detailed session breakdowns, weight tracking, and training metadata storage.
+                Calendar views, detailed breakdowns, and metadata storage for every session.
               </p>
             </div>
 
@@ -109,7 +108,7 @@ const Index = () => {
               </div>
               <h3 className="font-semibold text-lg">Insights & Progress Tracking</h3>
               <p className="text-sm text-muted-foreground">
-                Structured analytics on training volume, energy levels, adherence, and performance trends.
+                Visualizes volume, energy patterns, adherence, and training trends.
               </p>
             </div>
 
@@ -120,15 +119,14 @@ const Index = () => {
               </div>
               <h3 className="font-semibold text-lg">AI-Native Product Thinking</h3>
               <p className="text-sm text-muted-foreground">
-                Demonstrates capability in ideation, user-centered design, roadmap execution, rapid prototyping, and
-                delivering polished end-to-end experiences.
+                Demonstrates rapid prototyping, systems thinking, and going from idea → architecture → polished build.
               </p>
             </div>
           </div>
 
           <p className="text-muted-foreground mt-12 max-w-2xl leading-relaxed">
-            This project was built to showcase my ability to turn ambiguous AI opportunities into clear product
-            outcomes, and to design systems that learn, adapt, and deliver real user value.
+            This project showcases how I turn ambiguous AI opportunities into clear product outcomes—and design systems
+            that learn, adapt, and deliver real user value.
           </p>
         </div>
       </div>
