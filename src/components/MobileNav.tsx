@@ -19,7 +19,7 @@ export function MobileNav() {
   };
 
   const navItems = [
-    { path: '/', icon: Home, label: 'Home' },
+    { path: '/dashboard', icon: Home, label: 'Home' },
     { path: '/history', icon: Calendar, label: 'History' },
     { path: '/stats', icon: BarChart3, label: 'Stats' },
     { path: '/settings', icon: Settings, label: 'Settings' },

@@ -8,6 +8,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { lazy, Suspense } from "react";
 
 // Lazy load route components for better code splitting
+const Index = lazy(() => import("./pages/Index"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const AdjustWorkout = lazy(() => import("./pages/AdjustWorkout"));
 const Session = lazy(() => import("./pages/Session"));
@@ -36,7 +37,8 @@ const App = () => (
             </div>
           }>
             <Routes>
-              <Route path="/" element={<Auth />} />
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/adjust" element={<ProtectedRoute><AdjustWorkout /></ProtectedRoute>} />
               <Route path="/session" element={<ProtectedRoute><Session /></ProtectedRoute>} />
