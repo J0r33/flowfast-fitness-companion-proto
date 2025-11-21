@@ -217,16 +217,7 @@ export default function WorkoutDetail() {
               </Button>
               <div className="flex-1">
                 <h1 className="text-xl font-bold text-primary-foreground">{formatDate(entry.date)}</h1>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-sm text-primary-foreground/90">
-                    {energyInfo.emoji} {energyInfo.label} Energy
-                  </span>
-                  {difficultyInfo && (
-                    <Badge variant={difficultyInfo.variant} className="text-xs">
-                      {difficultyInfo.emoji} {difficultyInfo.label}
-                    </Badge>
-                  )}
-                </div>
+                {/* ❌ energy + difficulty removed from here to declutter */}
               </div>
             </div>
 
@@ -279,7 +270,22 @@ export default function WorkoutDetail() {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Workout Summary</CardTitle>
+
+            {/* ✅ Energy + difficulty moved here */}
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <div className={`text-sm ${energyInfo.color} flex items-center gap-1`}>
+                <span>{energyInfo.emoji}</span>
+                <span>{energyInfo.label} energy</span>
+              </div>
+
+              {difficultyInfo && (
+                <Badge variant={difficultyInfo.variant} className="text-xs">
+                  {difficultyInfo.emoji} {difficultyInfo.label}
+                </Badge>
+              )}
+            </div>
           </CardHeader>
+
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex items-center gap-3">
@@ -413,9 +419,7 @@ export default function WorkoutDetail() {
                                 <div className="w-full mt-2">
                                   <span className="text-xs text-muted-foreground">Weights: </span>
                                   <div className="flex flex-wrap gap-2 mt-1">
-                                    {Array.from({
-                                      length: exercise.sets,
-                                    }).map((_, idx) => {
+                                    {Array.from({ length: exercise.sets }).map((_, idx) => {
                                       const weight = isEditing
                                         ? (editedExercises[index]?.weights?.[idx] ?? 0)
                                         : (exercise.weights?.[idx] ?? 0);
