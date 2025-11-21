@@ -43,17 +43,13 @@ const Index = () => {
           </p>
 
           {/* CTA */}
-          <Button size="lg" onClick={() => navigate("/auth")} className="text-lg px-10 py-6 mt-4">
+          <Button size="lg" onClick={() => navigate("/auth")} className="text-lg px-12 py-6 mt-4">
             Explore the Demo
           </Button>
-          
-          <Button 
-            size="lg" 
-            variant="outline" 
-            onClick={() => navigate("/case-study")} 
-            className="text-lg px-10 py-6"
-          >
-            View Success Stories
+
+          {/* PM Case Study Button */}
+          <Button size="lg" variant="outline" onClick={() => navigate("/case-study")} className="text-lg px-12 py-6">
+            PM Case Study
           </Button>
 
           {/* Product Capabilities Section */}
