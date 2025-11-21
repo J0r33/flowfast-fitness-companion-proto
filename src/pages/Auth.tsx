@@ -28,7 +28,7 @@ const signInSchema = z.object({
 
 export default function Auth() {
   const navigate = useNavigate();
-  const { user, signUp, signIn, loading } = useAuth();
+  const { user, signUp, signIn, loading, needsOnboarding, profileLoading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Form state
@@ -49,10 +49,14 @@ export default function Auth() {
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (user && !loading) {
-      navigate('/dashboard', { replace: true });
+    if (user && !loading && !profileLoading) {
+      if (needsOnboarding) {
+        navigate('/onboarding', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, profileLoading, needsOnboarding, navigate]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();

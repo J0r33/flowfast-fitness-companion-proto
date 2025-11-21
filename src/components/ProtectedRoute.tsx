@@ -8,16 +8,24 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, loading } = useAuth();
+  const { user, loading, needsOnboarding, profileLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth', { replace: true });
+      return;
     }
-  }, [user, loading, navigate]);
 
-  if (loading) {
+    // Check if user needs onboarding (but allow access to /onboarding itself)
+    if (!loading && !profileLoading && user && needsOnboarding) {
+      if (window.location.pathname !== '/onboarding') {
+        navigate('/onboarding', { replace: true });
+      }
+    }
+  }, [user, loading, needsOnboarding, profileLoading, navigate]);
+
+  if (loading || profileLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
