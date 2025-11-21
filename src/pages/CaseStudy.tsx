@@ -51,8 +51,8 @@ export default function CaseStudy() {
 
           <p className="text-lg text-muted-foreground max-w-3xl leading-relaxed">
             FlowFast is a fully functional AI fitness companion I designed and built end-to-end to demonstrate how I
-            approach **AI-native product development** as a **technical Product Manager**: from problem framing and
-            system design to experimentation and implementation.
+            approach <strong>AI-native product development</strong> as a <strong>technical Product Manager</strong>:
+            from problem framing and system design to experimentation and implementation.
           </p>
 
           <div className="flex flex-wrap gap-3 text-sm">
@@ -80,8 +80,8 @@ export default function CaseStudy() {
               <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Problem framing</h2>
             </div>
             <p className="text-sm text-muted-foreground">
-              Existing apps either feel generic or force heavy manual setup. Users want **smart defaults** that adapt to
-              their energy, time, equipment, and progress.
+              Existing apps either feel generic or force heavy manual setup. Users want <strong>smart defaults</strong>{" "}
+              that adapt to their energy, time, equipment, and progress.
             </p>
           </Card>
 
@@ -91,8 +91,8 @@ export default function CaseStudy() {
               <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Outcome</h2>
             </div>
             <p className="text-sm text-muted-foreground">
-              A production-style prototype that generates, tracks, and adapts workouts in real time—showcasing how I
-              turn ambiguous AI opportunities into concrete product flows.
+              A production-style prototype that generates, tracks, and adapts workouts in real time, showing how I turn
+              ambiguous AI opportunities into concrete product flows.
             </p>
           </Card>
         </section>
@@ -101,20 +101,22 @@ export default function CaseStudy() {
         <section className="space-y-4">
           <h2 className="text-2xl font-bold">Product vision</h2>
           <p className="text-sm text-muted-foreground leading-relaxed max-w-3xl">
-            FlowFast’s vision is to become a **personalized training layer** that sits between users and the gym:
-            intelligently planning each session, adapting to constraints, and learning from every workout. For this
-            prototype, I focused on:
+            FlowFast&apos;s vision is to become a <strong>personalized training layer</strong> that sits between users
+            and the gym: intelligently planning each session, adapting to constraints, and learning from every workout.
+            For this prototype, I focused on:
           </p>
           <ul className="list-disc list-inside text-sm text-muted-foreground space-y-2 max-w-3xl">
             <li>
-              Proving that **AI can make strength programming feel effortless** while still respecting best practices.
+              Proving that <strong>AI can make strength programming feel effortless</strong> while still respecting best
+              practices.
             </li>
             <li>
-              Designing **closed feedback loops** (history → stats → recommendations → new plan) that showcase real
-              personalization.
+              Designing <strong>closed feedback loops</strong> (history → stats → recommendations → new plan) that
+              showcase real personalization.
             </li>
             <li>
-              Building a system that is **transparent and inspectable** for recruiters and technical stakeholders.
+              Building a system that is <strong>transparent and inspectable</strong> for recruiters and technical
+              stakeholders.
             </li>
           </ul>
         </section>
@@ -124,7 +126,7 @@ export default function CaseStudy() {
           <div className="space-y-4">
             <h2 className="text-2xl font-bold flex items-center gap-2">
               <Layers className="h-5 w-5 text-primary" />
-              System architecture & AI design
+              System architecture &amp; AI design
             </h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
               I treated FlowFast like a real product: start from user journeys, then design data contracts and AI
@@ -148,15 +150,15 @@ export default function CaseStudy() {
               </li>
             </ol>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Under the hood, the app uses **Supabase** for auth and data, React + TypeScript on the client, and server
-              functions to orchestrate AI prompts. I defined explicit types for workout plans, history entries, and
-              adaptation metrics to keep the AI integration deterministic and debuggable.
+              Under the hood, the app uses <strong>Supabase</strong> for auth and data, React + TypeScript on the
+              client, and server functions to orchestrate AI prompts. I defined explicit types for workout plans,
+              history entries, and adaptation metrics to keep the AI integration deterministic and debuggable.
             </p>
           </div>
 
           <Card className="p-5 space-y-4">
             <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              Key product & tech decisions
+              Key product &amp; tech decisions
             </h3>
             <ul className="space-y-3 text-sm text-muted-foreground">
               <li>
@@ -182,7 +184,7 @@ export default function CaseStudy() {
             <Card className="p-5 space-y-3">
               <h3 className="text-sm font-semibold flex items-center gap-2">
                 <Settings2 className="h-4 w-4 text-primary" />
-                1. Onboarding & preferences
+                1. Onboarding &amp; preferences
               </h3>
               <p className="text-sm text-muted-foreground">
                 Users define equipment, weekly goals, and training focus. I scoped this to a single page with sensible
@@ -196,9 +198,9 @@ export default function CaseStudy() {
                 2. Generate today&apos;s workout
               </h3>
               <p className="text-sm text-muted-foreground">
-                Two paths: a **Smart Auto Plan** that uses history and goals, and a **Customize Today** flow where users
-                set energy, time, and areas of focus. This demonstrates how I design parallel entry points for different
-                user mindsets.
+                Two paths: a <strong>Smart Auto Plan</strong> that uses history and goals, and a{" "}
+                <strong>Customize Today</strong> flow where users set energy, time, and areas of focus. This shows how I
+                design parallel entry points for different user mindsets.
               </p>
             </Card>
 
@@ -224,8 +226,8 @@ export default function CaseStudy() {
             </h2>
             <ul className="text-sm text-muted-foreground space-y-2">
               <li>
-                <span className="font-semibold text-foreground">Activation:</span> % of new users who complete a
-                generated workout within 48 hours.
+                <span className="font-semibold text-foreground">Activation:</span> Percentage of new users who complete
+                a generated workout within 48 hours.
               </li>
               <li>
                 <span className="font-semibold text-foreground">Engagement:</span> Weekly active users and average
@@ -237,7 +239,7 @@ export default function CaseStudy() {
               </li>
               <li>
                 <span className="font-semibold text-foreground">Retention:</span> Streak length and 4-week retention for
-                users who complete at least 3 sessions.
+                users who complete at least three sessions.
               </li>
             </ul>
           </Card>
@@ -250,14 +252,16 @@ export default function CaseStudy() {
             <ul className="text-sm text-muted-foreground space-y-2">
               <li>Run usability tests on the generation and feedback flows to reduce friction further.</li>
               <li>
-                Experiment with A/B variants of recommendation logic (e.g., more aggressive push vs. conservative
+                Experiment with A/B variants of recommendation logic (for example, more aggressive push vs conservative
                 recovery bias).
               </li>
               <li>
-                Add social proof & habit loops (e.g., streak celebrations, weekly recaps) to increase long-term
+                Add social proof and habit loops (such as streak celebrations and weekly recaps) to increase long-term
                 engagement.
               </li>
-              <li>Integrate wearable data (HR, steps) as additional signals for recovery and load management.</li>
+              <li>
+                Integrate wearable data (heart rate, steps) as additional signals for recovery and load management.
+              </li>
             </ul>
           </Card>
         </section>
@@ -266,8 +270,8 @@ export default function CaseStudy() {
         <section className="mt-6 border border-dashed border-border rounded-xl p-6 space-y-4">
           <h2 className="text-xl font-bold">What this project says about me as a Product Manager</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            FlowFast is intentionally **end-to-end**: from auth and state management to AI orchestration, UX flows, and
-            data modeling. I built it this way so hiring managers and technical peers can see how I:
+            FlowFast is intentionally <strong>end-to-end</strong>: from auth and state management to AI orchestration,
+            UX flows, and data modeling. I built it this way so hiring managers and technical peers can see how I:
           </p>
           <ul className="list-disc list-inside text-sm text-muted-foreground space-y-2">
             <li>Frame user problems and translate them into clear, testable product capabilities.</li>
