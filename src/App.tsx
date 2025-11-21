@@ -33,26 +33,99 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Suspense fallback={
-            <div className="min-h-screen bg-background flex items-center justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
-            </div>
-          }>
+          <Suspense
+            fallback={
+              <div className="min-h-screen bg-background flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+              </div>
+            }
+          >
+            <ScrollToTop />
             <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/case-study" element={<CaseStudy />} />
-              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path="/adjust" element={<ProtectedRoute><AdjustWorkout /></ProtectedRoute>} />
-              <Route path="/session" element={<ProtectedRoute><Session /></ProtectedRoute>} />
-              <Route path="/workout/:sessionId/:stepIndex" element={<ProtectedRoute><WorkoutPlayer /></ProtectedRoute>} />
-              <Route path="/workout/complete" element={<ProtectedRoute><WorkoutComplete /></ProtectedRoute>} />
-              <Route path="/feedback" element={<ProtectedRoute><Feedback /></ProtectedRoute>} />
-              <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
-              <Route path="/history/:workoutId" element={<ProtectedRoute><WorkoutDetail /></ProtectedRoute>} />
-              <Route path="/stats" element={<ProtectedRoute><Stats /></ProtectedRoute>} />
-              <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/case-study" element={<CaseStudy />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/adjust"
+                element={
+                  <ProtectedRoute>
+                    <AdjustWorkout />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/session"
+                element={
+                  <ProtectedRoute>
+                    <Session />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/workout/:sessionId/:stepIndex"
+                element={
+                  <ProtectedRoute>
+                    <WorkoutPlayer />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/workout/complete"
+                element={
+                  <ProtectedRoute>
+                    <WorkoutComplete />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/feedback"
+                element={
+                  <ProtectedRoute>
+                    <Feedback />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/history"
+                element={
+                  <ProtectedRoute>
+                    <History />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/history/:workoutId"
+                element={
+                  <ProtectedRoute>
+                    <WorkoutDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/stats"
+                element={
+                  <ProtectedRoute>
+                    <Stats />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/settings"
+                element={
+                  <ProtectedRoute>
+                    <Settings />
+                  </ProtectedRoute>
+                }
+              />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
