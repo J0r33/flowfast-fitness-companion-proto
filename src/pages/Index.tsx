@@ -41,7 +41,7 @@ const Index = () => {
           {/* Left: narrative */}
           <div className="space-y-6 text-left">
             <Badge className="mb-2 w-fit" variant="outline">
-              Product-managed AI prototype · Solo build
+              Fitness Companion AI prototype
             </Badge>
 
             <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
